@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+enum Rating {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+}
+
+enum CardState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+}
+
+enum UserRole {
+  ADMIN    // Teachers who create courses and content
+  STUDENT  // Students who enroll and study
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  DROPPED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      UserRole @default(STUDENT)
+  name      String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Admin relationships
+  createdCourses Course[] @relation("CourseCreator")
+
+  // Student relationships
+  enrollments    CourseEnrollment[]
+  cardProgresses CardProgress[]
+  reviews        Review[]
+
+  @@index([role])
+  @@index([email])
+}
+
+model Course {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  createdById   String
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+  isPublished   Boolean  @default(false)
+
+  // Course metadata
+  subject       String?
+  level         String?
+  estimatedHours Int?
+
+  // Decks are ordered via Deck.ordinal
+  creator     User               @relation("CourseCreator", fields: [createdById], references: [id])
+  decks       Deck[]
+  enrollments CourseEnrollment[]
+
+  @@unique([createdById, name]) // Same teacher can't have duplicate course names
+  @@index([createdById])
+  @@index([isPublished])
+  @@index([subject, level])
+}
+
+model Deck {
+  id          String   @id @default(cuid())
+  courseId    String
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  // Order within course (enables "deck 1" lookups)
+  ordinal        Int
+
+  // Deck-level configuration
+  cardsPerSession Int     @default(20)
+  passingScore    Int     @default(80)
+  isOptional      Boolean @default(false)
+
+  course         Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  cards          Card[]
+  deckProgresses DeckProgress[]
+
+  @@unique([courseId, name])
+  @@unique([courseId, ordinal])
+  @@index([courseId])
+  @@index([courseId, ordinal])
+}
+
+model Card {
+  id        String   @id @default(cuid())
+  deckId    String
+  front     String
+  back      String
+  notes     String?
+  tags      String[] // ["irregular-verb", "common-phrase"]
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  deck           Deck           @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  cardProgresses CardProgress[]
+
+  @@index([deckId])
+}
+
+model CourseEnrollment {
+  id         String           @id @default(cuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime         @default(now()) @db.Timestamptz
+  updatedAt  DateTime         @updatedAt @db.Timestamptz
+  status     EnrollmentStatus @default(ACTIVE)
+
+  // Course-level progress metrics
+  completedDecks   Int     @default(0)
+  totalDecks       Int
+  progressPercent  Float   @default(0) // 0-100
+  lastStudiedAt    DateTime? @db.Timestamptz
+
+  // Expected/actual completion tracking
+  targetCompletion DateTime? @db.Timestamptz
+  actualCompletion DateTime? @db.Timestamptz
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId, status])
+  @@index([courseId, status])
+}
+
+model DeckProgress {
+  id             String   @id @default(cuid())
+  userId         String
+  deckId         String
+  startedAt      DateTime @default(now()) @db.Timestamptz
+  lastStudiedAt  DateTime @default(now()) @db.Timestamptz
+
+  // Deck completion metrics
+  cardsStudied   Int      @default(0)
+  totalCards     Int
+  masteredCards  Int      @default(0)
+  isCompleted    Boolean  @default(false)
+  completedAt    DateTime? @db.Timestamptz
+
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deckId])
+  @@index([userId, isCompleted])
+  @@index([deckId])
+}
+
+model CardProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  cardId    String
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // FSRS-6 parameters (per user)
+  state          CardState @default(NEW)
+  due            DateTime  @default(now()) @db.Timestamptz
+  lastReviewedAt DateTime? @db.Timestamptz
+  stability      Float     @default(0)
+  difficulty     Float     @default(0)
+  scheduledDays  Int       @default(0)
+  learningSteps  Int       @default(0)
+  reps           Int       @default(0)
+  lapses         Int       @default(0)
+  suspended      Boolean   @default(false)
+
+  // Optimistic concurrency for UI
+  version        Int       @default(0)
+
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card    Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  reviews Review[]
+
+  @@unique([userId, cardId])
+  @@index([userId, state, due])
+  @@index([userId, suspended, due])
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  cardProgressId String
+  userId         String
+  reviewedAt     DateTime @default(now()) @db.Timestamptz
+  rating         Rating
+
+  elapsedDays    Int
+  scheduledDays  Int
+  newDue         DateTime @db.Timestamptz
+
+  // Idempotency for optimistic retries (client UUID)
+  clientReviewId String   @unique
+
+  cardProgress CardProgress @relation(fields: [cardProgressId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([userId, reviewedAt])
+  @@index([cardProgressId, reviewedAt])
+}
