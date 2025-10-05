@@ -24,27 +24,23 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@unique([provider, providerAccountId])
-  @@map("accounts")
 }
  
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique @map("session_token")
   userId       String   @map("user_id")
-  expires      DateTime
+  expires      DateTime @db.Timestamptz
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  @@map("sessions")
-}
+ }
  
 
 model VerificationToken {
   identifier String
   token      String
-  expires    DateTime
+  expires    DateTime @db.Timestamptz
  
   @@unique([identifier, token])
-  @@map("verification_tokens")
 }
 
 enum Rating {
@@ -76,7 +72,7 @@ enum EnrollmentStatus {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  emailVerified DateTime?
+  emailVerified DateTime? @db.Timestamptz
   image     String?
   accounts  Account[]
   sessions  Session[]
@@ -91,6 +87,7 @@ model User {
   // Student relationships
   enrollments    CourseEnrollment[]
   cardProgresses CardProgress[]
+  deckProgresses DeckProgress[]
   reviews        Review[]
 
   @@index([role])
@@ -205,6 +202,7 @@ model DeckProgress {
   isCompleted    Boolean  @default(false)
   completedAt    DateTime? @db.Timestamptz
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
 
   @@unique([userId, deckId])

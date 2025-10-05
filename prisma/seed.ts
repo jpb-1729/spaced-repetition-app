@@ -55,15 +55,36 @@ async function main() {
   ]);
 
   // Users
+  const adminEmail = process.env.ADMIN_EMAIL
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
+    where: { email: adminEmail!},
     update: {},
     create: {
-      email: 'admin@example.com',
+      email: adminEmail!,
       role: UserRole.ADMIN,
       name: 'Ada Admin',
+      emailVerified: new Date()
     },
   });
+
+
+  // Check if Google account already linked
+  const existingAccount = await prisma.account.findFirst({
+    where: {
+      userId: admin.id,
+      provider: 'google',
+    },
+  })
+
+  // If not linked, create a placeholder Account record
+  if (!existingAccount) {
+    console.log('⚠️  User exists but no Google account linked.')
+    console.log('   Sign in with Google to complete the linking.')
+    // We can't create the Account without providerAccountId from Google
+    // User needs to sign in once with allowDangerousEmailAccountLinking: true
+  }
+  
+  console.log(`✅ Admin user: ${adminEmail}`)
 
   const student = await prisma.user.upsert({
     where: { email: 'student@example.com' },
