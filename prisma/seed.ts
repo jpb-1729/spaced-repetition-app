@@ -1,28 +1,28 @@
 // prisma/seed.ts
-import { PrismaClient, UserRole, EnrollmentStatus, CardState, Rating } from '@prisma/client';
+import { PrismaClient, UserRole, EnrollmentStatus, CardState, Rating } from '@prisma/client'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 // --- helpers ---------------------------------------------------------------
 const addDays = (d: Date, days: number) => {
-  const nd = new Date(d);
-  nd.setDate(nd.getDate() + days);
-  return nd;
-};
+  const nd = new Date(d)
+  nd.setDate(nd.getDate() + days)
+  return nd
+}
 
-type SeedCard = { front: string; back: string; notes?: string; tags?: string[] };
+type SeedCard = { front: string; back: string; notes?: string; tags?: string[] }
 
 const deck1Cards: SeedCard[] = [
   { front: 'hola', back: 'hello', tags: ['common-phrase'] },
   { front: 'gracias', back: 'thank you', tags: ['common-phrase'] },
   { front: '¿cómo estás?', back: 'how are you?', tags: ['common-phrase'] },
-];
+]
 
 const deck2Cards: SeedCard[] = [
   { front: 'ser', back: 'to be (essential)', tags: ['irregular-verb'] },
   { front: 'estar', back: 'to be (state/location)', tags: ['irregular-verb'] },
   { front: 'tener', back: 'to have', tags: ['irregular-verb'] },
-];
+]
 
 // Initial per-card FSRS-like defaults
 const initialCardProgress = () => ({
@@ -37,11 +37,10 @@ const initialCardProgress = () => ({
   due: new Date(),
   lastReviewedAt: null as Date | null,
   version: 0,
-});
+})
 
 // --- main seeding ----------------------------------------------------------
 async function main() {
-  // Clean (optional). If you want to preserve data, comment these out.
   // Delete in dependency order to be safe.
   await prisma.$transaction([
     prisma.review.deleteMany(),
@@ -52,21 +51,20 @@ async function main() {
     prisma.deck.deleteMany(),
     prisma.course.deleteMany(),
     prisma.user.deleteMany(),
-  ]);
+  ])
 
   // Users
   const adminEmail = process.env.ADMIN_EMAIL
   const admin = await prisma.user.upsert({
-    where: { email: adminEmail!},
+    where: { email: adminEmail! },
     update: {},
     create: {
       email: adminEmail!,
       role: UserRole.ADMIN,
       name: 'Ada Admin',
-      emailVerified: new Date()
+      emailVerified: new Date(),
     },
-  });
-
+  })
 
   // Check if Google account already linked
   const existingAccount = await prisma.account.findFirst({
@@ -83,7 +81,7 @@ async function main() {
     // We can't create the Account without providerAccountId from Google
     // User needs to sign in once with allowDangerousEmailAccountLinking: true
   }
-  
+
   console.log(`✅ Admin user: ${adminEmail}`)
 
   const student = await prisma.user.upsert({
@@ -94,7 +92,7 @@ async function main() {
       role: UserRole.STUDENT,
       name: 'Stu Student',
     },
-  });
+  })
 
   // Course
   const course = await prisma.course.upsert({
@@ -112,7 +110,7 @@ async function main() {
       estimatedHours: 10,
       isPublished: true,
     },
-  });
+  })
 
   // Decks
   const deck1 = await prisma.deck.create({
@@ -125,7 +123,7 @@ async function main() {
       passingScore: 80,
       isOptional: false,
     },
-  });
+  })
 
   const deck2 = await prisma.deck.create({
     data: {
@@ -137,7 +135,7 @@ async function main() {
       passingScore: 80,
       isOptional: false,
     },
-  });
+  })
 
   // Cards
   const createdDeck1Cards = await Promise.all(
@@ -152,7 +150,7 @@ async function main() {
         },
       })
     )
-  );
+  )
 
   const createdDeck2Cards = await Promise.all(
     deck2Cards.map((c) =>
@@ -166,10 +164,10 @@ async function main() {
         },
       })
     )
-  );
+  )
 
   // Enrollment
-  const totalDecks = 2;
+  const totalDecks = 2
   const enrollment = await prisma.courseEnrollment.create({
     data: {
       userId: student.id,
@@ -180,8 +178,19 @@ async function main() {
       progressPercent: 0,
       targetCompletion: addDays(new Date(), 30),
     },
-  });
+  })
 
+  const adminEnrollment = await prisma.courseEnrollment.create({
+    data: {
+      userId: admin.id,
+      courseId: course.id,
+      status: EnrollmentStatus.ACTIVE,
+      completedDecks: 0,
+      totalDecks,
+      progressPercent: 0,
+      targetCompletion: addDays(new Date(), 30),
+    },
+  })
   // DeckProgress (one per deck for student)
   const deck1Progress = await prisma.deckProgress.create({
     data: {
@@ -192,7 +201,7 @@ async function main() {
       masteredCards: 0,
       isCompleted: false,
     },
-  });
+  })
 
   const deck2Progress = await prisma.deckProgress.create({
     data: {
@@ -203,10 +212,10 @@ async function main() {
       masteredCards: 0,
       isCompleted: false,
     },
-  });
+  })
 
   // CardProgress (one per card for student)
-  const allCards = [...createdDeck1Cards, ...createdDeck2Cards];
+  const allCards = [...createdDeck1Cards, ...createdDeck2Cards]
 
   const cardProgresses = await Promise.all(
     allCards.map((card, idx) =>
@@ -220,10 +229,10 @@ async function main() {
         },
       })
     )
-  );
+  )
 
   // Simulate a short first study session on the first three cards
-  const studied = cardProgresses.slice(0, 3);
+  const studied = cardProgresses.slice(0, 3)
   await Promise.all(
     studied.map((cp, i) =>
       prisma.review.create({
@@ -239,7 +248,7 @@ async function main() {
         },
       })
     )
-  );
+  )
 
   // Update the reviewed card progresses to reflect a pass
   await Promise.all(
@@ -257,10 +266,10 @@ async function main() {
         },
       })
     )
-  );
+  )
 
   // Recompute DeckProgress quick metrics
-  const masteredCards = 0; // keep simple for seed
+  const masteredCards = 0 // keep simple for seed
   await prisma.deckProgress.update({
     where: { id: deck1Progress.id },
     data: {
@@ -268,7 +277,7 @@ async function main() {
       masteredCards,
       lastStudiedAt: new Date(),
     },
-  });
+  })
 
   // Course-level progress: % complete = completedDecks / totalDecks * 100
   // For seed data, none completed; show last studied now.
@@ -278,16 +287,16 @@ async function main() {
       progressPercent: (0 / totalDecks) * 100,
       lastStudiedAt: new Date(),
     },
-  });
+  })
 
-  console.log('Seed complete ✅');
+  console.log('Seed complete ✅')
 }
 
 main()
   .catch((e) => {
-    console.error('Seed error ❌', e);
-    process.exit(1);
+    console.error('Seed error ❌', e)
+    process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })

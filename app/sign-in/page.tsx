@@ -1,4 +1,4 @@
-import SignIn from "@/components/SignIn" // Adjust path to your component
+import SignIn from '@/components/SignIn' // Adjust path to your component
 
 export default function SignInPage() {
   return (
@@ -8,7 +8,7 @@ export default function SignInPage() {
           <h1 className="text-3xl font-bold">Welcome</h1>
           <p className="mt-2 text-gray-600">Sign in to continue</p>
         </div>
-        
+
         <SignIn />
       </div>
     </div>

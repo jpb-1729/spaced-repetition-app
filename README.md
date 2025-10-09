@@ -1,6 +1,5 @@
 # Spaced Repetition App
 
-
 A lightweight spaced repetition learning app for efficient knowledge retention.
 
 > **Early Development** - This project is actively being built and is not yet feature-complete.
@@ -32,7 +31,9 @@ A lightweight spaced repetition learning app for efficient knowledge retention.
 ### Installation
 
 1. Clone the repo and install dependencies:
+
 ```bash
 git clone https://github.com/jpb-1729/spaced-repetition-app
 cd spaced-repetition-app
 pnpm install
+```

@@ -1,16 +1,16 @@
-import { signIn } from "@/auth"
+import { signIn } from '@/auth'
 
 export default function SignIn() {
   return (
     <form
       action={async () => {
-        "use server"
-        await signIn("google")
+        'use server'
+        await signIn('google')
       }}
     >
-      <button 
+      <button
         type="submit"
-        className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
