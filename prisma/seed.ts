@@ -13,9 +13,15 @@ const addDays = (d: Date, days: number) => {
 type SeedCard = { front: string; back: string; notes?: string; tags?: string[] }
 
 const deck1Cards: SeedCard[] = [
-  { front: 'hola', back: 'hello', tags: ['common-phrase'] },
-  { front: 'gracias', back: 'thank you', tags: ['common-phrase'] },
-  { front: '¿cómo estás?', back: 'how are you?', tags: ['common-phrase'] },
+  // { front: 'hola', back: 'hello', tags: ['common-phrase'] },
+  // { front: 'gracias', back: 'thank you', tags: ['common-phrase'] },
+  // { front: '¿cómo estás?', back: 'how are you?', tags: ['common-phrase'] },
+  {front: "What are the ingredients in the Bucatini?", back: "Chorizo, Charred Broccoli, Aged Provolone, Caramelized Onion"},
+  {front: "What two components are in the Agnolotti besides butter beans?", back: "Parmesan Brodo, Mascarpone, Lemon"},
+  {front: "What accompanies the Grilled Chicken Thigh?", back: "Charred Summer Squash, Manchego, Romesco Vinaigrette"},
+  {front: "What is served with the Twice Cooked Pork Shoulder?", back: "Polenta, Roasted Red Pepper Sugo, Aged Provolone"},
+  {front: "What two sauces or condiments come with the Ribeye?", back: "Espelette Aioli, Chimichurri"}
+
 ]
 
 const deck2Cards: SeedCard[] = [
