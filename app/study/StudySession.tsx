@@ -17,8 +17,8 @@ export function StudySession({ cards }: StudySessionProps) {
   // Safety check
   if (!cards || cards.length === 0 || currentIndex >= cards.length) {
     return (
-      <div className="text-center py-16">
-        <h2 className="text-2xl font-bold mb-4">Session Complete!</h2>
+      <div className="py-16 text-center">
+        <h2 className="mb-4 text-2xl font-bold">Session Complete!</h2>
         <p className="text-gray-600">No more cards to review.</p>
       </div>
     )
@@ -30,12 +30,8 @@ export function StudySession({ cards }: StudySessionProps) {
     setLoading(true)
     try {
       const clientReviewId = `${Date.now()}-${Math.random()}`
-      
-      const result = await reviewCard(
-        currentCard.id,
-        rating,
-        clientReviewId
-      )
+
+      const result = await reviewCard(currentCard.id, rating, clientReviewId)
 
       if (result.error) {
         alert(result.error)
@@ -60,7 +56,7 @@ export function StudySession({ cards }: StudySessionProps) {
   console.log(cards)
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="mx-auto max-w-2xl">
       <div className="mb-4 text-sm text-gray-600">
         Card {currentIndex + 1} of {cards.length}
       </div>
@@ -69,28 +65,28 @@ export function StudySession({ cards }: StudySessionProps) {
         {currentCard.card.deck.course.name} → {currentCard.card.deck.name}
       </div>
 
-      <div className="bg-white border rounded-lg shadow-lg p-8 min-h-[300px] flex flex-col justify-center">
+      <div className="flex min-h-[300px] flex-col justify-center rounded-lg border bg-white p-8 shadow-lg">
         {!showAnswer ? (
           <div>
-            <div className="text-sm text-gray-500 mb-2">Question</div>
-            <div className="text-2xl mb-8">{currentCard.card.front}</div>
+            <div className="mb-2 text-sm text-gray-500">Question</div>
+            <div className="mb-8 text-2xl">{currentCard.card.front}</div>
             <button
               onClick={() => setShowAnswer(true)}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full rounded-lg bg-blue-600 py-3 text-white transition-colors hover:bg-blue-700"
             >
               Show Answer
             </button>
           </div>
         ) : (
           <div>
-            <div className="text-sm text-gray-500 mb-2">Question</div>
-            <div className="text-xl mb-4">{currentCard.card.front}</div>
-            
-            <div className="text-sm text-gray-500 mb-2">Answer</div>
-            <div className="text-2xl mb-8">{currentCard.card.back}</div>
+            <div className="mb-2 text-sm text-gray-500">Question</div>
+            <div className="mb-4 text-xl">{currentCard.card.front}</div>
+
+            <div className="mb-2 text-sm text-gray-500">Answer</div>
+            <div className="mb-8 text-2xl">{currentCard.card.back}</div>
 
             {currentCard.card.notes && (
-              <div className="text-sm text-gray-600 mb-8 p-4 bg-gray-50 rounded">
+              <div className="mb-8 rounded bg-gray-50 p-4 text-sm text-gray-600">
                 {currentCard.card.notes}
               </div>
             )}
@@ -99,28 +95,28 @@ export function StudySession({ cards }: StudySessionProps) {
               <button
                 onClick={() => handleRating('AGAIN')}
                 disabled={loading}
-                className="py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400"
+                className="rounded-lg bg-red-500 py-3 text-white transition-colors hover:bg-red-600 disabled:bg-gray-400"
               >
                 Again
               </button>
               <button
                 onClick={() => handleRating('HARD')}
                 disabled={loading}
-                className="py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-400"
+                className="rounded-lg bg-orange-500 py-3 text-white transition-colors hover:bg-orange-600 disabled:bg-gray-400"
               >
                 Hard
               </button>
               <button
                 onClick={() => handleRating('GOOD')}
                 disabled={loading}
-                className="py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400"
+                className="rounded-lg bg-green-500 py-3 text-white transition-colors hover:bg-green-600 disabled:bg-gray-400"
               >
                 Good
               </button>
               <button
                 onClick={() => handleRating('EASY')}
                 disabled={loading}
-                className="py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400"
+                className="rounded-lg bg-blue-500 py-3 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-400"
               >
                 Easy
               </button>

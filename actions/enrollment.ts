@@ -10,7 +10,7 @@ export async function enrollInDeck(courseId: string, deckName: string) {
   if (!session?.user?.id) {
     return { error: 'Not authenticated' }
   }
-  
+
   const userId = session.user.id
 
   try {
@@ -18,19 +18,19 @@ export async function enrollInDeck(courseId: string, deckName: string) {
       where: {
         courseId_name: {
           courseId: courseId,
-          name: deckName
-        }
+          name: deckName,
+        },
       },
       include: {
         course: {
           select: {
-            _count: { select: { decks: true } }
-          }
+            _count: { select: { decks: true } },
+          },
         },
         _count: {
-          select: { cards: true }
-        }
-      }
+          select: { cards: true },
+        },
+      },
     })
 
     if (!deck) {
@@ -42,18 +42,18 @@ export async function enrollInDeck(courseId: string, deckName: string) {
       where: {
         userId_courseId: {
           userId,
-          courseId
-        }
+          courseId,
+        },
       },
       update: {
-        lastStudiedAt: new Date()
+        lastStudiedAt: new Date(),
       },
       create: {
         userId,
         courseId,
         totalDecks: deck.course._count.decks,
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     })
 
     // Create deck progress
@@ -61,41 +61,41 @@ export async function enrollInDeck(courseId: string, deckName: string) {
       where: {
         userId_deckId: {
           userId,
-          deckId: deck.id
-        }
+          deckId: deck.id,
+        },
       },
       update: {
-        lastStudiedAt: new Date()
+        lastStudiedAt: new Date(),
       },
       create: {
         userId,
         deckId: deck.id,
-        totalCards: deck._count.cards
-      }
+        totalCards: deck._count.cards,
+      },
     })
 
     // Initialize card progress
     const cards = await prisma.card.findMany({
       where: { deckId: deck.id },
-      select: { id: true }
+      select: { id: true },
     })
 
     await prisma.$transaction(
-      cards.map(card => 
+      cards.map((card) =>
         prisma.cardProgress.upsert({
           where: {
             userId_cardId: {
               userId,
-              cardId: card.id
-            }
+              cardId: card.id,
+            },
           },
           update: {},
           create: {
             userId,
             cardId: card.id,
             state: 'NEW',
-            due: new Date()
-          }
+            due: new Date(),
+          },
         })
       )
     )
@@ -103,7 +103,6 @@ export async function enrollInDeck(courseId: string, deckName: string) {
     revalidatePath('/decks')
 
     return { success: true }
-
   } catch (error) {
     console.error('Enrollment error:', error)
     return { error: 'Failed to enroll' }

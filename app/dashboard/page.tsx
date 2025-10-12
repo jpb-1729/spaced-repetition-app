@@ -30,7 +30,7 @@ export default async function CoursesPage() {
 
   const dueCards = await prisma.cardProgress.findMany({
     where: {
-      userId: "cmgi48jy600017sr7sztew7on",
+      userId: 'cmgi48jy600017sr7sztew7on',
       // card: {
       //   deckId: deckId,
       //   deck: {
@@ -38,9 +38,9 @@ export default async function CoursesPage() {
       //   }
       // },
       due: {
-        lte: new Date() // Due now or earlier
+        lte: new Date(), // Due now or earlier
       },
-      suspended: false
+      suspended: false,
     },
     include: {
       card: {
@@ -48,16 +48,16 @@ export default async function CoursesPage() {
           deck: {
             select: {
               name: true,
-              cardsPerSession: true
-            }
-          }
-        }
-      }
+              cardsPerSession: true,
+            },
+          },
+        },
+      },
     },
     orderBy: {
-      due: 'asc' // Oldest due cards first
-    }
-  });
+      due: 'asc', // Oldest due cards first
+    },
+  })
 
   console.log(dueCards)
 

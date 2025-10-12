@@ -46,10 +46,10 @@ export async function reviewCard(
       include: {
         card: {
           include: {
-            deck: true
-          }
-        }
-      }
+            deck: true,
+          },
+        },
+      },
     })
 
     if (!cardProgress) {
@@ -62,7 +62,7 @@ export async function reviewCard(
 
     // Check for existing review (idempotency)
     const existingReview = await prisma.review.findUnique({
-      where: { clientReviewId }
+      where: { clientReviewId },
     })
 
     if (existingReview) {

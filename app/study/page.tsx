@@ -43,11 +43,9 @@ export default async function StudyPage() {
   if (dueCards.length === 0) {
     return (
       <div className="container mx-auto p-8">
-        <div className="text-center py-16">
-          <h1 className="text-3xl font-bold mb-4">No Cards Due!</h1>
-          <p className="text-gray-600">
-            You're all caught up. Check back later for more reviews.
-          </p>
+        <div className="py-16 text-center">
+          <h1 className="mb-4 text-3xl font-bold">No Cards Due!</h1>
+          <p className="text-gray-600">You're all caught up. Check back later for more reviews.</p>
         </div>
       </div>
     )

@@ -18,7 +18,7 @@ export function EnrollButton({ courseId, deckId, deckName }: EnrollButtonProps) 
     setLoading(true)
     try {
       const result = await enrollInDeck(courseId, deckName)
-      
+
       if (result.error) {
         alert(result.error)
       } else {
@@ -35,10 +35,7 @@ export function EnrollButton({ courseId, deckId, deckName }: EnrollButtonProps) 
 
   if (enrolled) {
     return (
-      <button 
-        disabled
-        className="px-4 py-2 bg-green-500 text-white rounded-lg"
-      >
+      <button disabled className="rounded-lg bg-green-500 px-4 py-2 text-white">
         ✓ Enrolled
       </button>
     )
@@ -48,7 +45,7 @@ export function EnrollButton({ courseId, deckId, deckName }: EnrollButtonProps) 
     <button
       onClick={handleEnroll}
       disabled={loading}
-      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+      className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400"
     >
       {loading ? 'Enrolling...' : 'Enroll'}
     </button>
