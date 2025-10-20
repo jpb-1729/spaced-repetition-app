@@ -3,11 +3,10 @@
 
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
-import { revalidatePath } from 'next/cache'
-import { fsrs, Rating, Card as FSRSCard, State, Grade } from 'ts-fsrs'
-import { Rating as PrismaRating, CardState as PrismaCardState } from '@prisma/client'
+import { fsrs, Rating, Card as FSRSCard, State, Grade, default_request_retention } from 'ts-fsrs'
+import { Prisma } from '@prisma/client'
+import type { Rating as PrismaRating, CardState as PrismaCardState } from '@prisma/client'
 
-// Map Prisma enums to FSRS enums
 const ratingMap: Record<PrismaRating, Grade> = {
   AGAIN: Rating.Again,
   HARD: Rating.Hard,
@@ -32,140 +31,131 @@ const reverseStateMap: Record<State, PrismaCardState> = {
 export async function reviewCard(
   cardProgressId: string,
   rating: PrismaRating,
-  clientReviewId: string // For idempotency
+  clientReviewId: string // idempotency token (must be unique in DB)
 ) {
   const session = await auth()
-  if (!session?.user?.id) {
-    return { error: 'Not authenticated' }
-  }
+  if (!session?.user?.id) return { error: 'Not authenticated' }
+  const userId = session.user.id
 
   try {
-    // Get current card progress
-    const cardProgress = await prisma.cardProgress.findUnique({
-      where: { id: cardProgressId },
-      include: {
+    // Enforce ownership in the query
+    const cardProgress = await prisma.cardProgress.findFirst({
+      where: { id: cardProgressId, userId: userId },
+      select: {
+        id: true,
+        userId: true,
+        state: true,
+        due: true,
+        stability: true,
+        difficulty: true,
+        scheduledDays: true,
+        reps: true,
+        lapses: true,
+        lastReviewedAt: true,
+        version: true,
         card: {
-          include: {
-            deck: true,
+          select: {
+            deckId: true,
+            deck: { select: { courseId: true } },
           },
         },
       },
     })
 
-    if (!cardProgress) {
-      return { error: 'Card progress not found' }
-    }
+    if (!cardProgress) return { error: 'Card progress not found' }
 
-    if (cardProgress.userId !== session.user.id) {
-      return { error: 'Unauthorized' }
-    }
-
-    // Check for existing review (idempotency)
-    const existingReview = await prisma.review.findUnique({
-      where: { clientReviewId },
-    })
-
-    if (existingReview) {
-      return { success: true, message: 'Review already recorded' }
-    }
-
-    // Convert to FSRS card format
-    const fsrsCard: FSRSCard = {
-      due: cardProgress.due,
-      stability: cardProgress.stability,
-      difficulty: cardProgress.difficulty,
-      elapsed_days: cardProgress.scheduledDays,
-      scheduled_days: cardProgress.scheduledDays,
-      reps: cardProgress.reps,
-      lapses: cardProgress.lapses,
-      state: stateMap[cardProgress.state],
-      last_review: cardProgress.lastReviewedAt || undefined,
-    }
-
-    // Initialize FSRS scheduler
-    const f = fsrs()
     const now = new Date()
-
-    // Calculate next review schedule
-    const schedulingCards = f.repeat(fsrsCard, now)
-    const { card: nextCard, log } = schedulingCards[ratingMap[rating]]
-
-    // Calculate elapsed days since last review
-    const elapsedDays = cardProgress.lastReviewedAt
-      ? Math.floor((now.getTime() - cardProgress.lastReviewedAt.getTime()) / (1000 * 60 * 60 * 24))
+    const last = cardProgress.lastReviewedAt
+    const elapsedDaysSinceLast = last
+      ? Math.max(0, Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24)))
       : 0
 
-    // Update card progress and create review in transaction
-    await prisma.$transaction(async (tx) => {
-      // Update card progress
-      await tx.cardProgress.update({
-        where: { id: cardProgressId },
-        data: {
-          state: reverseStateMap[nextCard.state],
-          due: nextCard.due,
-          stability: nextCard.stability,
-          difficulty: nextCard.difficulty,
-          scheduledDays: nextCard.scheduled_days,
-          reps: nextCard.reps,
-          lapses: nextCard.lapses,
-          lastReviewedAt: now,
-          version: { increment: 1 },
-        },
-      })
+    // Prepare FSRS input
+    const fsrsCard: FSRSCard = {
+      due: cardProgress.due ?? now, // FSRS expects a Date; fallback to now for NEW cards
+      stability: cardProgress.stability ?? 0,
+      difficulty: cardProgress.difficulty ?? 0,
+      elapsed_days: elapsedDaysSinceLast,
+      scheduled_days: cardProgress.scheduledDays ?? 0,
+      reps: cardProgress.reps ?? 0,
+      lapses: cardProgress.lapses ?? 0,
+      state: stateMap[cardProgress.state],
+      last_review: last ?? undefined,
+      learning_steps: 0,
+    }
 
-      // Create review record
-      await tx.review.create({
-        data: {
-          cardProgressId,
-          userId: session.user.id,
-          rating,
-          elapsedDays,
-          scheduledDays: nextCard.scheduled_days,
-          newDue: nextCard.due,
-          clientReviewId,
-        },
-      })
+    const f = fsrs()
+    const scheduling = f.repeat(fsrsCard, now)
+    const grade = ratingMap[rating]
+    const { card: nextCard, log } = scheduling[grade]
 
-      // Update deck progress
-      const deckProgress = await tx.deckProgress.findUnique({
-        where: {
-          userId_deckId: {
-            userId: session.user.id,
-            deckId: cardProgress.card.deckId,
-          },
-        },
-      })
-
-      if (deckProgress) {
-        await tx.deckProgress.update({
-          where: { id: deckProgress.id },
+    // Transaction with (a) optimistic locking on version, (b) idempotent insert via unique constraint
+    await prisma
+      .$transaction(async (tx) => {
+        const updated = await tx.cardProgress.updateMany({
+          where: { id: cardProgressId, userId: userId, version: cardProgress.version },
           data: {
-            lastStudiedAt: now,
-            cardsStudied: { increment: 1 },
+            state: reverseStateMap[nextCard.state],
+            due: nextCard.due,
+            stability: nextCard.stability,
+            difficulty: nextCard.difficulty,
+            scheduledDays: nextCard.scheduled_days,
+            reps: nextCard.reps,
+            lapses: nextCard.lapses,
+            lastReviewedAt: now,
+            version: { increment: 1 },
           },
         })
-      }
 
-      // Update course enrollment
-      await tx.courseEnrollment.updateMany({
-        where: {
-          userId: session.user.id,
-          courseId: cardProgress.card.deck.courseId,
-        },
-        data: {
-          lastStudiedAt: now,
-        },
+        if (updated.count === 0) {
+          // Someone else updated this card first; surface a benign message
+          throw new Prisma.PrismaClientKnownRequestError('Version conflict', {
+            code: 'P2034', // arbitrary here; you can use a custom error class instead
+            clientVersion: 'n/a',
+          } as any)
+        }
+
+        await tx.review.create({
+          data: {
+            cardProgressId,
+            userId: userId,
+            rating,
+            elapsedDays: elapsedDaysSinceLast,
+            scheduledDays: nextCard.scheduled_days,
+            newDue: nextCard.due,
+            clientReviewId, // must be unique in schema
+          },
+        })
+
+        // Course enrollment (prefer unique & update)
+        await tx.courseEnrollment.updateMany({
+          where: { userId: userId, courseId: cardProgress.card.deck.courseId },
+          data: { lastStudiedAt: now },
+        })
       })
-    })
-
-    // revalidatePath('/study')
+      .catch((err) => {
+        // Convert unique violation on clientReviewId into idempotent success
+        if (err?.code === 'P2002') {
+          return // treat as already recorded
+        }
+        throw err
+      })
 
     return {
       success: true,
       nextDue: nextCard.due,
       scheduledDays: nextCard.scheduled_days,
+      nextState: reverseStateMap[nextCard.state],
+      // log, // expose if you want client insights
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2034') {
+      return { error: 'Card was updated elsewhere. Please retry.' }
+    }
+    if (error?.code === 'P2002') {
+      // Unique(clientReviewId) — idempotent success
+      return { success: true, message: 'Review already recorded' }
+    }
     console.error('Review error:', error)
     return { error: 'Failed to record review' }
   }
