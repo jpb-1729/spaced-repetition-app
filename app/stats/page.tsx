@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 export default async function MyCardsPage() {
   const session = await auth()
@@ -58,12 +59,12 @@ export default async function MyCardsPage() {
       {cardProgresses.length === 0 ? (
         <div className="rounded-lg bg-gray-50 py-16 text-center">
           <p className="mb-4 text-gray-600">No active cards. Enroll in a deck to get started!</p>
-          <a
+          <Link
             href="/decks"
             className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
           >
             Browse Decks
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">
