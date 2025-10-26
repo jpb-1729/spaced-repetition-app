@@ -13,35 +13,26 @@ const addDays = (d: Date, days: number) => {
 type SeedCard = { front: string; back: string; notes?: string; tags?: string[] }
 
 const deck1Cards: SeedCard[] = [
-  // { front: 'hola', back: 'hello', tags: ['common-phrase'] },
-  // { front: 'gracias', back: 'thank you', tags: ['common-phrase'] },
-  // { front: '¿cómo estás?', back: 'how are you?', tags: ['common-phrase'] },
   {
-    front: 'What are the ingredients in the Bucatini?',
-    back: 'Chorizo, Charred Broccoli, Aged Provolone, Caramelized Onion',
+    front: 'What is the main difference between Chianti DOCG and Chianti Classico DOCG',
+    back: 'Chianti is a broader region with easier-drinking wines; Chianti Classico is a smaller historic zone between Florence and Siena with higher quality and stricter standards.',
   },
   {
-    front: 'What two components are in the Agnolotti besides butter beans?',
-    back: 'Parmesan Brodo, Mascarpone, Lemon',
+    front: 'What symbol identifies Chianti Classico wines?',
+    back: 'The Black Rooster (Gallo Nero)',
   },
   {
-    front: 'What accompanies the Grilled Chicken Thigh?',
-    back: 'Charred Summer Squash, Manchego, Romesco Vinaigrette',
+    front: 'What is the minimum Sangiovese requirement for Chianti vs. Chianti Classico?',
+    back: 'Chianti = minimum 70% Sangiovese; Chianti Classico = minimum 80% Sangiovese',
   },
   {
-    front: 'What is served with the Twice Cooked Pork Shoulder?',
-    back: 'Polenta, Roasted Red Pepper Sugo, Aged Provolone',
+    front: 'Can white grapes be used in Chianti Classico?',
+    back: 'No, Chianti Classico uses 100% red varieties only. (Regular Chianti can include up to 10% white grapes)',
   },
   {
-    front: 'What two sauces or condiments come with the Ribeye?',
-    back: 'Espelette Aioli, Chimichurri',
+    front: 'What are the three aging categories for Chianti Classico?',
+    back: 'Regular (12 months), Riserva (24 months), Gran Selezione (30 months)',
   },
-]
-
-const deck2Cards: SeedCard[] = [
-  { front: 'ser', back: 'to be (essential)', tags: ['irregular-verb'] },
-  { front: 'estar', back: 'to be (state/location)', tags: ['irregular-verb'] },
-  { front: 'tener', back: 'to have', tags: ['irregular-verb'] },
 ]
 
 // Initial per-card FSRS-like defaults
@@ -81,7 +72,7 @@ async function main() {
     create: {
       email: adminEmail!,
       role: UserRole.ADMIN,
-      name: 'Ada Admin',
+      name: 'John',
       emailVerified: new Date(),
     },
   })
@@ -97,7 +88,7 @@ async function main() {
   // If not linked, create a placeholder Account record
   if (!existingAccount) {
     console.log('⚠️  User exists but no Google account linked.')
-    console.log('   Sign in with Google to complete the linking.')
+    console.log('Sign in with Google to complete the linking.')
     // We can't create the Account without providerAccountId from Google
     // User needs to sign in once with allowDangerousEmailAccountLinking: true
   }
@@ -122,10 +113,10 @@ async function main() {
     },
     update: {},
     create: {
-      name: 'Spanish I',
-      description: 'Introductory Spanish course with core phrases and verbs.',
+      name: 'Olivero - Drinks',
+      description: 'Beverages',
       createdById: admin.id,
-      subject: 'Spanish',
+      subject: '',
       level: 'Beginner',
       estimatedHours: 10,
       isPublished: true,
@@ -136,21 +127,9 @@ async function main() {
   const deck1 = await prisma.deck.create({
     data: {
       courseId: course.id,
-      name: 'Phrases — Greetings',
+      name: 'Chianti',
       description: 'Essential greetings and courtesies',
       ordinal: 1,
-      cardsPerSession: 10,
-      passingScore: 80,
-      isOptional: false,
-    },
-  })
-
-  const deck2 = await prisma.deck.create({
-    data: {
-      courseId: course.id,
-      name: 'Verbs — To Be & To Have',
-      description: 'High-frequency irregular verbs',
-      ordinal: 2,
       cardsPerSession: 10,
       passingScore: 80,
       isOptional: false,
@@ -172,22 +151,8 @@ async function main() {
     )
   )
 
-  const createdDeck2Cards = await Promise.all(
-    deck2Cards.map((c) =>
-      prisma.card.create({
-        data: {
-          deckId: deck2.id,
-          front: c.front,
-          back: c.back,
-          notes: c.notes,
-          tags: c.tags ?? [],
-        },
-      })
-    )
-  )
-
   // Enrollment
-  const totalDecks = 2
+  const totalDecks = 1
   const enrollment = await prisma.courseEnrollment.create({
     data: {
       userId: student.id,
@@ -211,23 +176,13 @@ async function main() {
       targetCompletion: addDays(new Date(), 30),
     },
   })
+
   // DeckProgress (one per deck for student)
   const deck1Progress = await prisma.deckProgress.create({
     data: {
       userId: student.id,
       deckId: deck1.id,
       totalCards: createdDeck1Cards.length,
-      cardsStudied: 0,
-      masteredCards: 0,
-      isCompleted: false,
-    },
-  })
-
-  const deck2Progress = await prisma.deckProgress.create({
-    data: {
-      userId: student.id,
-      deckId: deck2.id,
-      totalCards: createdDeck2Cards.length,
       cardsStudied: 0,
       masteredCards: 0,
       isCompleted: false,
