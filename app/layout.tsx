@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar'
 import './globals.css'
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
+  variable: '--font-geist-mono',
   subsets: ['latin'],
 })
 
@@ -25,11 +25,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistMono.className} flex min-h-screen flex-col antialiased`}>
         <Navbar />
-        {children}
+        <main className="flex-1">{children}</main>
         <footer className="border-t border-gray-200 p-8">
-          <p className="text-sm text-gray-500">© 2025 ...</p>
+          <p className="text-sm text-gray-500">© 2025 Nunya Business</p>
         </footer>
       </body>
     </html>
