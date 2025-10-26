@@ -45,7 +45,7 @@ export default async function StudyPage() {
       <div className="container mx-auto p-8">
         <div className="py-16 text-center">
           <h1 className="mb-4 text-3xl font-bold">No Cards Due!</h1>
-          <p className="text-gray-600">You're all caught up. Check back later for more reviews.</p>
+          <p className="text-gray-600">{`You're all caught up. Check back later for more reviews.`}</p>
         </div>
       </div>
     )
