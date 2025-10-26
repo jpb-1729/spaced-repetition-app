@@ -3,10 +3,31 @@
 
 import { useState } from 'react'
 import { reviewCard } from '@/actions/review-card'
-import { Rating } from '@prisma/client'
+import { Rating, Prisma } from '@prisma/client'
+
+// Infer exactly what your Prisma query returns:
+// CardProgress with Card → Deck → Course (names + card fields you use)
+type StudyCard = Prisma.CardProgressGetPayload<{
+  select: {
+    id: true
+    card: {
+      select: {
+        front: true
+        back: true
+        notes: true
+        deck: {
+          select: {
+            name: true
+            course: { select: { name: true } }
+          }
+        }
+      }
+    }
+  }
+}>
 
 interface StudySessionProps {
-  cards: any[] // Type this properly based on your Prisma query
+  cards: StudyCard[]
 }
 
 export function StudySession({ cards }: StudySessionProps) {
@@ -14,7 +35,6 @@ export function StudySession({ cards }: StudySessionProps) {
   const [showAnswer, setShowAnswer] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Safety check
   if (!cards || cards.length === 0 || currentIndex >= cards.length) {
     return (
       <div className="py-16 text-center">
@@ -30,7 +50,6 @@ export function StudySession({ cards }: StudySessionProps) {
     setLoading(true)
     try {
       const clientReviewId = `${Date.now()}-${Math.random()}`
-
       const result = await reviewCard(currentCard.id, rating, clientReviewId)
 
       if (result.error) {
@@ -38,22 +57,18 @@ export function StudySession({ cards }: StudySessionProps) {
         return
       }
 
-      // Move to next card
       if (currentIndex < cards.length - 1) {
         setCurrentIndex(currentIndex + 1)
         setShowAnswer(false)
       } else {
-        // Session complete - show completion
-        setCurrentIndex(cards.length) // Trigger the safety check above
+        setCurrentIndex(cards.length)
       }
-    } catch (error) {
+    } catch {
       alert('Failed to record review')
     } finally {
       setLoading(false)
     }
   }
-
-  console.log(cards)
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -93,28 +108,28 @@ export function StudySession({ cards }: StudySessionProps) {
 
             <div className="grid grid-cols-4 gap-2">
               <button
-                onClick={() => handleRating('AGAIN')}
+                onClick={() => handleRating(Rating.AGAIN)}
                 disabled={loading}
                 className="rounded-lg bg-red-500 py-3 text-white transition-colors hover:bg-red-600 disabled:bg-gray-400"
               >
                 Again
               </button>
               <button
-                onClick={() => handleRating('HARD')}
+                onClick={() => handleRating(Rating.HARD)}
                 disabled={loading}
                 className="rounded-lg bg-orange-500 py-3 text-white transition-colors hover:bg-orange-600 disabled:bg-gray-400"
               >
                 Hard
               </button>
               <button
-                onClick={() => handleRating('GOOD')}
+                onClick={() => handleRating(Rating.GOOD)}
                 disabled={loading}
                 className="rounded-lg bg-green-500 py-3 text-white transition-colors hover:bg-green-600 disabled:bg-gray-400"
               >
                 Good
               </button>
               <button
-                onClick={() => handleRating('EASY')}
+                onClick={() => handleRating(Rating.EASY)}
                 disabled={loading}
                 className="rounded-lg bg-blue-500 py-3 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-400"
               >
