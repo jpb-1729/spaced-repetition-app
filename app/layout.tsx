@@ -27,9 +27,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistMono.className} flex min-h-screen flex-col antialiased`}>
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="bg-background flex-1">{children}</main>
         <footer className="border-t border-gray-200 p-8">
-          <p className="text-sm text-gray-500">© 2025 Nunya Business</p>
+          <p className="text-foreground text-sm">© 2025 Nunya Business</p>
         </footer>
       </body>
     </html>

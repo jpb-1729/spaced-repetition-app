@@ -80,7 +80,7 @@ export function StudySession({ cards }: StudySessionProps) {
         {currentCard.card.deck.course.name} → {currentCard.card.deck.name}
       </div>
 
-      <div className="flex min-h-[300px] flex-col justify-center rounded-lg border bg-white p-8 shadow-lg">
+      <div className="flex min-h-[300px] flex-col justify-center rounded-lg border p-8 shadow-lg">
         {!showAnswer ? (
           <div>
             <div className="mb-2 text-sm text-gray-500">Question</div>
