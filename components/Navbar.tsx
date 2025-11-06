@@ -13,7 +13,7 @@ export default function Navbar() {
     <nav className="bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Image src="/logo.png" alt="Spaced Repetition Logo" width={64} height={64} priority />
+          <Image src="/logo.svg" alt="Spaced Repetition Logo" width={64} height={64} priority />
 
           <div className="flex items-center space-x-8">
             {navigation.map((item) => (
