@@ -6,7 +6,7 @@ type Props = { user?: { name?: string | null; image?: string | null } }
 export default function Navbar({ user }: Props) {
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Study', href: '/study' },
+    { name: 'Study', href: '/view_decks' },
     { name: 'Stats', href: '/stats' },
     { name: 'Decks', href: '/decks' },
   ]

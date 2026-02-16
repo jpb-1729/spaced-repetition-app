@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { StudySession } from './StudySession'
-import { Prisma } from '@prisma/client' // Import Prisma types for type safety
+import { Prisma } from '@prisma/client'
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -18,23 +18,30 @@ export default async function StudyPage(props: Props) {
   }
 
   const deckId = typeof searchParams.deckId === 'string' ? searchParams.deckId : undefined
+  const courseId = typeof searchParams.courseId === 'string' ? searchParams.courseId : undefined
 
-  // 1. Construct the Where Clause Object dynamically
+  // Require a scope — redirect if neither deckId nor courseId is provided
+  if (!deckId && !courseId) {
+    redirect('/view_decks')
+  }
+
+  // Construct the Where Clause dynamically
+  const cardFilter: Prisma.CardWhereInput = {}
+  if (deckId) {
+    cardFilter.deckId = deckId
+  } else if (courseId) {
+    cardFilter.deck = { courseId: courseId }
+  }
+
   const whereClause: Prisma.CardProgressWhereInput = {
     userId: session.user.id,
     due: {
       lte: new Date(),
     },
     suspended: false,
-    // Conditionally add the deck filter if deckId is present
-    ...(deckId && {
-      card: {
-        deckId: deckId,
-      },
-    }),
+    card: cardFilter,
   }
 
-  // 2. Fetch using the dynamic where clause
   const dueCards = await prisma.cardProgress.findMany({
     where: whereClause,
     include: {
@@ -58,27 +65,34 @@ export default async function StudyPage(props: Props) {
     take: 20,
   })
 
-  // 3. Optional: Fetch Deck details if filtering, to show a better title
-  let studyTitle = 'All Due Cards'
+  // Fetch scope name for the title
+  let studyTitle = 'Study'
   if (deckId) {
     const deck = await prisma.deck.findUnique({
       where: { id: deckId },
       select: { name: true },
     })
     if (deck) studyTitle = `Studying: ${deck.name}`
+  } else if (courseId) {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { name: true },
+    })
+    if (course) studyTitle = `Studying: ${course.name}`
   }
 
   if (dueCards.length === 0) {
     return (
       <div className="container mx-auto p-8">
         <div className="py-16 text-center">
-          <h1 className="mb-4 text-3xl font-bold">{deckId ? 'Deck Complete!' : 'No Cards Due!'}</h1>
+          <h1 className="mb-4 text-3xl font-bold">
+            {deckId ? 'Deck Complete!' : 'Course Complete!'}
+          </h1>
           <p className="text-gray-600">
             {deckId
               ? "You've finished reviews for this deck."
-              : "You're all caught up. Check back later."}
+              : "You've finished reviews for all decks in this course."}
           </p>
-          {/* Add a 'Back to Dashboard' or 'Study All' button here */}
         </div>
       </div>
     )
