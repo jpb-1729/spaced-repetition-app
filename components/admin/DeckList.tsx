@@ -53,6 +53,12 @@ export function DeckList({ decks, courseId }: { decks: Deck[]; courseId: string 
             <td className="py-3">
               <div className="flex gap-2">
                 <Link
+                  href={`/admin/courses/${courseId}/decks/${deck.id}/cards/bulk`}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Import Cards
+                </Link>
+                <Link
                   href={`/admin/courses/${courseId}/decks/${deck.id}/edit`}
                   className="text-sm text-blue-600 hover:underline"
                 >
