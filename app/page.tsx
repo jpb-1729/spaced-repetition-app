@@ -14,19 +14,30 @@ export default async function Home() {
           This app uses spaced repetition to burn knowledge into your memory with minimal effort.
         </p>
       </div>
-      <form
-        className="p-8"
-        action={async () => {
-          'use server'
-          await signIn('google')
-        }}
-      >
-        {!isLoggedIn && (
-          <button className="rounded-lg bg-blue-500 p-8 py-3 text-white transition-colors hover:bg-red-600 disabled:bg-gray-400">
-            Log In
-          </button>
-        )}
-      </form>
+      {!isLoggedIn && (
+        <div className="flex flex-col gap-4 p-8 sm:flex-row">
+          <form
+            action={async () => {
+              'use server'
+              await signIn('google')
+            }}
+          >
+            <button className="rounded-lg bg-blue-500 px-8 py-3 text-white transition-colors hover:bg-red-600 disabled:bg-gray-400">
+              Log In
+            </button>
+          </form>
+          <form
+            action={async () => {
+              'use server'
+              await signIn('google')
+            }}
+          >
+            <button className="rounded-lg bg-green-500 px-8 py-3 text-white transition-colors hover:bg-green-600 disabled:bg-gray-400">
+              Sign Up
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
