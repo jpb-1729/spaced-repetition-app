@@ -39,7 +39,7 @@ describe("Navbar", () => {
     const decksLink = screen.getByRole("link", { name: /decks/i });
 
     expect(homeLink).toHaveAttribute("href", "/");
-    expect(studyLink).toHaveAttribute("href", "/study");
+    expect(studyLink).toHaveAttribute("href", "/view_decks");
     expect(statsLink).toHaveAttribute("href", "/stats");
     expect(decksLink).toHaveAttribute("href", "/decks");
   });
