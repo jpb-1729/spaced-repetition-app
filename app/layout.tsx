@@ -31,7 +31,7 @@ export default async function RootLayout({
         <Navbar user={session?.user} />
         <main className="bg-background flex-1">{children}</main>
         <footer className="border-t border-gray-200 p-8">
-          <p className="text-foreground text-sm">© 2025 Nunya Business</p>
+          <p className="text-foreground text-sm">© {new Date().getFullYear()} Nunya Business</p>
         </footer>
       </body>
     </html>
