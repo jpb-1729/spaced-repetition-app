@@ -24,6 +24,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
  
 model Session {
@@ -32,7 +33,9 @@ model Session {
   userId       String   @map("user_id")
   expires      DateTime @db.Timestamptz
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- }
+
+  @@map("sessions")
+}
  
 
 model VerificationToken {
@@ -41,6 +44,7 @@ model VerificationToken {
   expires    DateTime @db.Timestamptz
  
   @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 enum Rating {
@@ -134,6 +138,9 @@ model Deck {
   cardsPerSession Int     @default(20)
   passingScore    Int     @default(80)
   isOptional      Boolean @default(false)
+
+  // Reference material the cards are derived from (markdown supported)
+  referenceText   String?
 
   course         Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
   cards          Card[]
