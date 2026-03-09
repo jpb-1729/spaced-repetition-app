@@ -72,10 +72,10 @@ export default async function SelectDeckPage() {
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="mb-6 text-2xl font-bold">Choose What to Study</h1>
+      <h1 className="text-foreground mb-6 text-3xl font-bold uppercase">Choose What to Study</h1>
 
       {courses.length === 0 && (
-        <p className="text-gray-600">You are not enrolled in any courses yet.</p>
+        <p className="text-muted-foreground text-lg">You are not enrolled in any courses yet.</p>
       )}
 
       <div className="space-y-8">
@@ -86,17 +86,17 @@ export default async function SelectDeckPage() {
           )
 
           return (
-            <div key={course.courseId} className="rounded-lg border p-6">
+            <div key={course.courseId} className="brutal-border brutal-shadow bg-card p-6">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold">{course.courseName}</h2>
-                  <p className="text-sm text-gray-600">
+                  <h2 className="text-foreground text-xl font-bold">{course.courseName}</h2>
+                  <p className="text-muted-foreground font-mono text-sm font-bold">
                     {courseDueCount} card{courseDueCount !== 1 ? 's' : ''} due
                   </p>
                 </div>
                 <Link
                   href={`/study?courseId=${course.courseId}`}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground inline-block px-4 py-2 text-sm"
                 >
                   Study Course
                 </Link>
@@ -110,14 +110,16 @@ export default async function SelectDeckPage() {
                     <Link
                       key={deck.id}
                       href={`/study?deckId=${deck.id}`}
-                      className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50"
+                      className="brutal-border bg-card flex items-center justify-between p-4 transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none brutal-shadow-sm"
                     >
                       <div>
-                        <h3 className="font-medium">{deck.name}</h3>
-                        <p className="text-sm text-gray-500">{deck._count.cards} cards total</p>
+                        <h3 className="text-foreground font-bold">{deck.name}</h3>
+                        <p className="text-muted-foreground font-mono text-sm">
+                          {deck._count.cards} cards total
+                        </p>
                       </div>
                       {deckDueCount > 0 && (
-                        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                        <span className="brutal-border bg-accent text-accent-foreground px-3 py-1 text-sm font-bold">
                           {deckDueCount} due
                         </span>
                       )}

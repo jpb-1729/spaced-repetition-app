@@ -23,8 +23,6 @@ export function EnrollButton({ courseId, deckId, deckName }: EnrollButtonProps) 
         alert(result.error)
       } else {
         setEnrolled(true)
-        // Optional: redirect to study page
-        // window.location.href = `/study/${deckId}`
       }
     } catch (error) {
       alert('Failed to enroll')
@@ -35,8 +33,11 @@ export function EnrollButton({ courseId, deckId, deckName }: EnrollButtonProps) 
 
   if (enrolled) {
     return (
-      <button disabled className="rounded-lg bg-green-500 px-4 py-2 text-white">
-        ✓ Enrolled
+      <button
+        disabled
+        className="brutal-btn bg-success text-success-foreground px-4 py-2"
+      >
+        Enrolled
       </button>
     )
   }
@@ -45,7 +46,7 @@ export function EnrollButton({ courseId, deckId, deckName }: EnrollButtonProps) 
     <button
       onClick={handleEnroll}
       disabled={loading}
-      className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400"
+      className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground px-4 py-2 disabled:opacity-50"
     >
       {loading ? 'Enrolling...' : 'Enroll'}
     </button>

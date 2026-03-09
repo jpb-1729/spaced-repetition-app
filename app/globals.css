@@ -1,82 +1,118 @@
 @import 'tailwindcss';
 
-/* Add inside your existing @theme { ... } light block */
 @theme {
-  /* neutrals */
-  --color-card: var(--color-background);
-  --color-border: #e5e7eb; /* ≈ gray-200 */
-  --color-muted: #f8fafc; /* ≈ gray-50 */
-  --color-muted-foreground: #64748b; /* ≈ gray-500 */
-  --color-subtle-foreground: #94a3b8; /* ≈ gray-400 */
+  /* Neo-brutalist palette */
+  --color-background: #FFFDF7;
+  --color-foreground: #1a1a1a;
+  --color-card: #FFFFFF;
+  --color-border: #1a1a1a;
+  --color-muted: #F0EDE8;
+  --color-muted-foreground: #555555;
+  --color-subtle-foreground: #777777;
 
-  /* brand (you can reuse your primary) */
-  --color-primary-600: #2563eb;
+  --color-primary: #FF6B35;
+  --color-primary-foreground: #FFFFFF;
+  --color-accent: #FFD166;
+  --color-accent-foreground: #1a1a1a;
 
-  /* status surfaces/text */
-  --color-info: #2563eb; /* blue-600 */
-  --color-info-surface: #eff6ff; /* blue-50 */
-  --color-info-foreground: #1e3a8a; /* blue-800 */
+  --color-success: #06D6A0;
+  --color-success-surface: #06D6A0;
+  --color-success-foreground: #1a1a1a;
 
-  --color-success: #16a34a; /* green-600 */
-  --color-success-surface: #f0fdf4; /* green-50 */
-  --color-success-foreground: #166534; /* green-800 */
+  --color-danger: #EF476F;
+  --color-danger-surface: #EF476F;
+  --color-danger-foreground: #FFFFFF;
 
-  --color-warn: #d97706; /* amber-600 */
-  --color-warn-surface: #fffbeb; /* amber-50 */
-  --color-warn-foreground: #92400e; /* amber-800 */
+  --color-warn: #F78C6B;
+  --color-warn-surface: #F78C6B;
+  --color-warn-foreground: #1a1a1a;
 
-  --color-danger: #dc2626; /* red-600 */
-  --color-danger-surface: #fef2f2; /* red-50 */
-  --color-danger-foreground: #991b1b; /* red-800 */
+  --color-info: #118AB2;
+  --color-info-surface: #118AB2;
+  --color-info-foreground: #FFFFFF;
 
-  --color-accent: #7c3aed; /* purple-600 (for LEARNING) */
-  --color-accent-surface: #faf5ff; /* purple-50 */
-  --color-accent-foreground: #4c1d95; /* purple-800 */
+  --color-accent-surface: #FFD166;
+
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-space-mono);
 }
 
-/* Add the dark equivalents inside your existing @layer theme { @media (prefers-color-scheme: dark) { :root { ... } } } */
 @layer theme {
   @media (prefers-color-scheme: dark) {
     :root {
-      --color-card: #0b1220;
-      --color-border: #1f2937;
-      --color-muted: #0b1220;
-      --color-muted-foreground: #a8b3c7;
-      --color-subtle-foreground: #93a2b5;
+      --color-background: #1a1a1a;
+      --color-foreground: #FFFDF7;
+      --color-card: #2a2a2a;
+      --color-border: #FFFDF7;
+      --color-muted: #2a2a2a;
+      --color-muted-foreground: #bbbbbb;
+      --color-subtle-foreground: #999999;
 
-      /* brand contrast nudges */
-      --color-primary-600: #3b82f6;
+      --color-primary: #FF6B35;
+      --color-primary-foreground: #FFFFFF;
+      --color-accent: #FFD166;
+      --color-accent-foreground: #1a1a1a;
 
-      /* status surfaces/text tuned for dark */
-      --color-info: #60a5fa;
-      --color-info-surface: #0b1220;
-      --color-info-foreground: #93c5fd;
+      --color-success: #06D6A0;
+      --color-success-surface: #06D6A0;
+      --color-success-foreground: #1a1a1a;
 
-      --color-success: #34d399;
-      --color-success-surface: #0b1220;
-      --color-success-foreground: #86efac;
+      --color-danger: #EF476F;
+      --color-danger-surface: #EF476F;
+      --color-danger-foreground: #FFFFFF;
 
-      --color-warn: #f59e0b;
-      --color-warn-surface: #0b1220;
-      --color-warn-foreground: #fbbf24;
+      --color-warn: #F78C6B;
+      --color-warn-surface: #F78C6B;
+      --color-warn-foreground: #1a1a1a;
 
-      --color-danger: #f87171;
-      --color-danger-surface: #0b1220;
-      --color-danger-foreground: #fca5a5;
+      --color-info: #118AB2;
+      --color-info-surface: #118AB2;
+      --color-info-foreground: #FFFFFF;
 
-      --color-accent: #a78bfa;
-      --color-accent-surface: #0b1220;
-      --color-accent-foreground: #c4b5fd;
+      --color-accent-surface: #FFD166;
     }
   }
 }
 
-/* (You likely already have this) */
 :root {
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
+  }
+}
+
+/* Brutalist utility classes */
+@utility brutal-border {
+  border: 3px solid var(--color-border);
+}
+
+@utility brutal-shadow {
+  box-shadow: 4px 4px 0 var(--color-border);
+}
+
+@utility brutal-shadow-sm {
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
+@utility brutal-btn {
+  border: 3px solid var(--color-border);
+  box-shadow: 4px 4px 0 var(--color-border);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: transform 0.1s, box-shadow 0.1s;
+  cursor: pointer;
+}
+
+@utility brutal-btn-hover {
+  &:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--color-border);
+  }
+  &:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--color-border);
   }
 }

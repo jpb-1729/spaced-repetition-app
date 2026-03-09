@@ -1,17 +1,18 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Space_Grotesk, Space_Mono } from 'next/font/google'
 import Navbar from '@/components/Navbar'
 import { auth } from '@/auth'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-mono',
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const spaceMono = Space_Mono({
+  variable: '--font-space-mono',
   subsets: ['latin'],
+  weight: ['400', '700'],
 })
 
 export const metadata: Metadata = {
@@ -27,11 +28,15 @@ export default async function RootLayout({
   const session = await auth()
   return (
     <html lang="en">
-      <body className={`${geistMono.className} flex min-h-screen flex-col antialiased`}>
+      <body
+        className={`${spaceGrotesk.variable} ${spaceMono.variable} bg-background text-foreground flex min-h-screen flex-col font-sans`}
+      >
         <Navbar user={session?.user} />
-        <main className="bg-background flex-1">{children}</main>
-        <footer className="border-t border-gray-200 p-8">
-          <p className="text-foreground text-sm">© {new Date().getFullYear()} Nunya Business</p>
+        <main className="flex-1">{children}</main>
+        <footer className="border-t-3 border-border p-8">
+          <p className="text-foreground text-sm font-bold uppercase tracking-wide">
+            &copy; {new Date().getFullYear()} Nunya Business
+          </p>
         </footer>
       </body>
     </html>

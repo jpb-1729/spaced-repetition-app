@@ -38,8 +38,8 @@ export function StudySession({ cards }: StudySessionProps) {
   if (!cards || cards.length === 0 || currentIndex >= cards.length) {
     return (
       <div className="py-16 text-center">
-        <h2 className="mb-4 text-2xl font-bold">Session Complete!</h2>
-        <p className="text-gray-600">No more cards to review.</p>
+        <h2 className="text-foreground mb-4 text-3xl font-bold uppercase">Session Complete!</h2>
+        <p className="text-muted-foreground text-lg">No more cards to review.</p>
       </div>
     )
   }
@@ -72,36 +72,42 @@ export function StudySession({ cards }: StudySessionProps) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-4 text-sm text-gray-600">
+      <div className="text-muted-foreground mb-4 font-mono text-sm font-bold uppercase tracking-wider">
         Card {currentIndex + 1} of {cards.length}
       </div>
 
-      <div className="mb-2 text-sm text-gray-500">
-        {currentCard.card.deck.course.name} → {currentCard.card.deck.name}
+      <div className="text-muted-foreground mb-2 font-mono text-sm">
+        {currentCard.card.deck.course.name} &rarr; {currentCard.card.deck.name}
       </div>
 
-      <div className="flex min-h-[300px] flex-col justify-center rounded-lg border p-8 shadow-lg">
+      <div className="brutal-border brutal-shadow bg-card flex min-h-[300px] flex-col justify-center p-8">
         {!showAnswer ? (
           <div>
-            <div className="mb-2 text-sm text-gray-500">Question</div>
-            <div className="mb-8 text-2xl">{currentCard.card.front}</div>
+            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
+              Question
+            </div>
+            <div className="text-foreground mb-8 text-2xl font-bold">{currentCard.card.front}</div>
             <button
               onClick={() => setShowAnswer(true)}
-              className="w-full rounded-lg bg-blue-600 py-3 text-white transition-colors hover:bg-blue-700"
+              className="brutal-btn brutal-btn-hover bg-info text-info-foreground w-full py-3"
             >
               Show Answer
             </button>
           </div>
         ) : (
           <div>
-            <div className="mb-2 text-sm text-gray-500">Question</div>
-            <div className="mb-4 text-xl">{currentCard.card.front}</div>
+            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
+              Question
+            </div>
+            <div className="text-foreground mb-4 text-xl font-bold">{currentCard.card.front}</div>
 
-            <div className="mb-2 text-sm text-gray-500">Answer</div>
-            <div className="mb-8 text-2xl">{currentCard.card.back}</div>
+            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
+              Answer
+            </div>
+            <div className="text-foreground mb-8 text-2xl font-bold">{currentCard.card.back}</div>
 
             {currentCard.card.notes && (
-              <div className="mb-8 rounded bg-gray-50 p-4 text-sm text-gray-600">
+              <div className="brutal-border bg-muted mb-8 p-4 text-sm">
                 {currentCard.card.notes}
               </div>
             )}
@@ -110,28 +116,28 @@ export function StudySession({ cards }: StudySessionProps) {
               <button
                 onClick={() => handleRating(Rating.AGAIN)}
                 disabled={loading}
-                className="rounded-lg bg-red-500 py-3 text-white transition-colors hover:bg-red-600 disabled:bg-gray-400"
+                className="brutal-btn brutal-btn-hover bg-danger text-danger-foreground py-3 text-sm disabled:opacity-50"
               >
                 Again
               </button>
               <button
                 onClick={() => handleRating(Rating.HARD)}
                 disabled={loading}
-                className="rounded-lg bg-orange-500 py-3 text-white transition-colors hover:bg-orange-600 disabled:bg-gray-400"
+                className="brutal-btn brutal-btn-hover bg-warn text-warn-foreground py-3 text-sm disabled:opacity-50"
               >
                 Hard
               </button>
               <button
                 onClick={() => handleRating(Rating.GOOD)}
                 disabled={loading}
-                className="rounded-lg bg-green-500 py-3 text-white transition-colors hover:bg-green-600 disabled:bg-gray-400"
+                className="brutal-btn brutal-btn-hover bg-success text-success-foreground py-3 text-sm disabled:opacity-50"
               >
                 Good
               </button>
               <button
                 onClick={() => handleRating(Rating.EASY)}
                 disabled={loading}
-                className="rounded-lg bg-blue-500 py-3 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-400"
+                className="brutal-btn brutal-btn-hover bg-info text-info-foreground py-3 text-sm disabled:opacity-50"
               >
                 Easy
               </button>

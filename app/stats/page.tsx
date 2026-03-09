@@ -20,35 +20,35 @@ export default async function MyCardsPage() {
 
   return (
     <div className="bg-background text-foreground container mx-auto max-w-4xl p-8">
-      <h1 className="mb-8 text-3xl font-bold">My Active Cards</h1>
+      <h1 className="text-foreground mb-8 text-3xl font-bold uppercase">My Active Cards</h1>
 
       <div className="mb-6 grid grid-cols-3 gap-4 text-center">
-        <div className="bg-info-surface rounded-lg p-4">
-          <div className="text-2xl font-bold">{cardProgresses.length}</div>
-          <div className="text-muted-foreground text-sm">Total Cards</div>
+        <div className="brutal-border brutal-shadow bg-info p-4">
+          <div className="font-mono text-3xl font-bold text-white">{cardProgresses.length}</div>
+          <div className="text-sm font-bold uppercase tracking-wider text-white/80">Total Cards</div>
         </div>
-        <div className="bg-danger-surface rounded-lg p-4">
-          <div className="text-danger text-2xl font-bold">
+        <div className="brutal-border brutal-shadow bg-danger p-4">
+          <div className="font-mono text-3xl font-bold text-white">
             {cardProgresses.filter((p) => p.due <= now).length}
           </div>
-          <div className="text-muted-foreground text-sm">Due Now</div>
+          <div className="text-sm font-bold uppercase tracking-wider text-white/80">Due Now</div>
         </div>
-        <div className="bg-success-surface rounded-lg p-4">
-          <div className="text-success text-2xl font-bold">
+        <div className="brutal-border brutal-shadow bg-success p-4">
+          <div className="font-mono text-3xl font-bold text-success-foreground">
             {cardProgresses.filter((p) => p.state === 'REVIEW').length}
           </div>
-          <div className="text-muted-foreground text-sm">In Review</div>
+          <div className="text-success-foreground/80 text-sm font-bold uppercase tracking-wider">In Review</div>
         </div>
       </div>
 
       {cardProgresses.length === 0 ? (
-        <div className="bg-muted rounded-lg py-16 text-center">
-          <p className="text-muted-foreground mb-4">
+        <div className="brutal-border brutal-shadow bg-muted py-16 text-center">
+          <p className="text-muted-foreground mb-4 text-lg">
             No active cards. Enroll in a deck to get started!
           </p>
           <Link
             href="/decks"
-            className="bg-primary text-primary-foreground hover:bg-primary-600 inline-block rounded-lg px-6 py-2"
+            className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground inline-block px-6 py-2"
           >
             Browse Decks
           </Link>
@@ -64,37 +64,37 @@ export default async function MyCardsPage() {
             return (
               <div
                 key={progress.id}
-                className={`rounded-lg border p-4 ${
-                  isDue ? 'border-warn bg-warn-surface' : 'bg-card border-border'
+                className={`brutal-border p-4 ${
+                  isDue ? 'bg-warn/20 brutal-shadow' : 'bg-card'
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <div className="text-subtle-foreground mb-1 text-xs">
-                      {progress.card.deck.course.name} → {progress.card.deck.name}
+                    <div className="text-muted-foreground mb-1 font-mono text-xs uppercase tracking-wider">
+                      {progress.card.deck.course.name} &rarr; {progress.card.deck.name}
                     </div>
-                    <div className="mb-1 text-lg font-medium">{progress.card.front}</div>
+                    <div className="text-foreground mb-1 text-lg font-bold">{progress.card.front}</div>
                     <div className="text-muted-foreground">{progress.card.back}</div>
                   </div>
 
                   <div className="flex-shrink-0 text-right">
                     <span
-                      className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                      className={`brutal-border inline-block px-3 py-1 text-xs font-bold uppercase ${
                         progress.state === 'NEW'
-                          ? 'bg-info-surface text-info-foreground'
+                          ? 'bg-info text-info-foreground'
                           : progress.state === 'LEARNING'
-                            ? 'bg-accent-surface text-accent-foreground'
+                            ? 'bg-accent text-accent-foreground'
                             : progress.state === 'REVIEW'
-                              ? 'bg-success-surface text-success-foreground'
-                              : 'bg-warn-surface text-warn-foreground'
+                              ? 'bg-success text-success-foreground'
+                              : 'bg-warn text-warn-foreground'
                       }`}
                     >
                       {progress.state}
                     </span>
 
-                    <div className="mt-2 text-sm">
+                    <div className="mt-2 text-sm font-bold">
                       {isDue ? (
-                        <span className="text-danger font-semibold">Due now!</span>
+                        <span className="text-danger">Due now!</span>
                       ) : daysUntilDue <= 0 ? (
                         <span className="text-danger">Overdue</span>
                       ) : (
@@ -102,8 +102,8 @@ export default async function MyCardsPage() {
                       )}
                     </div>
 
-                    <div className="text-subtle-foreground mt-1 text-xs">
-                      {progress.reps} reps · {progress.lapses} lapses
+                    <div className="text-muted-foreground mt-1 font-mono text-xs">
+                      {progress.reps} reps &middot; {progress.lapses} lapses
                     </div>
                   </div>
                 </div>

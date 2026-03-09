@@ -85,10 +85,10 @@ export default async function StudyPage(props: Props) {
     return (
       <div className="container mx-auto p-8">
         <div className="py-16 text-center">
-          <h1 className="mb-4 text-3xl font-bold">
+          <h1 className="text-foreground mb-4 text-4xl font-bold uppercase">
             {deckId ? 'Deck Complete!' : 'Course Complete!'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground text-lg">
             {deckId
               ? "You've finished reviews for this deck."
               : "You've finished reviews for all decks in this course."}
@@ -101,7 +101,7 @@ export default async function StudyPage(props: Props) {
   return (
     <div className="container mx-auto p-8">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">{studyTitle}</h2>
+        <h2 className="text-foreground text-2xl font-bold uppercase">{studyTitle}</h2>
       </div>
       <StudySession cards={dueCards} />
     </div>

@@ -6,11 +6,15 @@ export default async function Home() {
   return (
     <div className="flex flex-col">
       <header className="p-8">
-        <p className="text-foreground text-4xl font-bold">Welcome to Olivero Recall</p>
-        <p className="text-muted-foreground text-xl"> Learn smarter, not harder. </p>
+        <h1 className="text-foreground text-5xl font-bold uppercase tracking-tight sm:text-6xl">
+          Olivero Recall
+        </h1>
+        <p className="text-foreground mt-2 text-2xl font-bold">
+          Learn smarter, not harder.
+        </p>
       </header>
       <div className="max-w-2xl p-8">
-        <p className="text-foreground leading-relaxed">
+        <p className="text-foreground text-lg leading-relaxed">
           This app uses spaced repetition to burn knowledge into your memory with minimal effort.
         </p>
       </div>
@@ -22,7 +26,7 @@ export default async function Home() {
               await signIn('google')
             }}
           >
-            <button className="rounded-lg bg-blue-500 px-8 py-3 text-white transition-colors hover:bg-red-600 disabled:bg-gray-400">
+            <button className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground px-8 py-3">
               Log In
             </button>
           </form>
@@ -32,7 +36,7 @@ export default async function Home() {
               await signIn('google')
             }}
           >
-            <button className="rounded-lg bg-green-500 px-8 py-3 text-white transition-colors hover:bg-green-600 disabled:bg-gray-400">
+            <button className="brutal-btn brutal-btn-hover bg-success text-success-foreground px-8 py-3">
               Sign Up
             </button>
           </form>
