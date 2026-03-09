@@ -1,8 +1,21 @@
 // app/decks/page.tsx
 import { prisma } from '@/lib/prisma'
 import { EnrollButton } from '@/components/EnrollButton'
+import { auth } from '@/auth'
 
 export default async function DecksPage() {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  const enrolledDeckIds = userId
+    ? (
+        await prisma.deckProgress.findMany({
+          where: { userId },
+          select: { deckId: true },
+        })
+      ).map((dp) => dp.deckId)
+    : []
+
   const decks = await prisma.deck.findMany({
     include: {
       course: {
@@ -54,7 +67,7 @@ export default async function DecksPage() {
                 </p>
               </div>
 
-              <EnrollButton courseId={deck.course.id} deckId={deck.id} deckName={deck.name} />
+              <EnrollButton courseId={deck.course.id} deckId={deck.id} deckName={deck.name} isEnrolled={enrolledDeckIds.includes(deck.id)} />
             </div>
           </div>
         ))}

@@ -8,11 +8,12 @@ interface EnrollButtonProps {
   courseId: string
   deckId: string
   deckName: string
+  isEnrolled?: boolean
 }
 
-export function EnrollButton({ courseId, deckId, deckName }: EnrollButtonProps) {
+export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }: EnrollButtonProps) {
   const [loading, setLoading] = useState(false)
-  const [enrolled, setEnrolled] = useState(false)
+  const [enrolled, setEnrolled] = useState(isEnrolled)
 
   async function handleEnroll() {
     setLoading(true)

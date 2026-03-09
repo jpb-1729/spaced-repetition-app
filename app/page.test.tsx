@@ -40,7 +40,7 @@ describe("Home page", () => {
     const { default: Home } = await import("@/app/page");
     render(await Home());
 
-    expect(screen.getByText("Welcome to Olivero Recall")).toBeInTheDocument();
+    expect(screen.getByText("Olivero Recall")).toBeInTheDocument();
     expect(screen.getByText(/learn smarter, not harder/i)).toBeInTheDocument();
   });
 });
