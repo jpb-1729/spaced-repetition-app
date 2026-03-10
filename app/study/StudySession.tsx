@@ -1,15 +1,23 @@
 // app/study/study-session.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { reviewCard } from '@/actions/review-card'
 import { Rating, Prisma } from '@prisma/client'
+import { fsrs, Rating as FSRSRating, State, type Card as FSRSCard } from 'ts-fsrs'
 
-// Infer exactly what your Prisma query returns:
-// CardProgress with Card → Deck → Course (names + card fields you use)
 type StudyCard = Prisma.CardProgressGetPayload<{
   select: {
     id: true
+    state: true
+    due: true
+    stability: true
+    difficulty: true
+    scheduledDays: true
+    reps: true
+    lapses: true
+    lastReviewedAt: true
+    learningSteps: true
     card: {
       select: {
         front: true
@@ -30,12 +38,85 @@ interface StudySessionProps {
   cards: StudyCard[]
 }
 
+const stateMap = {
+  NEW: State.New,
+  LEARNING: State.Learning,
+  REVIEW: State.Review,
+  RELEARNING: State.Relearning,
+} as const
+
+const ratingButtons = [
+  { rating: Rating.AGAIN, fsrs: FSRSRating.Again, label: 'Again', className: 'bg-danger text-danger-foreground' },
+  { rating: Rating.HARD, fsrs: FSRSRating.Hard, label: 'Hard', className: 'bg-warn text-warn-foreground' },
+  { rating: Rating.GOOD, fsrs: FSRSRating.Good, label: 'Good', className: 'bg-success text-success-foreground' },
+  { rating: Rating.EASY, fsrs: FSRSRating.Easy, label: 'Easy', className: 'bg-info text-info-foreground' },
+] as const
+
+function formatDueInterval(due: Date, now: Date): string {
+  const diffMs = due.getTime() - now.getTime()
+
+  if (diffMs < 60_000) return '<1m'
+
+  const minutes = Math.round(diffMs / 60_000)
+  if (minutes < 60) return `${minutes}m`
+
+  const hours = Math.round(diffMs / 3_600_000)
+  if (hours < 24) return `${hours}h`
+
+  const days = Math.round(diffMs / 86_400_000)
+  if (days < 31) return `${days}d`
+
+  const months = Math.round(days / 30)
+  if (months < 12) return `${months}mo`
+
+  const years = +(days / 365).toFixed(1)
+  return `${years}y`
+}
+
+function computePreviews(card: StudyCard) {
+  const now = new Date()
+  const last = card.lastReviewedAt ? new Date(card.lastReviewedAt) : null
+  const elapsedDays = last
+    ? Math.max(0, Math.floor((now.getTime() - last.getTime()) / 86_400_000))
+    : 0
+
+  const fsrsCard: FSRSCard = {
+    due: new Date(card.due),
+    stability: card.stability,
+    difficulty: card.difficulty,
+    elapsed_days: elapsedDays,
+    scheduled_days: card.scheduledDays,
+    reps: card.reps,
+    lapses: card.lapses,
+    state: stateMap[card.state],
+    last_review: last ?? undefined,
+    learning_steps: card.learningSteps,
+  }
+
+  const f = fsrs()
+  const scheduling = f.repeat(fsrsCard, now)
+
+  return {
+    [Rating.AGAIN]: formatDueInterval(scheduling[FSRSRating.Again].card.due, now),
+    [Rating.HARD]: formatDueInterval(scheduling[FSRSRating.Hard].card.due, now),
+    [Rating.GOOD]: formatDueInterval(scheduling[FSRSRating.Good].card.due, now),
+    [Rating.EASY]: formatDueInterval(scheduling[FSRSRating.Easy].card.due, now),
+  }
+}
+
 export function StudySession({ cards }: StudySessionProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  if (!cards || cards.length === 0 || currentIndex >= cards.length) {
+  const currentCard = currentIndex < cards.length ? cards[currentIndex] : null
+
+  const previews = useMemo(() => {
+    if (!currentCard) return null
+    return computePreviews(currentCard)
+  }, [currentCard])
+
+  if (!currentCard) {
     return (
       <div className="py-16 text-center">
         <h2 className="text-foreground mb-4 text-3xl font-bold uppercase">Session Complete!</h2>
@@ -44,13 +125,11 @@ export function StudySession({ cards }: StudySessionProps) {
     )
   }
 
-  const currentCard = cards[currentIndex]
-
   async function handleRating(rating: Rating) {
     setLoading(true)
     try {
       const clientReviewId = `${Date.now()}-${Math.random()}`
-      const result = await reviewCard(currentCard.id, rating, clientReviewId)
+      const result = await reviewCard(currentCard!.id, rating, clientReviewId)
 
       if (result.error) {
         alert(result.error)
@@ -113,34 +192,19 @@ export function StudySession({ cards }: StudySessionProps) {
             )}
 
             <div className="grid grid-cols-4 gap-2">
-              <button
-                onClick={() => handleRating(Rating.AGAIN)}
-                disabled={loading}
-                className="brutal-btn brutal-btn-hover bg-danger text-danger-foreground py-3 text-sm disabled:opacity-50"
-              >
-                Again
-              </button>
-              <button
-                onClick={() => handleRating(Rating.HARD)}
-                disabled={loading}
-                className="brutal-btn brutal-btn-hover bg-warn text-warn-foreground py-3 text-sm disabled:opacity-50"
-              >
-                Hard
-              </button>
-              <button
-                onClick={() => handleRating(Rating.GOOD)}
-                disabled={loading}
-                className="brutal-btn brutal-btn-hover bg-success text-success-foreground py-3 text-sm disabled:opacity-50"
-              >
-                Good
-              </button>
-              <button
-                onClick={() => handleRating(Rating.EASY)}
-                disabled={loading}
-                className="brutal-btn brutal-btn-hover bg-info text-info-foreground py-3 text-sm disabled:opacity-50"
-              >
-                Easy
-              </button>
+              {ratingButtons.map(({ rating, label, className }) => (
+                <button
+                  key={rating}
+                  onClick={() => handleRating(rating)}
+                  disabled={loading}
+                  className={`brutal-btn brutal-btn-hover ${className} py-3 text-sm disabled:opacity-50`}
+                >
+                  <span className="block font-mono text-xs opacity-75">
+                    {previews?.[rating]}
+                  </span>
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         )}

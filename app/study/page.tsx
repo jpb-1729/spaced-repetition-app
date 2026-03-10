@@ -44,16 +44,26 @@ export default async function StudyPage(props: Props) {
 
   const dueCards = await prisma.cardProgress.findMany({
     where: whereClause,
-    include: {
+    select: {
+      id: true,
+      state: true,
+      due: true,
+      stability: true,
+      difficulty: true,
+      scheduledDays: true,
+      reps: true,
+      lapses: true,
+      lastReviewedAt: true,
+      learningSteps: true,
       card: {
-        include: {
+        select: {
+          front: true,
+          back: true,
+          notes: true,
           deck: {
-            include: {
-              course: {
-                select: {
-                  name: true,
-                },
-              },
+            select: {
+              name: true,
+              course: { select: { name: true } },
             },
           },
         },
