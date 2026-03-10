@@ -52,6 +52,7 @@ export async function reviewCard(
         reps: true,
         lapses: true,
         lastReviewedAt: true,
+        learningSteps: true,
         version: true,
         card: {
           select: {
@@ -81,7 +82,7 @@ export async function reviewCard(
       lapses: cardProgress.lapses ?? 0,
       state: stateMap[cardProgress.state],
       last_review: last ?? undefined,
-      learning_steps: 0,
+      learning_steps: cardProgress.learningSteps ?? 0,
     }
 
     const f = fsrs()
@@ -102,6 +103,7 @@ export async function reviewCard(
             scheduledDays: nextCard.scheduled_days,
             reps: nextCard.reps,
             lapses: nextCard.lapses,
+            learningSteps: nextCard.learning_steps,
             lastReviewedAt: now,
             version: { increment: 1 },
           },
