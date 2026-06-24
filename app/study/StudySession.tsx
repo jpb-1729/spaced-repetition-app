@@ -55,22 +55,22 @@ const ratingButtons = [
 function formatDueInterval(due: Date, now: Date): string {
   const diffMs = due.getTime() - now.getTime()
 
-  if (diffMs < 60_000) return '<1m'
+  if (diffMs < 60_000) return '<1 minute'
 
   const minutes = Math.round(diffMs / 60_000)
-  if (minutes < 60) return `${minutes}m`
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
 
   const hours = Math.round(diffMs / 3_600_000)
-  if (hours < 24) return `${hours}h`
+  if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'}`
 
   const days = Math.round(diffMs / 86_400_000)
-  if (days < 31) return `${days}d`
+  if (days < 31) return `${days} ${days === 1 ? 'day' : 'days'}`
 
   const months = Math.round(days / 30)
-  if (months < 12) return `${months}mo`
+  if (months < 12) return `${months} ${months === 1 ? 'month' : 'months'}`
 
   const years = +(days / 365).toFixed(1)
-  return `${years}y`
+  return `${years} ${years === 1 ? 'year' : 'years'}`
 }
 
 function computePreviews(card: StudyCard) {
@@ -160,26 +160,22 @@ export function StudySession({ cards }: StudySessionProps) {
       </div>
 
       <div className="brutal-border brutal-shadow bg-card flex min-h-[300px] flex-col justify-center p-8">
-        {!showAnswer ? (
-          <div>
-            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
-              Question
-            </div>
-            <div className="text-foreground mb-8 text-2xl font-bold">{currentCard.card.front}</div>
-            <button
-              onClick={() => setShowAnswer(true)}
-              className="brutal-btn brutal-btn-hover bg-info text-info-foreground w-full py-3"
-            >
-              Show Answer
-            </button>
-          </div>
-        ) : (
-          <div>
-            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
-              Question
-            </div>
-            <div className="text-foreground mb-4 text-xl font-bold">{currentCard.card.front}</div>
+        <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
+          Question
+        </div>
+        <div className={`text-foreground font-bold ${showAnswer ? 'mb-4 text-xl' : 'mb-8 text-2xl'}`}>
+          {currentCard.card.front}
+        </div>
 
+        {!showAnswer ? (
+          <button
+            onClick={() => setShowAnswer(true)}
+            className="brutal-btn brutal-btn-hover bg-info text-info-foreground w-full py-3"
+          >
+            Show Answer
+          </button>
+        ) : (
+          <div className="animate-fade-in-up">
             <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
               Answer
             </div>
