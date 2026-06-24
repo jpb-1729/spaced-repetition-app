@@ -19,10 +19,10 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
     "@prisma/client": "^6.19.3",
-    "next": "16.1.6",
+    "next": "16.2.9",
     "next-auth": "5.0.0-beta.30",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "ts-fsrs": "^5.4.1",
     "zod": "^4.4.3"
   },
@@ -40,7 +40,7 @@
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^28.1.0",
     "prettier": "^3.8.4",
-    "prettier-plugin-tailwindcss": "^0.7.4",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "prisma": "^6.19.3",
     "tailwindcss": "^4.3.1",
     "tsx": "^4.22.4",
