@@ -128,7 +128,7 @@ export function StudySession({ cards }: StudySessionProps) {
   async function handleRating(rating: Rating) {
     setLoading(true)
     try {
-      const clientReviewId = `${Date.now()}-${Math.random()}`
+      const clientReviewId = crypto.randomUUID()
       const result = await reviewCard(currentCard!.id, rating, clientReviewId)
 
       if (result.error) {

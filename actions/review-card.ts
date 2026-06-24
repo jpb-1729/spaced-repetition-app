@@ -114,7 +114,7 @@ export async function reviewCard(
           throw new Prisma.PrismaClientKnownRequestError('Version conflict', {
             code: 'P2034', // arbitrary here; you can use a custom error class instead
             clientVersion: 'n/a',
-          } as any)
+          })
         }
 
         await tx.review.create({
@@ -150,11 +150,12 @@ export async function reviewCard(
       nextState: reverseStateMap[nextCard.state],
       // log, // expose if you want client insights
     }
-  } catch (error: any) {
-    if (error?.code === 'P2034') {
+  } catch (error) {
+    const code = (error as { code?: string } | null)?.code
+    if (code === 'P2034') {
       return { error: 'Card was updated elsewhere. Please retry.' }
     }
-    if (error?.code === 'P2002') {
+    if (code === 'P2002') {
       // Unique(clientReviewId) — idempotent success
       return { success: true, message: 'Review already recorded' }
     }
