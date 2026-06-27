@@ -263,7 +263,7 @@ model Review {
   clientReviewId String   @unique
 
   cardProgress CardProgress @relation(fields: [cardProgressId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, reviewedAt])
   @@index([cardProgressId, reviewedAt])
