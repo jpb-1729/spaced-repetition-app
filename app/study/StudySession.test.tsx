@@ -66,4 +66,34 @@ describe('StudySession answer reveal', () => {
 
     expect(screen.getByText('What is the capital of France?')).toBeInTheDocument()
   })
+
+  it('keeps the question text styling identical before and after reveal so it does not jump', async () => {
+    render(<StudySession cards={[mockCard]} />)
+
+    const question = screen.getByText('What is the capital of France?')
+    const classBefore = question.className
+
+    await userEvent.click(screen.getByRole('button', { name: /show answer/i }))
+
+    // Same element, unchanged classes — no font-size/margin swap means no positional jump.
+    expect(question.className).toBe(classBefore)
+  })
+
+  it('floors the card at a min-height without a fixed height or scroll overflow', async () => {
+    render(<StudySession cards={[mockCard]} />)
+
+    const container = screen.getByTestId('card-container')
+
+    // A min-height gives short cards a stable floor while letting tall cards
+    // extend downward — so the box never needs an inner scrollbar.
+    expect(container.style.minHeight).toBe('480px')
+    expect(container.style.height).toBe('')
+    // No overflow-y-auto/scroll class means no scrollbar can appear.
+    expect(container.className).not.toMatch(/overflow-y-(auto|scroll)/)
+
+    await userEvent.click(screen.getByRole('button', { name: /show answer/i }))
+
+    expect(container.style.minHeight).toBe('480px')
+    expect(container.className).not.toMatch(/overflow-y-(auto|scroll)/)
+  })
 })
