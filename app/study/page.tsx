@@ -1,4 +1,5 @@
 // app/study/page.tsx
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
@@ -93,27 +94,41 @@ export default async function StudyPage(props: Props) {
 
   if (dueCards.length === 0) {
     return (
-      <div className="container mx-auto p-8">
-        <div className="py-16 text-center">
-          <h1 className="text-foreground mb-4 text-4xl font-bold uppercase">
-            {deckId ? 'Deck Complete!' : 'Course Complete!'}
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            {deckId
-              ? "You've finished reviews for this deck."
-              : "You've finished reviews for all decks in this course."}
-          </p>
+      <div className="bg-dots flex-1">
+        <div className="container mx-auto p-8">
+          <div className="mx-auto max-w-2xl py-16">
+            <div className="brutal-border brutal-shadow-xl bg-success animate-pop p-10 text-center">
+              <h1 className="text-success-foreground text-4xl font-bold uppercase sm:text-5xl">
+                {deckId ? 'Deck Complete!' : 'Course Complete!'}
+              </h1>
+              <p className="text-success-foreground mt-4 text-lg font-bold">
+                {deckId
+                  ? "You've finished reviews for this deck."
+                  : "You've finished reviews for all decks in this course."}
+              </p>
+              <Link
+                href="/view_decks"
+                className="brutal-btn brutal-btn-hover bg-card text-foreground mt-8 inline-block px-8 py-3"
+              >
+                Back to Decks
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <div className="mb-6">
-        <h2 className="text-foreground text-2xl font-bold uppercase">{studyTitle}</h2>
+    <div className="bg-dots flex-1">
+      <div className="container mx-auto p-8">
+        <div className="mx-auto mb-8 max-w-2xl">
+          <h2 className="brutal-border brutal-shadow bg-accent text-accent-foreground inline-block rotate-[-1deg] px-4 py-2 text-xl font-bold tracking-wide uppercase sm:text-2xl">
+            {studyTitle}
+          </h2>
+        </div>
+        <StudySession cards={dueCards} />
       </div>
-      <StudySession cards={dueCards} />
     </div>
   )
 }

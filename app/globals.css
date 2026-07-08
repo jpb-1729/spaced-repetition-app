@@ -6,6 +6,12 @@
   --color-foreground: #1a1a1a;
   --color-card: #FFFFFF;
   --color-border: #1a1a1a;
+  /* Shadows are a physical metaphor — they stay dark in both modes. */
+  --color-shadow: #1a1a1a;
+  --color-dots: #E3DFD6;
+  /* Ink: always-dark slab surfaces (footer), regardless of mode. */
+  --color-ink: #1a1a1a;
+  --color-ink-foreground: #FFFDF7;
   --color-muted: #F0EDE8;
   --color-muted-foreground: #555555;
   --color-subtle-foreground: #777777;
@@ -40,12 +46,20 @@
 @layer theme {
   @media (prefers-color-scheme: dark) {
     :root {
-      --color-background: #1a1a1a;
+      /* Background is raised above pure black so #000 shadows can fall on it —
+         a shadow only reads if the surface beneath it is lighter. */
+      --color-background: #212121;
       --color-foreground: #FFFDF7;
-      --color-card: #2a2a2a;
+      --color-card: #2e2e2e;
       --color-border: #FFFDF7;
-      --color-muted: #2a2a2a;
-      --color-muted-foreground: #bbbbbb;
+      /* Black shadow on lifted surfaces — never a white "glow". */
+      --color-shadow: #000000;
+      --color-dots: #3a3a3a;
+      /* Ink drops below the page bg, so the footer reads as a darker slab. */
+      --color-ink: #0f0f0f;
+      --color-ink-foreground: #FFFDF7;
+      --color-muted: #383838;
+      --color-muted-foreground: #c0c0c0;
       --color-subtle-foreground: #999999;
 
       --color-primary: #FF6B35;
@@ -83,6 +97,12 @@
   }
 }
 
+/* Brutalist focus: loud, unmissable, keyboard-friendly. */
+:focus-visible {
+  outline: 3px solid var(--color-info);
+  outline-offset: 3px;
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.4s ease-out;
 }
@@ -104,16 +124,46 @@
 }
 
 @utility brutal-shadow {
-  box-shadow: 4px 4px 0 var(--color-border);
+  box-shadow: 4px 4px 0 var(--color-shadow);
 }
 
 @utility brutal-shadow-sm {
-  box-shadow: 2px 2px 0 var(--color-border);
+  box-shadow: 2px 2px 0 var(--color-shadow);
+}
+
+@utility brutal-shadow-lg {
+  box-shadow: 6px 6px 0 var(--color-shadow);
+}
+
+@utility brutal-shadow-xl {
+  box-shadow: 8px 8px 0 var(--color-shadow);
+}
+
+/* Colored shadow — for hero surfaces that deserve extra volume. */
+@utility brutal-shadow-accent {
+  box-shadow: 8px 8px 0 var(--color-accent);
+}
+
+/* Dot-grid backdrop: graph-paper energy for study surfaces. */
+@utility bg-dots {
+  background-image: radial-gradient(var(--color-dots) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+/* Diagonal caution-tape stripes — decorative divider bands. */
+@utility bg-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-accent),
+    var(--color-accent) 12px,
+    transparent 12px,
+    transparent 24px
+  );
 }
 
 @utility brutal-btn {
   border: 3px solid var(--color-border);
-  box-shadow: 4px 4px 0 var(--color-border);
+  box-shadow: 4px 4px 0 var(--color-shadow);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -124,10 +174,25 @@
 @utility brutal-btn-hover {
   &:hover {
     transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0 var(--color-border);
+    box-shadow: 2px 2px 0 var(--color-shadow);
   }
   &:active {
     transform: translate(4px, 4px);
-    box-shadow: 0 0 0 var(--color-border);
+    box-shadow: 0 0 0 var(--color-shadow);
+  }
+}
+
+.animate-pop {
+  animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85) rotate(-1deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-1deg);
   }
 }

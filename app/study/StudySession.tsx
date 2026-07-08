@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { reviewCard } from '@/actions/review-card'
 import { Rating, Prisma } from '@prisma/client'
 import { fsrs, Rating as FSRSRating, State, type Card as FSRSCard } from 'ts-fsrs'
@@ -122,6 +123,7 @@ export function StudySession({ cards }: StudySessionProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const currentCard = currentIndex < cards.length ? cards[currentIndex] : null
 
@@ -132,21 +134,38 @@ export function StudySession({ cards }: StudySessionProps) {
 
   if (!currentCard) {
     return (
-      <div className="py-16 text-center">
-        <h2 className="text-foreground mb-4 text-3xl font-bold uppercase">Session Complete!</h2>
-        <p className="text-muted-foreground text-lg">No more cards to review.</p>
+      <div className="mx-auto max-w-2xl py-16">
+        <div className="brutal-border brutal-shadow-xl bg-success animate-pop relative p-10 text-center">
+          <span className="brutal-border brutal-shadow-sm bg-accent text-accent-foreground absolute -top-4 -left-3 rotate-[-6deg] px-3 py-1 text-xs font-bold tracking-[0.2em] uppercase">
+            ★ Nice ★
+          </span>
+          <h2 className="text-success-foreground text-4xl font-bold uppercase sm:text-5xl">
+            Session Complete!
+          </h2>
+          <p className="text-success-foreground mt-4 text-lg font-bold">
+            {cards.length} {cards.length === 1 ? 'card' : 'cards'} reviewed. Your future self says
+            thanks.
+          </p>
+          <Link
+            href="/view_decks"
+            className="brutal-btn brutal-btn-hover bg-card text-foreground mt-8 inline-block px-8 py-3"
+          >
+            Back to Decks
+          </Link>
+        </div>
       </div>
     )
   }
 
   async function handleRating(rating: Rating) {
     setLoading(true)
+    setError(null)
     try {
       const clientReviewId = crypto.randomUUID()
       const result = await reviewCard(currentCard!.id, rating, clientReviewId)
 
       if (result.error) {
-        alert(result.error)
+        setError(result.error)
         return
       }
 
@@ -157,7 +176,7 @@ export function StudySession({ cards }: StudySessionProps) {
         setCurrentIndex(cards.length)
       }
     } catch {
-      alert('Failed to record review')
+      setError('Failed to record review')
     } finally {
       setLoading(false)
     }
@@ -165,40 +184,57 @@ export function StudySession({ cards }: StudySessionProps) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="text-subtle-foreground mb-6 flex items-baseline justify-between font-mono text-sm">
-        <span className="truncate">
-          {currentCard.card.deck.course.name} / {currentCard.card.deck.name}
-        </span>
-        <span className="shrink-0 tabular-nums">
-          {currentIndex + 1} / {cards.length}
-        </span>
+      <div className="mb-8 space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <span className="brutal-border brutal-shadow-sm bg-card text-foreground truncate px-3 py-1 font-mono text-xs font-bold tracking-wider uppercase">
+            {currentCard.card.deck.course.name} / {currentCard.card.deck.name}
+          </span>
+          <span className="text-foreground shrink-0 font-mono text-sm font-bold tabular-nums">
+            {currentIndex + 1} / {cards.length}
+          </span>
+        </div>
+        <div className="brutal-border bg-card h-5">
+          <div
+            className="bg-accent border-border h-full border-r-[3px] transition-all duration-300"
+            style={{ width: `${(currentIndex / cards.length) * 100}%` }}
+          />
+        </div>
       </div>
+
+      {error && (
+        <div
+          role="alert"
+          className="brutal-border brutal-shadow bg-danger text-danger-foreground mb-6 px-4 py-3 font-bold uppercase"
+        >
+          {error}
+        </div>
+      )}
 
       <div
         data-testid="card-container"
         style={{ minHeight: '480px' }}
-        className="brutal-border brutal-shadow-sm bg-card flex flex-col justify-start p-6 sm:p-6"
+        className="brutal-border brutal-shadow-accent bg-card relative flex flex-col justify-start p-6 pt-8 sm:p-8"
       >
-        <div className="text-subtle-foreground mb-3 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
+        <span className="brutal-border brutal-shadow-sm bg-accent text-accent-foreground absolute -top-4 left-6 rotate-[-2deg] px-3 py-1 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
           Question
-        </div>
-        <div className="text-foreground text-2xl leading-snug font-semibold text-balance">
+        </span>
+        <div className="text-foreground text-2xl leading-snug font-bold text-balance sm:text-3xl">
           {currentCard.card.front}
         </div>
 
         {!showAnswer ? (
           <button
             onClick={() => setShowAnswer(true)}
-            className="brutal-btn brutal-btn-hover bg-info text-info-foreground mt-8 self-center px-6 py-3"
+            className="brutal-btn brutal-btn-hover bg-info text-info-foreground mt-10 self-center px-10 py-4 text-lg"
           >
             Show Answer
           </button>
         ) : (
-          <div className="animate-fade-in-up border-border mt-8 border-t-[3px] pt-8">
-            <div className="text-subtle-foreground mb-3 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
+          <div className="animate-fade-in-up border-border mt-8 border-t-[3px] pt-6">
+            <span className="brutal-border brutal-shadow-sm bg-success text-success-foreground mb-4 inline-block rotate-[1deg] px-3 py-1 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
               Answer
-            </div>
-            <div className="text-foreground text-2xl leading-snug font-semibold text-balance">
+            </span>
+            <div className="text-foreground text-2xl leading-snug font-bold text-balance sm:text-3xl">
               {currentCard.card.back}
             </div>
 
@@ -208,13 +244,13 @@ export function StudySession({ cards }: StudySessionProps) {
               </div>
             )}
 
-            <div className="mt-8 grid grid-cols-4 gap-2">
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {ratingButtons.map(({ rating, label, className }) => (
                 <button
                   key={rating}
                   onClick={() => handleRating(rating)}
                   disabled={loading}
-                  className={`brutal-btn brutal-btn-hover ${className} py-3 text-sm disabled:opacity-50`}
+                  className={`brutal-btn brutal-btn-hover ${className} py-4 text-sm disabled:opacity-50`}
                 >
                   <span className="block">{label}</span>
                   <span className="block font-mono text-xs opacity-75">{previews?.[rating]}</span>
