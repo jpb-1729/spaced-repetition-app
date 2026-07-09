@@ -1,8 +1,14 @@
-// app/my-cards/page.tsx
+// app/stats/page.tsx
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { StatCard } from '@/components/ui/stat-card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { EmptyState, EmptyStateTitle, EmptyStateDescription, EmptyStateActions } from '@/components/ui/empty-state'
+import { Layers, AlarmClock, CheckCircle2 } from 'lucide-react'
 
 export default async function MyCardsPage() {
   const session = await auth()
@@ -18,41 +24,48 @@ export default async function MyCardsPage() {
 
   const now = new Date()
 
-  return (
-    <div className="bg-background text-foreground container mx-auto max-w-4xl p-8">
-      <h1 className="text-foreground mb-8 text-3xl font-bold uppercase">My Active Cards</h1>
+  const stateVariant = {
+    NEW: 'info',
+    LEARNING: 'accent',
+    REVIEW: 'success',
+    RELEARNING: 'warning',
+  } as const
 
-      <div className="mb-6 grid grid-cols-3 gap-4 text-center">
-        <div className="brutal-border brutal-shadow bg-info p-4">
-          <div className="font-mono text-3xl font-bold text-white">{cardProgresses.length}</div>
-          <div className="text-sm font-bold uppercase tracking-wider text-white/80">Total Cards</div>
-        </div>
-        <div className="brutal-border brutal-shadow bg-danger p-4">
-          <div className="font-mono text-3xl font-bold text-white">
-            {cardProgresses.filter((p) => p.due <= now).length}
-          </div>
-          <div className="text-sm font-bold uppercase tracking-wider text-white/80">Due Now</div>
-        </div>
-        <div className="brutal-border brutal-shadow bg-success p-4">
-          <div className="font-mono text-3xl font-bold text-success-foreground">
-            {cardProgresses.filter((p) => p.state === 'REVIEW').length}
-          </div>
-          <div className="text-success-foreground/80 text-sm font-bold uppercase tracking-wider">In Review</div>
-        </div>
+  return (
+    <div className="container mx-auto max-w-4xl p-8">
+      <h1 className="text-foreground mb-8 text-3xl font-black uppercase">My Active Cards</h1>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard
+          title="Total Cards"
+          value={cardProgresses.length}
+          icon={<Layers />}
+          colorScheme="info"
+        />
+        <StatCard
+          title="Due Now"
+          value={cardProgresses.filter((p) => p.due <= now).length}
+          icon={<AlarmClock />}
+          colorScheme="destructive"
+        />
+        <StatCard
+          title="In Review"
+          value={cardProgresses.filter((p) => p.state === 'REVIEW').length}
+          icon={<CheckCircle2 />}
+          colorScheme="success"
+        />
       </div>
 
       {cardProgresses.length === 0 ? (
-        <div className="brutal-border brutal-shadow bg-muted py-16 text-center">
-          <p className="text-muted-foreground mb-4 text-lg">
-            No active cards. Enroll in a deck to get started!
-          </p>
-          <Link
-            href="/decks"
-            className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground inline-block px-6 py-2"
-          >
-            Browse Decks
-          </Link>
-        </div>
+        <EmptyState variant="filled">
+          <EmptyStateTitle>No active cards</EmptyStateTitle>
+          <EmptyStateDescription>Enroll in a deck to get started!</EmptyStateDescription>
+          <EmptyStateActions>
+            <Button asChild>
+              <Link href="/decks">Browse Decks</Link>
+            </Button>
+          </EmptyStateActions>
+        </EmptyState>
       ) : (
         <div className="space-y-3">
           {cardProgresses.map((progress) => {
@@ -62,12 +75,7 @@ export default async function MyCardsPage() {
             )
 
             return (
-              <div
-                key={progress.id}
-                className={`brutal-border p-4 ${
-                  isDue ? 'bg-warn/20 brutal-shadow' : 'bg-card'
-                }`}
-              >
+              <Card key={progress.id} className={isDue ? 'bg-warning/10 p-4' : 'p-4'}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="text-muted-foreground mb-1 font-mono text-xs uppercase tracking-wider">
@@ -77,26 +85,14 @@ export default async function MyCardsPage() {
                     <div className="text-muted-foreground">{progress.card.back}</div>
                   </div>
 
-                  <div className="flex-shrink-0 text-right">
-                    <span
-                      className={`brutal-border inline-block px-3 py-1 text-xs font-bold uppercase ${
-                        progress.state === 'NEW'
-                          ? 'bg-info text-info-foreground'
-                          : progress.state === 'LEARNING'
-                            ? 'bg-accent text-accent-foreground'
-                            : progress.state === 'REVIEW'
-                              ? 'bg-success text-success-foreground'
-                              : 'bg-warn text-warn-foreground'
-                      }`}
-                    >
-                      {progress.state}
-                    </span>
+                  <div className="shrink-0 text-right">
+                    <Badge variant={stateVariant[progress.state]}>{progress.state}</Badge>
 
                     <div className="mt-2 text-sm font-bold">
                       {isDue ? (
-                        <span className="text-danger">Due now!</span>
+                        <span className="text-destructive">Due now!</span>
                       ) : daysUntilDue <= 0 ? (
-                        <span className="text-danger">Overdue</span>
+                        <span className="text-destructive">Overdue</span>
                       ) : (
                         <span className="text-muted-foreground">Due in {daysUntilDue}d</span>
                       )}
@@ -107,7 +103,7 @@ export default async function MyCardsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
             )
           })}
         </div>

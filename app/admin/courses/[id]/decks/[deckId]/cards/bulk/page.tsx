@@ -16,8 +16,8 @@ export default async function BulkCardsPage({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">Import Cards</h1>
-      <p className="mt-1 text-gray-600">
+      <h1 className="text-foreground text-3xl font-black uppercase">Import Cards</h1>
+      <p className="text-muted-foreground mt-1">
         Adding cards to: {deck.name} ({deck._count.cards} existing)
       </p>
       <div className="mt-6">

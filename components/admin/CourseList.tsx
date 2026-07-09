@@ -3,6 +3,28 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { deleteCourse } from '@/actions/course'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog'
+import { EmptyState, EmptyStateTitle, EmptyStateDescription } from '@/components/ui/empty-state'
 
 type Course = {
   id: string
@@ -16,63 +38,83 @@ type Course = {
 export function CourseList({ courses }: { courses: Course[] }) {
   const [isPending, startTransition] = useTransition()
 
-  function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Delete course "${name}" and all its decks? This cannot be undone.`)) {
-      return
-    }
+  function handleDelete(id: string) {
     startTransition(() => deleteCourse(id))
   }
 
   if (courses.length === 0) {
-    return <p className="text-gray-500">No courses yet. Create one to get started.</p>
+    return (
+      <EmptyState variant="filled">
+        <EmptyStateTitle>No courses yet</EmptyStateTitle>
+        <EmptyStateDescription>Create one to get started.</EmptyStateDescription>
+      </EmptyState>
+    )
   }
 
   return (
-    <table className="w-full text-left">
-      <thead>
-        <tr className="border-b text-sm text-gray-500">
-          <th className="pb-2">Name</th>
-          <th className="pb-2">Subject</th>
-          <th className="pb-2">Level</th>
-          <th className="pb-2">Decks</th>
-          <th className="pb-2">Enrollments</th>
-          <th className="pb-2">Published</th>
-          <th className="pb-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Subject</TableHead>
+          <TableHead>Level</TableHead>
+          <TableHead>Decks</TableHead>
+          <TableHead>Enrollments</TableHead>
+          <TableHead>Published</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {courses.map((course) => (
-          <tr key={course.id} className="border-b">
-            <td className="py-3">
-              <Link href={`/admin/courses/${course.id}`} className="text-blue-600 hover:underline">
+          <TableRow key={course.id}>
+            <TableCell>
+              <Link href={`/admin/courses/${course.id}`} className="text-primary font-bold hover:underline">
                 {course.name}
               </Link>
-            </td>
-            <td className="py-3">{course.subject || '-'}</td>
-            <td className="py-3">{course.level || '-'}</td>
-            <td className="py-3">{course._count.decks}</td>
-            <td className="py-3">{course._count.enrollments}</td>
-            <td className="py-3">{course.isPublished ? 'Yes' : 'No'}</td>
-            <td className="py-3">
+            </TableCell>
+            <TableCell>{course.subject || '-'}</TableCell>
+            <TableCell>{course.level || '-'}</TableCell>
+            <TableCell>{course._count.decks}</TableCell>
+            <TableCell>{course._count.enrollments}</TableCell>
+            <TableCell>
+              <Badge variant={course.isPublished ? 'success' : 'outline'}>
+                {course.isPublished ? 'Yes' : 'No'}
+              </Badge>
+            </TableCell>
+            <TableCell>
               <div className="flex gap-2">
-                <Link
-                  href={`/admin/courses/${course.id}/edit`}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => handleDelete(course.id, course.name)}
-                  disabled={isPending}
-                  className="text-sm text-red-600 hover:underline disabled:opacity-50"
-                >
-                  Delete
-                </button>
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/admin/courses/${course.id}/edit`}>Edit</Link>
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" disabled={isPending}>
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete &quot;{course.name}&quot;?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This deletes the course and all its decks. This cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => handleDelete(course.id)}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   )
 }

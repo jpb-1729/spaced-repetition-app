@@ -2,6 +2,10 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { EmptyState, EmptyStateTitle, EmptyStateDescription } from '@/components/ui/empty-state'
 
 export default async function SelectDeckPage() {
   const session = await auth()
@@ -72,10 +76,13 @@ export default async function SelectDeckPage() {
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-foreground mb-6 text-3xl font-bold uppercase">Choose What to Study</h1>
+      <h1 className="text-foreground mb-6 text-3xl font-black uppercase">Choose What to Study</h1>
 
       {courses.length === 0 && (
-        <p className="text-muted-foreground text-lg">You are not enrolled in any courses yet.</p>
+        <EmptyState variant="filled">
+          <EmptyStateTitle>Not enrolled yet</EmptyStateTitle>
+          <EmptyStateDescription>You are not enrolled in any courses yet.</EmptyStateDescription>
+        </EmptyState>
       )}
 
       <div className="space-y-8">
@@ -86,7 +93,7 @@ export default async function SelectDeckPage() {
           )
 
           return (
-            <div key={course.courseId} className="brutal-border brutal-shadow bg-card p-6">
+            <Card key={course.courseId} className="p-6">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <h2 className="text-foreground text-xl font-bold">{course.courseName}</h2>
@@ -94,12 +101,9 @@ export default async function SelectDeckPage() {
                     {courseDueCount} card{courseDueCount !== 1 ? 's' : ''} due
                   </p>
                 </div>
-                <Link
-                  href={`/study?courseId=${course.courseId}`}
-                  className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground inline-block px-4 py-2 text-sm"
-                >
-                  Study Course
-                </Link>
+                <Button asChild>
+                  <Link href={`/study?courseId=${course.courseId}`}>Study Course</Link>
+                </Button>
               </div>
 
               <div className="grid gap-3">
@@ -110,7 +114,7 @@ export default async function SelectDeckPage() {
                     <Link
                       key={deck.id}
                       href={`/study?deckId=${deck.id}`}
-                      className="brutal-border bg-card flex items-center justify-between p-4 transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none brutal-shadow-sm"
+                      className="border-3 border-foreground bg-card flex items-center justify-between p-4 shadow-[2px_2px_0px_hsl(var(--shadow-color))] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
                     >
                       <div>
                         <h3 className="text-foreground font-bold">{deck.name}</h3>
@@ -118,16 +122,12 @@ export default async function SelectDeckPage() {
                           {deck._count.cards} cards total
                         </p>
                       </div>
-                      {deckDueCount > 0 && (
-                        <span className="brutal-border bg-accent text-accent-foreground px-3 py-1 text-sm font-bold">
-                          {deckDueCount} due
-                        </span>
-                      )}
+                      {deckDueCount > 0 && <Badge variant="accent">{deckDueCount} due</Badge>}
                     </Link>
                   )
                 })}
               </div>
-            </div>
+            </Card>
           )
         })}
       </div>

@@ -6,17 +6,26 @@ vi.mock("@/auth", () => ({
 }));
 
 import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@/hooks/use-theme";
+
+function renderNavbar(props?: React.ComponentProps<typeof Navbar>) {
+  return render(
+    <ThemeProvider>
+      <Navbar {...props} />
+    </ThemeProvider>
+  );
+}
 
 describe("Navbar", () => {
   it("renders the logo", () => {
-    render(<Navbar />);
+    renderNavbar();
 
     const logo = screen.getByAltText("Spaced Repetition Logo");
     expect(logo).toBeInTheDocument();
   });
 
   it("hides navigation links when user is not logged in", () => {
-    render(<Navbar />);
+    renderNavbar();
 
     expect(screen.queryByText("Study")).not.toBeInTheDocument();
     expect(screen.queryByText("Stats")).not.toBeInTheDocument();
@@ -25,7 +34,7 @@ describe("Navbar", () => {
 
   it("shows navigation links when user is logged in", () => {
     const user = { name: "Test User", image: "/test.jpg" };
-    render(<Navbar user={user} />);
+    renderNavbar({ user });
 
     expect(screen.getByText("Study")).toBeInTheDocument();
     expect(screen.getByText("Stats")).toBeInTheDocument();
@@ -34,7 +43,7 @@ describe("Navbar", () => {
 
   it("renders correct navigation links with proper hrefs", () => {
     const user = { name: "Test User", image: "/test.jpg" };
-    render(<Navbar user={user} />);
+    renderNavbar({ user });
 
     const studyLink = screen.getByRole("link", { name: /study/i });
     const statsLink = screen.getByRole("link", { name: /stats/i });

@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { enrollInDeck } from '@/actions/enrollment'
+import { Button } from '@/components/ui/button'
 
 interface EnrollButtonProps {
   courseId: string
@@ -34,22 +35,15 @@ export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }:
 
   if (enrolled) {
     return (
-      <button
-        disabled
-        className="brutal-btn bg-success text-success-foreground px-4 py-2"
-      >
+      <Button disabled variant="success">
         Enrolled
-      </button>
+      </Button>
     )
   }
 
   return (
-    <button
-      onClick={handleEnroll}
-      disabled={loading}
-      className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground px-4 py-2 disabled:opacity-50"
-    >
+    <Button onClick={handleEnroll} disabled={loading}>
       {loading ? 'Enrolling...' : 'Enroll'}
-    </button>
+    </Button>
   )
 }

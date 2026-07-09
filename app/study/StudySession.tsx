@@ -6,6 +6,11 @@ import Link from 'next/link'
 import { reviewCard } from '@/actions/review-card'
 import { Rating, Prisma } from '@prisma/client'
 import { fsrs, Rating as FSRSRating, State, type Card as FSRSCard } from 'ts-fsrs'
+import { Card } from '@/components/ui/card'
+import { Sticker } from '@/components/ui/sticker'
+import { Button, type ButtonProps } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 type StudyCard = Prisma.CardProgressGetPayload<{
   select: {
@@ -46,32 +51,17 @@ const stateMap = {
   RELEARNING: State.Relearning,
 } as const
 
-const ratingButtons = [
-  {
-    rating: Rating.AGAIN,
-    fsrs: FSRSRating.Again,
-    label: 'Again',
-    className: 'bg-danger text-danger-foreground',
-  },
-  {
-    rating: Rating.HARD,
-    fsrs: FSRSRating.Hard,
-    label: 'Hard',
-    className: 'bg-warn text-warn-foreground',
-  },
-  {
-    rating: Rating.GOOD,
-    fsrs: FSRSRating.Good,
-    label: 'Good',
-    className: 'bg-success text-success-foreground',
-  },
-  {
-    rating: Rating.EASY,
-    fsrs: FSRSRating.Easy,
-    label: 'Easy',
-    className: 'bg-info text-info-foreground',
-  },
-] as const
+const ratingButtons: {
+  rating: Rating
+  fsrs: FSRSRating
+  label: string
+  variant: NonNullable<ButtonProps['variant']>
+}[] = [
+  { rating: Rating.AGAIN, fsrs: FSRSRating.Again, label: 'Again', variant: 'destructive' },
+  { rating: Rating.HARD, fsrs: FSRSRating.Hard, label: 'Hard', variant: 'warning' },
+  { rating: Rating.GOOD, fsrs: FSRSRating.Good, label: 'Good', variant: 'success' },
+  { rating: Rating.EASY, fsrs: FSRSRating.Easy, label: 'Easy', variant: 'info' },
+]
 
 function formatDueInterval(due: Date, now: Date): string {
   const diffMs = due.getTime() - now.getTime()
@@ -135,24 +125,25 @@ export function StudySession({ cards }: StudySessionProps) {
   if (!currentCard) {
     return (
       <div className="mx-auto max-w-2xl py-16">
-        <div className="brutal-border brutal-shadow-xl bg-success animate-pop relative p-10 text-center">
-          <span className="brutal-border brutal-shadow-sm bg-accent text-accent-foreground absolute -top-4 -left-3 rotate-[-6deg] px-3 py-1 text-xs font-bold tracking-[0.2em] uppercase">
+        <Card className="bg-success animate-pop relative p-10 text-center shadow-[8px_8px_0px_hsl(var(--shadow-color))]">
+          <Sticker
+            size="sm"
+            rotation="medium"
+            className="absolute -top-4 -left-3"
+          >
             ★ Nice ★
-          </span>
-          <h2 className="text-success-foreground text-4xl font-bold uppercase sm:text-5xl">
+          </Sticker>
+          <h2 className="text-success-foreground text-4xl font-black uppercase sm:text-5xl">
             Session Complete!
           </h2>
           <p className="text-success-foreground mt-4 text-lg font-bold">
             {cards.length} {cards.length === 1 ? 'card' : 'cards'} reviewed. Your future self says
             thanks.
           </p>
-          <Link
-            href="/view_decks"
-            className="brutal-btn brutal-btn-hover bg-card text-foreground mt-8 inline-block px-8 py-3"
-          >
-            Back to Decks
-          </Link>
-        </div>
+          <Button asChild variant="outline" size="lg" className="mt-8">
+            <Link href="/view_decks">Back to Decks</Link>
+          </Button>
+        </Card>
       </div>
     )
   }
@@ -186,80 +177,76 @@ export function StudySession({ cards }: StudySessionProps) {
     <div className="mx-auto max-w-2xl">
       <div className="mb-8 space-y-3">
         <div className="flex items-center justify-between gap-4">
-          <span className="brutal-border brutal-shadow-sm bg-card text-foreground truncate px-3 py-1 font-mono text-xs font-bold tracking-wider uppercase">
+          <span className="border-3 border-foreground bg-card text-foreground shadow-[2px_2px_0px_hsl(var(--shadow-color))] truncate px-3 py-1 font-mono text-xs font-bold tracking-wider uppercase">
             {currentCard.card.deck.course.name} / {currentCard.card.deck.name}
           </span>
           <span className="text-foreground shrink-0 font-mono text-sm font-bold tabular-nums">
             {currentIndex + 1} / {cards.length}
           </span>
         </div>
-        <div className="brutal-border bg-card h-5">
-          <div
-            className="bg-accent border-border h-full border-r-[3px] transition-all duration-300"
-            style={{ width: `${(currentIndex / cards.length) * 100}%` }}
-          />
-        </div>
+        <Progress value={(currentIndex / cards.length) * 100} />
       </div>
 
       {error && (
-        <div
-          role="alert"
-          className="brutal-border brutal-shadow bg-danger text-danger-foreground mb-6 px-4 py-3 font-bold uppercase"
-        >
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription className="font-bold uppercase">{error}</AlertDescription>
+        </Alert>
       )}
 
-      <div
+      <Card
         data-testid="card-container"
         style={{ minHeight: '480px' }}
-        className="brutal-border brutal-shadow-accent bg-card relative flex flex-col justify-start p-6 pt-8 sm:p-8"
+        className="relative flex flex-col justify-start p-6 pt-8 shadow-[8px_8px_0px_hsl(var(--accent))] sm:p-8"
       >
-        <span className="brutal-border brutal-shadow-sm bg-accent text-accent-foreground absolute -top-4 left-6 rotate-[-2deg] px-3 py-1 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
+        <Sticker size="sm" rotation="slight" className="absolute -top-4 left-6">
           Question
-        </span>
+        </Sticker>
         <div className="text-foreground text-2xl leading-snug font-bold text-balance sm:text-3xl">
           {currentCard.card.front}
         </div>
 
         {!showAnswer ? (
-          <button
+          <Button
             onClick={() => setShowAnswer(true)}
-            className="brutal-btn brutal-btn-hover bg-info text-info-foreground mt-10 self-center px-10 py-4 text-lg"
+            variant="info"
+            size="xl"
+            className="mt-10 self-center"
           >
             Show Answer
-          </button>
+          </Button>
         ) : (
-          <div className="animate-fade-in-up border-border mt-8 border-t-[3px] pt-6">
-            <span className="brutal-border brutal-shadow-sm bg-success text-success-foreground mb-4 inline-block rotate-[1deg] px-3 py-1 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
+          <div className="animate-fade-in-up border-foreground mt-8 border-t-[3px] pt-6">
+            <Sticker size="sm" rotation="slight-right" variant="success" className="mb-4">
               Answer
-            </span>
+            </Sticker>
             <div className="text-foreground text-2xl leading-snug font-bold text-balance sm:text-3xl">
               {currentCard.card.back}
             </div>
 
             {currentCard.card.notes && (
-              <div className="text-muted-foreground border-border bg-muted mt-6 border-l-[3px] px-4 py-3 text-sm leading-relaxed">
+              <div className="text-muted-foreground border-foreground bg-muted mt-6 border-l-[3px] px-4 py-3 text-sm leading-relaxed">
                 {currentCard.card.notes}
               </div>
             )}
 
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {ratingButtons.map(({ rating, label, className }) => (
-                <button
+              {ratingButtons.map(({ rating, label, variant }) => (
+                <Button
                   key={rating}
                   onClick={() => handleRating(rating)}
                   disabled={loading}
-                  className={`brutal-btn brutal-btn-hover ${className} py-4 text-sm disabled:opacity-50`}
+                  variant={variant}
+                  size="lg"
+                  className="h-auto flex-col py-4 text-sm"
                 >
                   <span className="block">{label}</span>
                   <span className="block font-mono text-xs opacity-75">{previews?.[rating]}</span>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

@@ -2,6 +2,10 @@
 
 import { useActionState } from 'react'
 import { bulkInsertCards, type BulkCardActionState } from '@/actions/card'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function BulkCardForm({ deckId }: { deckId: string }) {
   const [state, formAction, isPending] = useActionState<BulkCardActionState, FormData>(
@@ -14,16 +18,14 @@ export function BulkCardForm({ deckId }: { deckId: string }) {
       <input type="hidden" name="deckId" value={deckId} />
 
       {state.error && (
-        <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-          {state.error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       )}
 
-      <div>
-        <label htmlFor="json" className="block text-sm font-medium">
-          Card JSON *
-        </label>
-        <textarea
+      <div className="space-y-1.5">
+        <Label htmlFor="json">Card JSON *</Label>
+        <Textarea
           id="json"
           name="json"
           rows={16}
@@ -34,21 +36,17 @@ export function BulkCardForm({ deckId }: { deckId: string }) {
     { "Question": "Capital of France?", "Answer": "Paris" }
   ]
 }`}
-          className="mt-1 w-full rounded border px-3 py-2 font-mono text-sm"
+          className="font-mono text-sm"
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="text-muted-foreground text-xs">
           Paste JSON with a &quot;test&quot; array of objects, each with &quot;Question&quot; and
           &quot;Answer&quot; fields.
         </p>
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Importing...' : 'Import Cards'}
-      </button>
+      </Button>
     </form>
   )
 }

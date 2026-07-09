@@ -16,7 +16,7 @@ export default async function EditDeckPage({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">Edit Deck</h1>
+      <h1 className="text-foreground text-3xl font-black uppercase">Edit Deck</h1>
       <div className="mt-6">
         <DeckForm courseId={id} deck={deck} />
       </div>

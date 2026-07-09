@@ -1,9 +1,10 @@
 import Link from 'next/link'
+import { Separator } from '@/components/ui/separator'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <nav className="border-b-3 border-border mb-8 flex gap-6 pb-4">
+      <nav className="mb-8 flex gap-6 pb-4">
         <Link
           href="/admin"
           className="text-foreground text-sm font-bold uppercase tracking-wider hover:underline decoration-3 underline-offset-4"
@@ -17,6 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           Courses
         </Link>
       </nav>
+      <Separator className="mb-8" />
       {children}
     </div>
   )

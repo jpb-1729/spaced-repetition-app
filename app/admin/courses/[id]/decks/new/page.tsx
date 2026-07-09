@@ -16,8 +16,8 @@ export default async function NewDeckPage({ params }: { params: Promise<{ id: st
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">New Deck</h1>
-      <p className="mt-1 text-gray-600">Adding deck to: {course.name}</p>
+      <h1 className="text-foreground text-3xl font-black uppercase">New Deck</h1>
+      <p className="text-muted-foreground mt-1">Adding deck to: {course.name}</p>
       <div className="mt-6">
         <DeckForm courseId={course.id} nextOrdinal={nextOrdinal} />
       </div>

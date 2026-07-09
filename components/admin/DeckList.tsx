@@ -3,6 +3,28 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { deleteDeck } from '@/actions/deck'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog'
+import { EmptyState, EmptyStateTitle, EmptyStateDescription } from '@/components/ui/empty-state'
 
 type Deck = {
   id: string
@@ -17,65 +39,84 @@ type Deck = {
 export function DeckList({ decks, courseId }: { decks: Deck[]; courseId: string }) {
   const [isPending, startTransition] = useTransition()
 
-  function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Delete deck "${name}" and all its cards? This cannot be undone.`)) {
-      return
-    }
+  function handleDelete(id: string) {
     startTransition(() => deleteDeck(id))
   }
 
   if (decks.length === 0) {
-    return <p className="text-gray-500">No decks yet. Add one to get started.</p>
+    return (
+      <EmptyState variant="filled">
+        <EmptyStateTitle>No decks yet</EmptyStateTitle>
+        <EmptyStateDescription>Add one to get started.</EmptyStateDescription>
+      </EmptyState>
+    )
   }
 
   return (
-    <table className="w-full text-left">
-      <thead>
-        <tr className="border-b text-sm text-gray-500">
-          <th className="pb-2">#</th>
-          <th className="pb-2">Name</th>
-          <th className="pb-2">Cards</th>
-          <th className="pb-2">Per Session</th>
-          <th className="pb-2">Pass %</th>
-          <th className="pb-2">Optional</th>
-          <th className="pb-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>#</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Cards</TableHead>
+          <TableHead>Per Session</TableHead>
+          <TableHead>Pass %</TableHead>
+          <TableHead>Optional</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {decks.map((deck) => (
-          <tr key={deck.id} className="border-b">
-            <td className="py-3">{deck.ordinal}</td>
-            <td className="py-3">{deck.name}</td>
-            <td className="py-3">{deck._count.cards}</td>
-            <td className="py-3">{deck.cardsPerSession}</td>
-            <td className="py-3">{deck.passingScore}%</td>
-            <td className="py-3">{deck.isOptional ? 'Yes' : 'No'}</td>
-            <td className="py-3">
-              <div className="flex gap-2">
-                <Link
-                  href={`/admin/courses/${courseId}/decks/${deck.id}/cards/bulk`}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  Import Cards
-                </Link>
-                <Link
-                  href={`/admin/courses/${courseId}/decks/${deck.id}/edit`}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => handleDelete(deck.id, deck.name)}
-                  disabled={isPending}
-                  className="text-sm text-red-600 hover:underline disabled:opacity-50"
-                >
-                  Delete
-                </button>
+          <TableRow key={deck.id}>
+            <TableCell>{deck.ordinal}</TableCell>
+            <TableCell className="font-bold">{deck.name}</TableCell>
+            <TableCell>{deck._count.cards}</TableCell>
+            <TableCell>{deck.cardsPerSession}</TableCell>
+            <TableCell>{deck.passingScore}%</TableCell>
+            <TableCell>
+              <Badge variant={deck.isOptional ? 'accent' : 'outline'}>
+                {deck.isOptional ? 'Yes' : 'No'}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/admin/courses/${courseId}/decks/${deck.id}/cards/bulk`}>
+                    Import Cards
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/admin/courses/${courseId}/decks/${deck.id}/edit`}>Edit</Link>
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" disabled={isPending}>
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete &quot;{deck.name}&quot;?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This deletes the deck and all its cards. This cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => handleDelete(deck.id)}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   )
 }

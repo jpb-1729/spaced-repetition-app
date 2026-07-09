@@ -2,6 +2,8 @@
 import { prisma } from '@/lib/prisma'
 import { EnrollButton } from '@/components/EnrollButton'
 import { auth } from '@/auth'
+import { Card } from '@/components/ui/card'
+import { EmptyState, EmptyStateTitle, EmptyStateDescription } from '@/components/ui/empty-state'
 
 export default async function DecksPage() {
   const session = await auth()
@@ -42,15 +44,12 @@ export default async function DecksPage() {
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-foreground mb-8 text-3xl font-bold uppercase">All Decks</h1>
+      <h1 className="text-foreground mb-8 text-3xl font-black uppercase">All Decks</h1>
 
       <div className="grid gap-4">
         {decks.map((deck) => (
-          <div
-            key={deck.id}
-            className="brutal-border brutal-shadow bg-card p-6 transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          >
-            <div className="flex items-start justify-between">
+          <Card key={deck.id} className="p-6">
+            <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-foreground text-xl font-bold">{deck.name}</h2>
                 <p className="text-muted-foreground mt-1 text-sm font-bold">
@@ -69,11 +68,14 @@ export default async function DecksPage() {
 
               <EnrollButton courseId={deck.course.id} deckId={deck.id} deckName={deck.name} isEnrolled={enrolledDeckIds.includes(deck.id)} />
             </div>
-          </div>
+          </Card>
         ))}
 
         {decks.length === 0 && (
-          <p className="text-muted-foreground py-8 text-center text-lg">No decks available yet.</p>
+          <EmptyState variant="filled">
+            <EmptyStateTitle>No decks available yet</EmptyStateTitle>
+            <EmptyStateDescription>Check back soon.</EmptyStateDescription>
+          </EmptyState>
         )}
       </div>
     </div>

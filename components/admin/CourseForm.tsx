@@ -2,6 +2,12 @@
 
 import { useActionState } from 'react'
 import { createCourse, updateCourse, type CourseActionState } from '@/actions/course'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 type CourseData = {
   id: string
@@ -22,105 +28,57 @@ export function CourseForm({ course }: { course?: CourseData }) {
       {course && <input type="hidden" name="id" value={course.id} />}
 
       {state.error && (
-        <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-          {state.error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
       )}
 
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium">
-          Name *
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          defaultValue={course?.name ?? ''}
-          required
-          className="mt-1 w-full rounded border px-3 py-2"
-        />
+      <div className="space-y-1.5">
+        <Label htmlFor="name">Name *</Label>
+        <Input id="name" name="name" type="text" defaultValue={course?.name ?? ''} required />
         {state.fieldErrors?.name && (
-          <p className="mt-1 text-sm text-red-600">{state.fieldErrors.name[0]}</p>
+          <p className="text-destructive text-sm font-bold">{state.fieldErrors.name[0]}</p>
         )}
       </div>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium">
-          Description
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          rows={3}
-          defaultValue={course?.description ?? ''}
-          className="mt-1 w-full rounded border px-3 py-2"
-        />
+      <div className="space-y-1.5">
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" name="description" rows={3} defaultValue={course?.description ?? ''} />
         {state.fieldErrors?.description && (
-          <p className="mt-1 text-sm text-red-600">{state.fieldErrors.description[0]}</p>
+          <p className="text-destructive text-sm font-bold">{state.fieldErrors.description[0]}</p>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="subject" className="block text-sm font-medium">
-            Subject
-          </label>
-          <input
-            id="subject"
-            name="subject"
-            type="text"
-            defaultValue={course?.subject ?? ''}
-            className="mt-1 w-full rounded border px-3 py-2"
-          />
+        <div className="space-y-1.5">
+          <Label htmlFor="subject">Subject</Label>
+          <Input id="subject" name="subject" type="text" defaultValue={course?.subject ?? ''} />
         </div>
-        <div>
-          <label htmlFor="level" className="block text-sm font-medium">
-            Level
-          </label>
-          <input
-            id="level"
-            name="level"
-            type="text"
-            defaultValue={course?.level ?? ''}
-            className="mt-1 w-full rounded border px-3 py-2"
-          />
+        <div className="space-y-1.5">
+          <Label htmlFor="level">Level</Label>
+          <Input id="level" name="level" type="text" defaultValue={course?.level ?? ''} />
         </div>
       </div>
 
-      <div>
-        <label htmlFor="estimatedHours" className="block text-sm font-medium">
-          Estimated Hours
-        </label>
-        <input
+      <div className="space-y-1.5">
+        <Label htmlFor="estimatedHours">Estimated Hours</Label>
+        <Input
           id="estimatedHours"
           name="estimatedHours"
           type="number"
           min={0}
           defaultValue={course?.estimatedHours ?? ''}
-          className="mt-1 w-full rounded border px-3 py-2"
         />
       </div>
 
       <div className="flex items-center gap-2">
-        <input
-          id="isPublished"
-          name="isPublished"
-          type="checkbox"
-          value="true"
-          defaultChecked={course?.isPublished ?? false}
-        />
-        <label htmlFor="isPublished" className="text-sm font-medium">
-          Published
-        </label>
+        <Checkbox id="isPublished" name="isPublished" value="true" defaultChecked={course?.isPublished ?? false} />
+        <Label htmlFor="isPublished">Published</Label>
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? 'Saving...' : course ? 'Update Course' : 'Create Course'}
-      </button>
+      </Button>
     </form>
   )
 }
