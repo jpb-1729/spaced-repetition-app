@@ -46,31 +46,45 @@ const stateMap = {
 } as const
 
 const ratingButtons = [
-  { rating: Rating.AGAIN, fsrs: FSRSRating.Again, label: 'Again', className: 'bg-danger text-danger-foreground' },
-  { rating: Rating.HARD, fsrs: FSRSRating.Hard, label: 'Hard', className: 'bg-warn text-warn-foreground' },
-  { rating: Rating.GOOD, fsrs: FSRSRating.Good, label: 'Good', className: 'bg-success text-success-foreground' },
-  { rating: Rating.EASY, fsrs: FSRSRating.Easy, label: 'Easy', className: 'bg-info text-info-foreground' },
+  {
+    rating: Rating.AGAIN,
+    fsrs: FSRSRating.Again,
+    label: 'Again',
+    className: 'bg-danger text-danger-foreground',
+  },
+  {
+    rating: Rating.HARD,
+    fsrs: FSRSRating.Hard,
+    label: 'Hard',
+    className: 'bg-warn text-warn-foreground',
+  },
+  {
+    rating: Rating.GOOD,
+    fsrs: FSRSRating.Good,
+    label: 'Good',
+    className: 'bg-success text-success-foreground',
+  },
+  {
+    rating: Rating.EASY,
+    fsrs: FSRSRating.Easy,
+    label: 'Easy',
+    className: 'bg-info text-info-foreground',
+  },
 ] as const
 
 function formatDueInterval(due: Date, now: Date): string {
   const diffMs = due.getTime() - now.getTime()
 
-  if (diffMs < 60_000) return '<1m'
+  if (diffMs < 60_000) return '<1 minute'
 
   const minutes = Math.round(diffMs / 60_000)
-  if (minutes < 60) return `${minutes}m`
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
 
   const hours = Math.round(diffMs / 3_600_000)
-  if (hours < 24) return `${hours}h`
+  if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'}`
 
   const days = Math.round(diffMs / 86_400_000)
-  if (days < 31) return `${days}d`
-
-  const months = Math.round(days / 30)
-  if (months < 12) return `${months}mo`
-
-  const years = +(days / 365).toFixed(1)
-  return `${years}y`
+  return `${days} ${days === 1 ? 'day' : 'days'}`
 }
 
 function computePreviews(card: StudyCard) {
@@ -128,7 +142,7 @@ export function StudySession({ cards }: StudySessionProps) {
   async function handleRating(rating: Rating) {
     setLoading(true)
     try {
-      const clientReviewId = `${Date.now()}-${Math.random()}`
+      const clientReviewId = crypto.randomUUID()
       const result = await reviewCard(currentCard!.id, rating, clientReviewId)
 
       if (result.error) {
@@ -151,47 +165,50 @@ export function StudySession({ cards }: StudySessionProps) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="text-muted-foreground mb-4 font-mono text-sm font-bold uppercase tracking-wider">
-        Card {currentIndex + 1} of {cards.length}
+      <div className="text-subtle-foreground mb-6 flex items-baseline justify-between font-mono text-sm">
+        <span className="truncate">
+          {currentCard.card.deck.course.name} / {currentCard.card.deck.name}
+        </span>
+        <span className="shrink-0 tabular-nums">
+          {currentIndex + 1} / {cards.length}
+        </span>
       </div>
 
-      <div className="text-muted-foreground mb-2 font-mono text-sm">
-        {currentCard.card.deck.course.name} &rarr; {currentCard.card.deck.name}
-      </div>
+      <div
+        data-testid="card-container"
+        style={{ minHeight: '480px' }}
+        className="brutal-border brutal-shadow-sm bg-card flex flex-col justify-start p-6 sm:p-6"
+      >
+        <div className="text-subtle-foreground mb-3 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
+          Question
+        </div>
+        <div className="text-foreground text-2xl leading-snug font-semibold text-balance">
+          {currentCard.card.front}
+        </div>
 
-      <div className="brutal-border brutal-shadow bg-card flex min-h-[300px] flex-col justify-center p-8">
         {!showAnswer ? (
-          <div>
-            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
-              Question
-            </div>
-            <div className="text-foreground mb-8 text-2xl font-bold">{currentCard.card.front}</div>
-            <button
-              onClick={() => setShowAnswer(true)}
-              className="brutal-btn brutal-btn-hover bg-info text-info-foreground w-full py-3"
-            >
-              Show Answer
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAnswer(true)}
+            className="brutal-btn brutal-btn-hover bg-info text-info-foreground mt-8 self-center px-6 py-3"
+          >
+            Show Answer
+          </button>
         ) : (
-          <div>
-            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
-              Question
-            </div>
-            <div className="text-foreground mb-4 text-xl font-bold">{currentCard.card.front}</div>
-
-            <div className="text-muted-foreground mb-2 text-xs font-bold uppercase tracking-widest">
+          <div className="animate-fade-in-up border-border mt-8 border-t-[3px] pt-8">
+            <div className="text-subtle-foreground mb-3 text-[0.7rem] font-bold tracking-[0.2em] uppercase">
               Answer
             </div>
-            <div className="text-foreground mb-8 text-2xl font-bold">{currentCard.card.back}</div>
+            <div className="text-foreground text-2xl leading-snug font-semibold text-balance">
+              {currentCard.card.back}
+            </div>
 
             {currentCard.card.notes && (
-              <div className="brutal-border bg-muted mb-8 p-4 text-sm">
+              <div className="text-muted-foreground border-border bg-muted mt-6 border-l-[3px] px-4 py-3 text-sm leading-relaxed">
                 {currentCard.card.notes}
               </div>
             )}
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="mt-8 grid grid-cols-4 gap-2">
               {ratingButtons.map(({ rating, label, className }) => (
                 <button
                   key={rating}
@@ -199,10 +216,8 @@ export function StudySession({ cards }: StudySessionProps) {
                   disabled={loading}
                   className={`brutal-btn brutal-btn-hover ${className} py-3 text-sm disabled:opacity-50`}
                 >
-                  <span className="block font-mono text-xs opacity-75">
-                    {previews?.[rating]}
-                  </span>
-                  {label}
+                  <span className="block">{label}</span>
+                  <span className="block font-mono text-xs opacity-75">{previews?.[rating]}</span>
                 </button>
               ))}
             </div>
