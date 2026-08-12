@@ -53,7 +53,7 @@ export async function reviewCard(
     const fsrsCard = toFsrsCard(cardProgress, now)
     const scheduling = scheduler.repeat(fsrsCard, now)
     const grade = ratingMap[rating]
-    const { card: nextCard, log } = scheduling[grade]
+    const { card: nextCard } = scheduling[grade]
 
     // Transaction with (a) optimistic locking on version, (b) idempotent insert via unique constraint
     await prisma
@@ -118,7 +118,6 @@ export async function reviewCard(
       reps: nextCard.reps,
       lapses: nextCard.lapses,
       learningSteps: nextCard.learning_steps,
-      // log, // expose if you want client insights
     }
   } catch (error) {
     const code = (error as { code?: string } | null)?.code

@@ -42,7 +42,7 @@ export default async function DecksPage() {
 
   return (
     <div className="mx-auto max-w-[1680px] px-5 py-10 sm:px-8 lg:px-10">
-      <div className="flex items-baseline justify-between gap-3 border-b border-ink pb-3">
+      <div className="border-ink flex items-baseline justify-between gap-3 border-b pb-3">
         <h1 className="flex items-baseline gap-2">
           <span className="label text-vermillion">Index</span>
           <span className="label text-ink">All decks</span>
@@ -56,23 +56,23 @@ export default async function DecksPage() {
         {decks.map((deck, i) => (
           <div
             key={deck.id}
-            className="flex items-start justify-between gap-6 border-b border-ink/12 py-6"
+            className="border-ink/12 flex items-start justify-between gap-6 border-b py-6"
           >
             <div className="flex min-w-0 gap-5">
-              <span className="label pt-1.5 text-ink-mute">{String(i + 1).padStart(2, '0')}</span>
+              <span className="label text-ink-mute pt-1.5">{String(i + 1).padStart(2, '0')}</span>
               <div className="min-w-0">
                 <h2 className="font-serif text-[22px] leading-tight font-medium tracking-tight">
                   {deck.name}
                 </h2>
-                <p className="label mt-2 text-ink-mute">
+                <p className="label text-ink-mute mt-2">
                   {deck.course.name} · {deck.course.creator.name || 'Unknown'}
                 </p>
                 {deck.description && (
-                  <p className="mt-3 max-w-[52ch] text-[14px] leading-relaxed text-ink-soft">
+                  <p className="text-ink-soft mt-3 max-w-[52ch] text-[14px] leading-relaxed">
                     {deck.description}
                   </p>
                 )}
-                <p className="mt-3 font-mono text-[11px] text-ink-mute tabular-nums">
+                <p className="text-ink-mute mt-3 font-mono text-[11px] tabular-nums">
                   {deck._count.cards} cards
                 </p>
               </div>
@@ -88,7 +88,7 @@ export default async function DecksPage() {
         ))}
 
         {decks.length === 0 && (
-          <p className="py-16 text-center font-serif text-xl text-ink-mute italic">
+          <p className="text-ink-mute py-16 text-center font-serif text-xl italic">
             No decks available yet.
           </p>
         )}

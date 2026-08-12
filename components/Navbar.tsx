@@ -11,7 +11,7 @@ export default function Navbar({ user }: Props) {
   const isLoggedIn = !!user
 
   return (
-    <nav className="border-b border-ink">
+    <nav className="border-ink border-b">
       <div className="mx-auto flex h-14 max-w-[1680px] items-center justify-between px-5 sm:px-8">
         <Link href="/" className="font-serif text-[22px] leading-none tracking-tight">
           Noema<span className="text-vermillion">.</span>
@@ -22,7 +22,7 @@ export default function Navbar({ user }: Props) {
               <Link
                 key={item.name}
                 href={item.href}
-                className="label text-ink transition-colors hover:text-vermillion"
+                className="label text-ink hover:text-vermillion transition-colors"
               >
                 {item.name}
               </Link>
@@ -35,7 +35,7 @@ export default function Navbar({ user }: Props) {
             >
               <button
                 type="submit"
-                className="label cursor-pointer text-ink-mute transition-colors hover:text-vermillion"
+                className="label text-ink-mute hover:text-vermillion cursor-pointer transition-colors"
               >
                 Sign Out
               </button>

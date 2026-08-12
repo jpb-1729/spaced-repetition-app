@@ -62,9 +62,7 @@ function toDate(value: Date | number | null | undefined): Date | null {
 
 export function toFsrsCard(progress: ProgressScalars, now: Date): FSRSCard {
   const last = toDate(progress.lastReviewedAt)
-  const elapsedDays = last
-    ? Math.max(0, Math.floor((now.getTime() - last.getTime()) / DAY_MS))
-    : 0
+  const elapsedDays = last ? Math.max(0, Math.floor((now.getTime() - last.getTime()) / DAY_MS)) : 0
   return {
     due: toDate(progress.due) ?? now, // FSRS expects a Date; fallback to now for NEW cards
     stability: progress.stability ?? 0,

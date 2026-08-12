@@ -6,18 +6,18 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-[1680px] px-5 sm:px-8 lg:px-10">
-      <header className="border-b border-ink pt-14 pb-10 sm:pt-20">
+      <header className="border-ink border-b pt-14 pb-10 sm:pt-20">
         <p className="label text-vermillion">Spaced repetition</p>
         <h1 className="mt-4 font-serif text-[52px] leading-[0.98] font-medium tracking-tight text-balance sm:text-[76px]">
           Olivero Recall<span className="text-vermillion">.</span>
         </h1>
-        <p className="mt-5 font-serif text-2xl text-ink-soft italic sm:text-[28px]">
+        <p className="text-ink-soft mt-5 font-serif text-2xl italic sm:text-[28px]">
           Learn smarter, not harder.
         </p>
       </header>
 
-      <div className="max-w-[52ch] border-b border-ink/12 py-8">
-        <p className="text-[15px] leading-relaxed text-ink-soft">
+      <div className="border-ink/12 max-w-[52ch] border-b py-8">
+        <p className="text-ink-soft text-[15px] leading-relaxed">
           This app uses spaced repetition to burn knowledge into your memory with minimal effort.
         </p>
       </div>
@@ -30,7 +30,7 @@ export default async function Home() {
               await signIn('google')
             }}
           >
-            <button className="label cursor-pointer border border-ink bg-ink px-8 py-4 text-paper transition-colors hover:bg-vermillion hover:border-vermillion">
+            <button className="label border-ink bg-ink text-paper hover:bg-vermillion hover:border-vermillion cursor-pointer border px-8 py-4 transition-colors">
               Log In
             </button>
           </form>
@@ -40,7 +40,7 @@ export default async function Home() {
               await signIn('google')
             }}
           >
-            <button className="label cursor-pointer border border-ink px-8 py-4 text-ink transition-colors hover:bg-ink hover:text-paper">
+            <button className="label border-ink text-ink hover:bg-ink hover:text-paper cursor-pointer border px-8 py-4 transition-colors">
               Sign Up
             </button>
           </form>

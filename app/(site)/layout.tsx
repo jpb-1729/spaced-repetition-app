@@ -11,7 +11,7 @@ export default async function SiteLayout({
     <>
       <Navbar user={session?.user} />
       <main className="flex-1">{children}</main>
-      <footer className="border-t border-ink px-5 py-5 sm:px-8">
+      <footer className="border-ink border-t px-5 py-5 sm:px-8">
         <div className="mx-auto flex max-w-[1680px] flex-wrap items-center justify-between gap-3">
           <span className="label text-ink-mute">
             &copy; {new Date().getFullYear()} Nunya Business

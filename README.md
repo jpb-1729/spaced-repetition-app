@@ -21,15 +21,15 @@ Olivero Recall is a spaced repetition flashcard app powered by the **FSRS-6 algo
 
 ## Tech Stack
 
-| Layer | Tech |
-|---|---|
-| Framework | Next.js 16 (App Router + Turbopack) |
-| Database ORM | Prisma + PostgreSQL |
-| Auth | Auth.js v5 (Google OAuth) |
-| Styling | Tailwind CSS v4, neo-brutalist theme |
-| Algorithm | FSRS-6 (open-source spaced repetition) |
-| Testing | Vitest + Testing Library |
-| Language | TypeScript |
+| Layer        | Tech                                   |
+| ------------ | -------------------------------------- |
+| Framework    | Next.js 16 (App Router + Turbopack)    |
+| Database ORM | Prisma + PostgreSQL                    |
+| Auth         | Auth.js v5 (Google OAuth)              |
+| Styling      | Tailwind CSS v4, neo-brutalist theme   |
+| Algorithm    | FSRS-6 (open-source spaced repetition) |
+| Testing      | Vitest + Testing Library               |
+| Language     | TypeScript                             |
 
 ---
 

@@ -10,7 +10,12 @@ interface EnrollButtonProps {
   isEnrolled?: boolean
 }
 
-export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }: EnrollButtonProps) {
+export function EnrollButton({
+  courseId,
+  deckId,
+  deckName,
+  isEnrolled = false,
+}: EnrollButtonProps) {
   const [loading, setLoading] = useState(false)
   const [enrolled, setEnrolled] = useState(isEnrolled)
 
@@ -32,14 +37,14 @@ export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }:
   }
 
   if (enrolled) {
-    return <span className="label border border-moss/40 px-4 py-2.5 text-moss">Enrolled</span>
+    return <span className="label border-moss/40 text-moss border px-4 py-2.5">Enrolled</span>
   }
 
   return (
     <button
       onClick={handleEnroll}
       disabled={loading}
-      className="label cursor-pointer border border-ink px-4 py-2.5 text-ink transition-colors hover:bg-ink hover:text-paper disabled:opacity-50"
+      className="label border-ink text-ink hover:bg-ink hover:text-paper cursor-pointer border px-4 py-2.5 transition-colors disabled:opacity-50"
     >
       {loading ? 'Enrolling…' : 'Enroll'}
     </button>
