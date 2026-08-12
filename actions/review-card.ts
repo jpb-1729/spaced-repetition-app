@@ -3,30 +3,9 @@
 
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
-import { fsrs, Rating, Card as FSRSCard, State, Grade, default_request_retention } from 'ts-fsrs'
 import { Prisma } from '@prisma/client'
-import type { Rating as PrismaRating, CardState as PrismaCardState } from '@prisma/client'
-
-const ratingMap: Record<PrismaRating, Grade> = {
-  AGAIN: Rating.Again,
-  HARD: Rating.Hard,
-  GOOD: Rating.Good,
-  EASY: Rating.Easy,
-}
-
-const stateMap: Record<PrismaCardState, State> = {
-  NEW: State.New,
-  LEARNING: State.Learning,
-  REVIEW: State.Review,
-  RELEARNING: State.Relearning,
-}
-
-const reverseStateMap: Record<State, PrismaCardState> = {
-  [State.New]: 'NEW',
-  [State.Learning]: 'LEARNING',
-  [State.Review]: 'REVIEW',
-  [State.Relearning]: 'RELEARNING',
-}
+import type { Rating as PrismaRating } from '@prisma/client'
+import { scheduler, toFsrsCard, ratingMap, reverseStateMap, DAY_MS } from '@/lib/fsrs'
 
 export async function reviewCard(
   cardProgressId: string,
@@ -68,25 +47,11 @@ export async function reviewCard(
     const now = new Date()
     const last = cardProgress.lastReviewedAt
     const elapsedDaysSinceLast = last
-      ? Math.max(0, Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24)))
+      ? Math.max(0, Math.floor((now.getTime() - last.getTime()) / DAY_MS))
       : 0
 
-    // Prepare FSRS input
-    const fsrsCard: FSRSCard = {
-      due: cardProgress.due ?? now, // FSRS expects a Date; fallback to now for NEW cards
-      stability: cardProgress.stability ?? 0,
-      difficulty: cardProgress.difficulty ?? 0,
-      elapsed_days: elapsedDaysSinceLast,
-      scheduled_days: cardProgress.scheduledDays ?? 0,
-      reps: cardProgress.reps ?? 0,
-      lapses: cardProgress.lapses ?? 0,
-      state: stateMap[cardProgress.state],
-      last_review: last ?? undefined,
-      learning_steps: cardProgress.learningSteps ?? 0,
-    }
-
-    const f = fsrs()
-    const scheduling = f.repeat(fsrsCard, now)
+    const fsrsCard = toFsrsCard(cardProgress, now)
+    const scheduling = scheduler.repeat(fsrsCard, now)
     const grade = ratingMap[rating]
     const { card: nextCard, log } = scheduling[grade]
 
@@ -148,6 +113,11 @@ export async function reviewCard(
       nextDue: nextCard.due,
       scheduledDays: nextCard.scheduled_days,
       nextState: reverseStateMap[nextCard.state],
+      stability: nextCard.stability,
+      difficulty: nextCard.difficulty,
+      reps: nextCard.reps,
+      lapses: nextCard.lapses,
+      learningSteps: nextCard.learning_steps,
       // log, // expose if you want client insights
     }
   } catch (error) {
