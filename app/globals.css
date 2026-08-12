@@ -1,11 +1,15 @@
 @import 'tailwindcss';
 
-@theme {
-  /* Swiss-modernist (Noema) palette */
+/* Font tokens reference the next/font variables set on <body>, so they must be
+   inlined into the utilities (var() on :root cannot see body-scoped vars). */
+@theme inline {
   --font-sans: var(--font-inter-tight), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-serif: var(--font-newsreader), 'Times New Roman', Times, serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
 
+@theme {
+  /* Swiss-modernist (Noema) palette */
   --color-paper: #f1efe9;
   --color-paper-2: #e8e5dd;
   --color-card: #f8f7f4;
@@ -54,7 +58,7 @@
   body {
     background-color: var(--color-paper);
     color: var(--color-ink);
-    font-family: var(--font-sans);
+    font-family: var(--font-inter-tight), 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-feature-settings:
       'tnum' 1,
       'cv05' 1;
@@ -128,7 +132,7 @@
 }
 
 @utility label {
-  font-family: var(--font-mono);
+  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
   font-size: 9.5px;
   line-height: 1;
   letter-spacing: 0.18em;
