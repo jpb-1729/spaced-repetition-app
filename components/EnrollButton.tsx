@@ -1,4 +1,3 @@
-// app/decks/enroll-button.tsx
 'use client'
 
 import { useState } from 'react'
@@ -25,7 +24,7 @@ export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }:
       } else {
         setEnrolled(true)
       }
-    } catch (error) {
+    } catch {
       alert('Failed to enroll')
     } finally {
       setLoading(false)
@@ -33,23 +32,16 @@ export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }:
   }
 
   if (enrolled) {
-    return (
-      <button
-        disabled
-        className="brutal-btn bg-success text-success-foreground px-4 py-2"
-      >
-        Enrolled
-      </button>
-    )
+    return <span className="label border border-moss/40 px-4 py-2.5 text-moss">Enrolled</span>
   }
 
   return (
     <button
       onClick={handleEnroll}
       disabled={loading}
-      className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground px-4 py-2 disabled:opacity-50"
+      className="label cursor-pointer border border-ink px-4 py-2.5 text-ink transition-colors hover:bg-ink hover:text-paper disabled:opacity-50"
     >
-      {loading ? 'Enrolling...' : 'Enroll'}
+      {loading ? 'Enrolling…' : 'Enroll'}
     </button>
   )
 }

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 import { Newsreader, Inter_Tight, JetBrains_Mono } from 'next/font/google'
-import Navbar from '@/components/Navbar'
-import { auth } from '@/auth'
 import './globals.css'
 
 const newsreader = Newsreader({
@@ -26,24 +24,17 @@ export const metadata: Metadata = {
   description: 'Spaced repetition system.',
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const session = await auth()
   return (
     <html lang="en">
       <body
         className={`${newsreader.variable} ${interTight.variable} ${jetbrainsMono.variable} bg-paper text-ink grain flex min-h-screen flex-col font-sans antialiased`}
       >
-        <Navbar user={session?.user} />
-        <main className="flex-1">{children}</main>
-        <footer className="border-t-3 border-border p-8">
-          <p className="text-foreground text-sm font-bold uppercase tracking-wide">
-            &copy; {new Date().getFullYear()} Nunya Business
-          </p>
-        </footer>
+        {children}
       </body>
     </html>
   )

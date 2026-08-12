@@ -14,7 +14,7 @@ describe("Home page", () => {
   it("shows login and signup buttons when not logged in", async () => {
     mockedAuth.mockResolvedValue(null as any);
 
-    const { default: Home } = await import("@/app/page");
+    const { default: Home } = await import("@/app/(site)/page");
     render(await Home());
 
     expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
@@ -27,7 +27,7 @@ describe("Home page", () => {
       expires: "2099-01-01",
     } as any);
 
-    const { default: Home } = await import("@/app/page");
+    const { default: Home } = await import("@/app/(site)/page");
     render(await Home());
 
     expect(screen.queryByRole("button", { name: /log in/i })).not.toBeInTheDocument();
@@ -37,7 +37,7 @@ describe("Home page", () => {
   it("renders the welcome heading and description", async () => {
     mockedAuth.mockResolvedValue(null as any);
 
-    const { default: Home } = await import("@/app/page");
+    const { default: Home } = await import("@/app/(site)/page");
     render(await Home());
 
     expect(screen.getByText("Olivero Recall")).toBeInTheDocument();

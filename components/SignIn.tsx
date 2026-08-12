@@ -10,7 +10,7 @@ export default function SignIn() {
     >
       <button
         type="submit"
-        className="brutal-btn brutal-btn-hover bg-card text-foreground flex w-full items-center justify-center gap-3 px-4 py-3"
+        className="flex w-full cursor-pointer items-center justify-center gap-3 border border-ink bg-paper px-4 py-3 text-sm transition-colors hover:bg-paper-2"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
