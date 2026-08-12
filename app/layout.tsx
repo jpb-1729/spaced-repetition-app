@@ -1,18 +1,24 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk, Space_Mono } from 'next/font/google'
+import { Newsreader, Inter_Tight, JetBrains_Mono } from 'next/font/google'
 import Navbar from '@/components/Navbar'
 import { auth } from '@/auth'
 import './globals.css'
 
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
+const newsreader = Newsreader({
+  variable: '--font-newsreader',
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  axes: ['opsz'],
+})
+
+const interTight = Inter_Tight({
+  variable: '--font-inter-tight',
   subsets: ['latin'],
 })
 
-const spaceMono = Space_Mono({
-  variable: '--font-space-mono',
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
   subsets: ['latin'],
-  weight: ['400', '700'],
 })
 
 export const metadata: Metadata = {
@@ -29,7 +35,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spaceGrotesk.variable} ${spaceMono.variable} bg-background text-foreground flex min-h-screen flex-col font-sans`}
+        className={`${newsreader.variable} ${interTight.variable} ${jetbrainsMono.variable} bg-paper text-ink grain flex min-h-screen flex-col font-sans antialiased`}
       >
         <Navbar user={session?.user} />
         <main className="flex-1">{children}</main>

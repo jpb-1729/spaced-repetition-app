@@ -1,96 +1,94 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Neo-brutalist palette */
-  --color-background: #FFFDF7;
-  --color-foreground: #1a1a1a;
-  --color-card: #FFFFFF;
-  --color-border: #1a1a1a;
-  --color-muted: #F0EDE8;
-  --color-muted-foreground: #555555;
-  --color-subtle-foreground: #777777;
+  /* Swiss-modernist (Noema) palette */
+  --font-sans: var(--font-inter-tight), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-newsreader), 'Times New Roman', Times, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 
-  --color-primary: #FF6B35;
-  --color-primary-foreground: #FFFFFF;
-  --color-accent: #FFD166;
-  --color-accent-foreground: #1a1a1a;
+  --color-paper: #f1efe9;
+  --color-paper-2: #e8e5dd;
+  --color-card: #f8f7f4;
+  --color-ink: #16150f;
+  --color-ink-soft: #4b4a42;
+  --color-ink-mute: #86847a;
+  --color-rule: #16150f;
+  --color-vermillion: #c1402a;
+  --color-cobalt: #2c4a86;
+  --color-moss: #4a6141;
 
-  --color-success: #06D6A0;
-  --color-success-surface: #06D6A0;
-  --color-success-foreground: #1a1a1a;
+  /* Compatibility aliases so pages still using the old token names
+     (admin, stock Tailwind pages) inherit the Swiss palette. */
+  --color-background: #f1efe9;
+  --color-foreground: #16150f;
+  --color-border: #16150f;
+  --color-muted: #e8e5dd;
+  --color-muted-foreground: #4b4a42;
+  --color-subtle-foreground: #86847a;
 
-  --color-danger: #EF476F;
-  --color-danger-surface: #EF476F;
-  --color-danger-foreground: #FFFFFF;
+  --color-primary: #c1402a;
+  --color-primary-foreground: #f1efe9;
+  --color-accent: #e8e5dd;
+  --color-accent-foreground: #16150f;
 
-  --color-warn: #F78C6B;
-  --color-warn-surface: #F78C6B;
-  --color-warn-foreground: #1a1a1a;
-
-  --color-info: #118AB2;
-  --color-info-surface: #118AB2;
-  --color-info-foreground: #FFFFFF;
-
-  --color-accent-surface: #FFD166;
-
-  --font-sans: var(--font-space-grotesk);
-  --font-mono: var(--font-space-mono);
-}
-
-@layer theme {
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-background: #1a1a1a;
-      --color-foreground: #FFFDF7;
-      --color-card: #2a2a2a;
-      --color-border: #FFFDF7;
-      --color-muted: #2a2a2a;
-      --color-muted-foreground: #bbbbbb;
-      --color-subtle-foreground: #999999;
-
-      --color-primary: #FF6B35;
-      --color-primary-foreground: #FFFFFF;
-      --color-accent: #FFD166;
-      --color-accent-foreground: #1a1a1a;
-
-      --color-success: #06D6A0;
-      --color-success-surface: #06D6A0;
-      --color-success-foreground: #1a1a1a;
-
-      --color-danger: #EF476F;
-      --color-danger-surface: #EF476F;
-      --color-danger-foreground: #FFFFFF;
-
-      --color-warn: #F78C6B;
-      --color-warn-surface: #F78C6B;
-      --color-warn-foreground: #1a1a1a;
-
-      --color-info: #118AB2;
-      --color-info-surface: #118AB2;
-      --color-info-foreground: #FFFFFF;
-
-      --color-accent-surface: #FFD166;
-    }
-  }
+  --color-success: #4a6141;
+  --color-success-foreground: #f1efe9;
+  --color-danger: #c1402a;
+  --color-danger-foreground: #f1efe9;
+  --color-warn: #86847a;
+  --color-warn-foreground: #f1efe9;
+  --color-info: #2c4a86;
+  --color-info-foreground: #f1efe9;
 }
 
 :root {
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings:
+      'tnum' 1,
+      'cv05' 1;
+  }
+
+  ::selection {
+    background: var(--color-vermillion);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--color-vermillion);
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.4s ease-out;
-}
-
-@keyframes fade-in-up {
+@keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -98,7 +96,57 @@
   }
 }
 
-/* Brutalist utility classes */
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.anim-rise {
+  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-fade {
+  animation: fade 0.35s ease-out both;
+}
+
+.anim-draw {
+  transform-origin: top;
+  animation: draw 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.grain {
+  background-image: radial-gradient(rgba(22, 21, 15, 0.055) 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Legacy brutalist utilities — still referenced by admin pages.
+   They now render as ink-on-paper via the aliased tokens. */
 @utility brutal-border {
   border: 3px solid var(--color-border);
 }
@@ -117,7 +165,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
   cursor: pointer;
 }
 
