@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "check:contrast": "node scripts/check-contrast.mjs",
     "db:seed": "pnpm dlx prisma db seed",
     "format": "prettier --write .",
     "check:format": "prettier --check .",

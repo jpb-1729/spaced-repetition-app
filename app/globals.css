@@ -8,45 +8,84 @@
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
-@theme {
-  /* Swiss-modernist palette */
-  --color-paper: #f1efe9;
-  --color-paper-2: #e8e5dd;
-  --color-card: #f8f7f4;
-  --color-ink: #16150f;
-  --color-ink-soft: #4b4a42;
-  --color-ink-mute: #86847a;
-  --color-rule: #16150f;
-  --color-vermillion: #c1402a;
-  --color-cobalt: #2c4a86;
-  --color-moss: #4a6141;
+/* Palette. Every value is a light-dark() pair, resolved against the `color-scheme`
+   in effect, so the whole theme flips by changing color-scheme alone — no
+   duplicated dark block to keep in sync.
+
+   Dark values are not a lightness inversion. The accents are lightened because
+   the light-theme vermillion sits at 3.57:1 on a dark ground (below the 4.5
+   minimum), and `on-accent` flips from paper to ink because the accents become
+   light fills in dark. All pairs are verified in scripts/check-contrast.mjs. */
+:root {
+  color-scheme: light dark;
+
+  --paper: light-dark(#f1efe9, #14130f);
+  --paper-2: light-dark(#e8e5dd, #201d18);
+  --card: light-dark(#f8f7f4, #1a1712);
+  --ink: light-dark(#16150f, #ece9e1);
+  --ink-soft: light-dark(#4b4a42, #b5b1a5);
+  --ink-mute: light-dark(#86847a, #8b8879);
+  --rule: light-dark(#16150f, #767065);
+  --vermillion: light-dark(#c1402a, #e2664a);
+  --cobalt: light-dark(#2c4a86, #7fa3e0);
+  --moss: light-dark(#4a6141, #93b184);
+
+  /* Text drawn on top of an accent fill. */
+  --on-accent: light-dark(#f1efe9, #14130f);
+
+  /* Grain dots are ink in light, paper in dark, or they vanish into the ground. */
+  --grain-dot: light-dark(rgb(22 21 15 / 0.055), rgb(236 233 225 / 0.04));
+}
+
+/* An explicit choice overrides the system preference in both directions.
+   No attribute (the default) means "follow the system". */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* Tokens resolve through the palette above rather than repeating hex literals,
+   so each colour is defined exactly once. `inline` is required: it substitutes
+   the var() reference into the utility, which is what lets light-dark() resolve
+   per element. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-mute: var(--ink-mute);
+  --color-rule: var(--rule);
+  --color-vermillion: var(--vermillion);
+  --color-cobalt: var(--cobalt);
+  --color-moss: var(--moss);
+  --color-on-accent: var(--on-accent);
 
   /* Compatibility aliases so pages still using the old token names
      (admin, stock Tailwind pages) inherit the Swiss palette. */
-  --color-background: #f1efe9;
-  --color-foreground: #16150f;
-  --color-border: #16150f;
-  --color-muted: #e8e5dd;
-  --color-muted-foreground: #4b4a42;
-  --color-subtle-foreground: #86847a;
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-border: var(--rule);
+  --color-muted: var(--paper-2);
+  --color-muted-foreground: var(--ink-soft);
+  --color-subtle-foreground: var(--ink-mute);
 
-  --color-primary: #c1402a;
-  --color-primary-foreground: #f1efe9;
-  --color-accent: #e8e5dd;
-  --color-accent-foreground: #16150f;
+  --color-primary: var(--vermillion);
+  --color-primary-foreground: var(--on-accent);
+  --color-accent: var(--paper-2);
+  --color-accent-foreground: var(--ink);
 
-  --color-success: #4a6141;
-  --color-success-foreground: #f1efe9;
-  --color-danger: #c1402a;
-  --color-danger-foreground: #f1efe9;
-  --color-warn: #86847a;
-  --color-warn-foreground: #f1efe9;
-  --color-info: #2c4a86;
-  --color-info-foreground: #f1efe9;
-}
-
-:root {
-  color-scheme: light;
+  --color-success: var(--moss);
+  --color-success-foreground: var(--on-accent);
+  --color-danger: var(--vermillion);
+  --color-danger-foreground: var(--on-accent);
+  --color-warn: var(--ink-mute);
+  --color-warn-foreground: var(--on-accent);
+  --color-info: var(--cobalt);
+  --color-info-foreground: var(--on-accent);
 }
 
 @layer base {
@@ -66,7 +105,8 @@
 
   ::selection {
     background: var(--color-vermillion);
-    color: var(--color-paper);
+    /* Not paper: vermillion is a light fill in dark, so the text on it must be ink. */
+    color: var(--color-on-accent);
   }
 
   :focus-visible {
@@ -140,7 +180,7 @@
 }
 
 .grain {
-  background-image: radial-gradient(rgba(22, 21, 15, 0.055) 0.5px, transparent 0.5px);
+  background-image: radial-gradient(var(--grain-dot) 0.5px, transparent 0.5px);
   background-size: 3px 3px;
 }
 
