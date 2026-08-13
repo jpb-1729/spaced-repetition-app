@@ -35,6 +35,13 @@
 
   /* Grain dots are ink in light, paper in dark, or they vanish into the ground. */
   --grain-dot: light-dark(rgb(22 21 15 / 0.055), rgb(236 233 225 / 0.04));
+
+  /* Empty cell of the consistency heatmap: an ink wash in light, a paper wash
+     in dark, matching --grain-dot above. Stated as a light-dark() pair rather
+     than color-mix(var(--ink)) because Lightning CSS drops a color-mix() it
+     cannot resolve statically. Filled cells scale --vermillion in Metrics.tsx,
+     where an inline style is not subject to that pass. */
+  --heat-empty: light-dark(rgb(22 21 15 / 0.07), rgb(236 233 225 / 0.08));
 }
 
 /* An explicit choice overrides the system preference in both directions.

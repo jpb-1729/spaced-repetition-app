@@ -95,8 +95,13 @@ export function Metrics({
               key={i}
               className="aspect-square w-full"
               style={{
+                // Resolved from the palette rather than hex literals, so the
+                // cells follow the theme. color-mix supplies the per-cell alpha
+                // that a bare var() cannot.
                 backgroundColor:
-                  v === 0 ? 'rgba(22,21,15,0.07)' : `rgba(193,64,42,${0.2 + v * 0.8})`,
+                  v === 0
+                    ? 'var(--heat-empty)'
+                    : `color-mix(in srgb, var(--vermillion) ${Math.round((0.2 + v * 0.8) * 100)}%, transparent)`,
               }}
             />
           ))}
