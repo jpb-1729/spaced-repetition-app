@@ -19,7 +19,6 @@ export interface MetricsSummary {
 }
 
 export function Metrics({
-  retention,
   summary,
   forecast,
   heat,
@@ -27,7 +26,6 @@ export function Metrics({
   streak,
   totalEntries,
 }: {
-  retention: number
   summary: MetricsSummary
   forecast: number[]
   heat: number[]
@@ -42,21 +40,7 @@ export function Metrics({
   return (
     <div className="flex min-h-full flex-col gap-8">
       <section>
-        <SectionHead n="04" title="Retention" meta="estimated" />
-        <div className="flex items-end justify-between gap-4 pt-4 pb-3">
-          <div className="font-serif text-[62px] leading-[0.78] font-light tracking-[-0.04em] tabular-nums">
-            {Math.round(retention * 100)}
-            <span className="text-vermillion text-[26px]">%</span>
-          </div>
-          <p className="label text-ink-mute max-w-[9rem] pb-1 text-right leading-[1.6]">
-            Mean recall probability across all cards
-          </p>
-        </div>
-        <Curve retention={retention} />
-      </section>
-
-      <section>
-        <SectionHead n="05" title="Session summary" />
+        <SectionHead n="04" title="Session summary" />
         <div className="pt-1">
           <DataRow k="Reviewed" v={String(summary.reviewed).padStart(3, '0')} />
           <DataRow k="Forgotten" v={String(summary.again).padStart(3, '0')} accent />
@@ -74,7 +58,7 @@ export function Metrics({
       </section>
 
       <section>
-        <SectionHead n="06" title="Forecast" meta="14 days" />
+        <SectionHead n="05" title="Forecast" meta="14 days" />
         <div className="flex items-end gap-[3px] pt-5">
           {forecast.map((v, i) => (
             <div key={i} className="group relative flex flex-1 flex-col items-center gap-1.5">
@@ -104,7 +88,7 @@ export function Metrics({
       </section>
 
       <section>
-        <SectionHead n="07" title="Consistency" meta={`${streak} day streak`} />
+        <SectionHead n="06" title="Consistency" meta={`${streak} day streak`} />
         <div className="grid grid-flow-col grid-rows-7 gap-[2px] pt-4">
           {heat.map((v, i) => (
             <div
@@ -124,7 +108,7 @@ export function Metrics({
       </section>
 
       <section className="flex min-h-[168px] flex-1 flex-col">
-        <SectionHead n="08" title="Review log" meta={`${totalEntries} entries`} />
+        <SectionHead n="07" title="Review log" meta={`${totalEntries} entries`} />
         <ul className="hide-scroll min-h-0 flex-1 overflow-y-auto">
           {log.length === 0 ? (
             <li className="label text-ink-mute py-4">No cards graded yet.</li>
@@ -148,32 +132,5 @@ export function Metrics({
         </ul>
       </section>
     </div>
-  )
-}
-
-function Curve({ retention }: { retention: number }) {
-  const decay = 1.1 + retention * 2.4
-  const pts = Array.from({ length: 41 }, (_, i) => {
-    const x = i / 40
-    const y = Math.exp(-x * (3.4 - decay * 0.6))
-    return `${(x * 200).toFixed(2)},${(46 - y * 42).toFixed(2)}`
-  })
-  return (
-    <svg viewBox="0 0 200 48" className="mt-1 w-full" preserveAspectRatio="none" height="48">
-      <line x1="0" y1="47" x2="200" y2="47" stroke="rgba(22,21,15,0.25)" strokeWidth="0.5" />
-      {[0.25, 0.5, 0.75].map((t) => (
-        <line
-          key={t}
-          x1={t * 200}
-          y1="0"
-          x2={t * 200}
-          y2="47"
-          stroke="rgba(22,21,15,0.12)"
-          strokeWidth="0.5"
-          strokeDasharray="1.5 2"
-        />
-      ))}
-      <polyline points={pts.join(' ')} fill="none" stroke="#c1402a" strokeWidth="1.1" />
-    </svg>
   )
 }

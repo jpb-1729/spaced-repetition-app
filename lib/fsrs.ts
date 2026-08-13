@@ -101,11 +101,6 @@ export function previewIntervals(
   }
 }
 
-/** Probability of recall right now, from the FSRS forgetting curve (0–1). */
-export function retrievability(progress: ProgressScalars, now: Date): number {
-  return scheduler.get_retrievability(toFsrsCard(progress, now), now, false)
-}
-
 /** The three labels the study surface's state chip uses. */
 export function cardStateLabel(state: PrismaCardState): 'Unseen' | 'Relearning' | 'In review' {
   if (state === 'NEW') return 'Unseen'

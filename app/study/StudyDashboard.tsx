@@ -8,7 +8,6 @@ import {
   DAY_MS,
   formatInterval,
   ratingMap,
-  retrievability,
   reverseStateMap,
   scheduler,
   toFsrsCard,
@@ -277,12 +276,6 @@ export function StudyDashboard({
     return days
   }, [allRows, nowMs])
 
-  const retention = useMemo(() => {
-    const seen = allRows.filter((r) => collapsedState(r.state) !== 'new')
-    if (seen.length === 0) return 0
-    return seen.reduce((a, r) => a + retrievability(r, now), 0) / seen.length
-  }, [allRows, now])
-
   // Session entries not yet reflected in the server-fetched history (the
   // fetch horizon is data.serverNow, which advances on every refresh).
   const unsyncedLog = useMemo(
@@ -420,7 +413,6 @@ export function StudyDashboard({
           <div className="border-ink/20 order-3 border-t py-7 lg:order-none lg:min-h-0 lg:border-t-0 lg:border-l lg:pl-7">
             <div className="hide-scroll h-full overflow-y-auto">
               <Metrics
-                retention={retention}
                 summary={summary}
                 forecast={forecast}
                 heat={heat}
