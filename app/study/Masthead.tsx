@@ -26,8 +26,8 @@ export function Masthead({
     <header className="border-ink border-b">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4 pt-5 pb-3">
         <div className="flex items-end gap-4">
-          <h1 className="font-serif text-[40px] leading-[0.82] font-normal tracking-[-0.035em] sm:text-[54px]">
-            Noema<span className="text-vermillion">.</span>
+          <h1 className="font-serif text-[28px] leading-[0.82] font-normal tracking-[-0.035em] sm:text-[38px]">
+            Olivero Recall<span className="text-vermillion">.</span>
           </h1>
           <p className="label text-ink-mute mb-1 hidden max-w-[13rem] leading-[1.5] sm:block">
             Spaced repetition

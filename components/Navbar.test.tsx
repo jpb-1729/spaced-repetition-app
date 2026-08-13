@@ -11,7 +11,7 @@ describe('Navbar', () => {
   it('renders the wordmark linking home', () => {
     render(<Navbar />)
 
-    const wordmark = screen.getByRole('link', { name: /noema/i })
+    const wordmark = screen.getByRole('link', { name: /olivero recall/i })
     expect(wordmark).toBeInTheDocument()
     expect(wordmark).toHaveAttribute('href', '/')
   })

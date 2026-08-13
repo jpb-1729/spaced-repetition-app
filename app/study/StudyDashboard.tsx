@@ -434,7 +434,7 @@ export function StudyDashboard({
 
         <footer className="border-ink flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t py-4">
           <span className="label text-ink-mute">
-            Noema — FSRS-6 scheduler, retention-targeted intervals
+            Olivero Recall — FSRS-6 scheduler, retention-targeted intervals
           </span>
           <span className="label text-ink-mute">
             Set in Newsreader &amp; Inter Tight · Grid 3 : 7 : 3

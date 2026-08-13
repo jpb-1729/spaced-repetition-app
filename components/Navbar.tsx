@@ -14,7 +14,7 @@ export default function Navbar({ user }: Props) {
     <nav className="border-ink border-b">
       <div className="mx-auto flex h-14 max-w-[1680px] items-center justify-between px-5 sm:px-8">
         <Link href="/" className="font-serif text-[22px] leading-none tracking-tight">
-          Noema<span className="text-vermillion">.</span>
+          Olivero Recall<span className="text-vermillion">.</span>
         </Link>
         {isLoggedIn && (
           <div className="flex items-center gap-7">

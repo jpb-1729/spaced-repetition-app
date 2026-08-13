@@ -46,8 +46,8 @@ export default async function StudyPage(props: Props) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-[1680px] flex-col px-5 sm:px-8 lg:px-10">
         <header className="border-ink border-b pt-5 pb-3">
-          <h1 className="font-serif text-[40px] leading-[0.82] font-normal tracking-[-0.035em] sm:text-[54px]">
-            Noema<span className="text-vermillion">.</span>
+          <h1 className="font-serif text-[28px] leading-[0.82] font-normal tracking-[-0.035em] sm:text-[38px]">
+            Olivero Recall<span className="text-vermillion">.</span>
           </h1>
         </header>
         <div className="flex flex-1 flex-col justify-center py-16">
