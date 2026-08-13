@@ -1,4 +1,5 @@
 import { Kbd } from './ui'
+import ThemeToggle from '@/components/ThemeToggle'
 
 function pad(n: number) {
   return String(n).padStart(2, '0')
@@ -46,6 +47,11 @@ export function Masthead({
             <span className="label text-ink-mute">reveal</span>
             <Kbd>1—4</Kbd>
             <span className="label text-ink-mute">grade</span>
+          </div>
+          {/* /study sits outside the (site) group, so it never renders Navbar
+              and needs its own theme control. */}
+          <div className="pb-0.5">
+            <ThemeToggle />
           </div>
         </div>
       </div>
