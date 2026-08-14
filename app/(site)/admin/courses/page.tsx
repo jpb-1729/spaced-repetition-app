@@ -1,5 +1,6 @@
 import { getCourses } from '@/actions/course'
 import { CourseList } from '@/components/admin/CourseList'
+import { PageHead, btnSolid } from '@/components/admin/ui'
 import Link from 'next/link'
 
 export default async function CoursesPage() {
@@ -7,16 +8,17 @@ export default async function CoursesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Courses</h1>
-        <Link
-          href="/admin/courses/new"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          New Course
-        </Link>
-      </div>
-      <div className="mt-6">
+      <PageHead
+        eyebrow="Admin"
+        title="Courses"
+        meta={`${courses.length} ${courses.length === 1 ? 'course' : 'courses'}`}
+        actions={
+          <Link href="/admin/courses/new" className={btnSolid}>
+            New course
+          </Link>
+        }
+      />
+      <div className="mt-8">
         <CourseList courses={courses} />
       </div>
     </div>

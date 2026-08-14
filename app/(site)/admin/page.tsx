@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { PageHead, btnOutline } from '@/components/admin/ui'
 
 export default async function AdminDashboard() {
   const [courseCount, deckCount, enrollmentCount] = await Promise.all([
@@ -8,34 +9,33 @@ export default async function AdminDashboard() {
     prisma.courseEnrollment.count(),
   ])
 
+  const figures = [
+    { label: 'Courses', value: courseCount },
+    { label: 'Decks', value: deckCount },
+    { label: 'Enrollments', value: enrollmentCount },
+  ]
+
   return (
     <div>
-      <h1 className="text-foreground text-3xl font-bold uppercase">Admin Dashboard</h1>
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="brutal-border brutal-shadow bg-accent p-6">
-          <p className="text-accent-foreground text-sm font-bold tracking-wider uppercase">
-            Courses
-          </p>
-          <p className="text-accent-foreground font-mono text-4xl font-bold">{courseCount}</p>
-        </div>
-        <div className="brutal-border brutal-shadow bg-info p-6">
-          <p className="text-info-foreground text-sm font-bold tracking-wider uppercase">Decks</p>
-          <p className="text-info-foreground font-mono text-4xl font-bold">{deckCount}</p>
-        </div>
-        <div className="brutal-border brutal-shadow bg-success p-6">
-          <p className="text-success-foreground text-sm font-bold tracking-wider uppercase">
-            Enrollments
-          </p>
-          <p className="text-success-foreground font-mono text-4xl font-bold">{enrollmentCount}</p>
-        </div>
-      </div>
-      <div className="mt-6">
-        <Link
-          href="/admin/courses"
-          className="text-foreground hover:text-primary font-bold uppercase underline decoration-3 underline-offset-4"
-        >
-          Manage Courses &rarr;
-        </Link>
+      <PageHead
+        eyebrow="Admin"
+        title="Dashboard"
+        actions={
+          <Link href="/admin/courses" className={btnOutline}>
+            Manage courses →
+          </Link>
+        }
+      />
+
+      <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
+        {figures.map((f) => (
+          <div key={f.label} className="border-ink border-t pt-3">
+            <span className="label text-ink-mute">{f.label}</span>
+            <p className="text-ink mt-3 font-mono text-[44px] leading-none tabular-nums">
+              {String(f.value).padStart(2, '0')}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   )

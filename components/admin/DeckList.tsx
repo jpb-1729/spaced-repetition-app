@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { deleteDeck } from '@/actions/deck'
+import { EmptyState, Td, TdNum, Th, btnDanger, btnQuiet } from '@/components/admin/ui'
 
 type Deck = {
   id: string
@@ -25,54 +26,62 @@ export function DeckList({ decks, courseId }: { decks: Deck[]; courseId: string 
   }
 
   if (decks.length === 0) {
-    return <p className="text-gray-500">No decks yet. Add one to get started.</p>
+    return <EmptyState>No decks yet. Add one to get started.</EmptyState>
   }
 
   return (
-    <table className="w-full text-left">
+    <table className="w-full">
       <thead>
-        <tr className="border-b text-sm text-gray-500">
-          <th className="pb-2">#</th>
-          <th className="pb-2">Name</th>
-          <th className="pb-2">Cards</th>
-          <th className="pb-2">Per Session</th>
-          <th className="pb-2">Pass %</th>
-          <th className="pb-2">Optional</th>
-          <th className="pb-2">Actions</th>
+        <tr className="border-ink/12 border-b">
+          <Th className="w-10">№</Th>
+          <Th>Name</Th>
+          <Th className="text-right">Cards</Th>
+          <Th className="text-right">Per session</Th>
+          <Th className="text-right">Pass</Th>
+          <Th>Optional</Th>
+          <Th className="text-right">Actions</Th>
         </tr>
       </thead>
       <tbody>
         {decks.map((deck) => (
-          <tr key={deck.id} className="border-b">
-            <td className="py-3">{deck.ordinal}</td>
-            <td className="py-3">{deck.name}</td>
-            <td className="py-3">{deck._count.cards}</td>
-            <td className="py-3">{deck.cardsPerSession}</td>
-            <td className="py-3">{deck.passingScore}%</td>
-            <td className="py-3">{deck.isOptional ? 'Yes' : 'No'}</td>
-            <td className="py-3">
-              <div className="flex gap-2">
+          <tr key={deck.id} className="border-ink/12 border-b">
+            <Td className="text-ink-mute font-mono text-[13px] tabular-nums">
+              {String(deck.ordinal).padStart(2, '0')}
+            </Td>
+            <Td className="font-serif text-[17px]">{deck.name}</Td>
+            <TdNum>{deck._count.cards}</TdNum>
+            <TdNum>{deck.cardsPerSession}</TdNum>
+            <TdNum>{deck.passingScore}%</TdNum>
+            <Td>
+              {deck.isOptional ? (
+                <span className="label text-ink-mute">Optional</span>
+              ) : (
+                <span className="text-ink-mute/50">—</span>
+              )}
+            </Td>
+            <Td>
+              <div className="flex justify-end gap-4">
                 <Link
                   href={`/admin/courses/${courseId}/decks/${deck.id}/cards/bulk`}
-                  className="text-sm text-blue-600 hover:underline"
+                  className={btnQuiet}
                 >
-                  Import Cards
+                  Import
                 </Link>
                 <Link
                   href={`/admin/courses/${courseId}/decks/${deck.id}/edit`}
-                  className="text-sm text-blue-600 hover:underline"
+                  className={btnQuiet}
                 >
                   Edit
                 </Link>
                 <button
                   onClick={() => handleDelete(deck.id, deck.name)}
                   disabled={isPending}
-                  className="text-sm text-red-600 hover:underline disabled:opacity-50"
+                  className={btnDanger}
                 >
                   Delete
                 </button>
               </div>
-            </td>
+            </Td>
           </tr>
         ))}
       </tbody>

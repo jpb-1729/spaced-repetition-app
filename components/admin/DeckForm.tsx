@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import { createDeck, updateDeck, type DeckActionState } from '@/actions/deck'
+import { CheckField, Field, FormError, btnSolid, inputClass } from '@/components/admin/ui'
 
 type DeckData = {
   id: string
@@ -26,51 +27,35 @@ export function DeckForm({
   const [state, formAction, isPending] = useActionState<DeckActionState, FormData>(action, {})
 
   return (
-    <form action={formAction} className="max-w-lg space-y-4">
+    <form action={formAction} className="max-w-[52ch] space-y-7">
       <input type="hidden" name="courseId" value={courseId} />
       {deck && <input type="hidden" name="id" value={deck.id} />}
 
-      {state.error && (
-        <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-          {state.error}
-        </div>
-      )}
+      {state.error && <FormError>{state.error}</FormError>}
 
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium">
-          Name *
-        </label>
+      <Field label="Name" htmlFor="name" required error={state.fieldErrors?.name?.[0]}>
         <input
           id="name"
           name="name"
           type="text"
           defaultValue={deck?.name ?? ''}
           required
-          className="mt-1 w-full rounded border px-3 py-2"
+          className={inputClass}
         />
-        {state.fieldErrors?.name && (
-          <p className="mt-1 text-sm text-red-600">{state.fieldErrors.name[0]}</p>
-        )}
-      </div>
+      </Field>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium">
-          Description
-        </label>
+      <Field label="Description" htmlFor="description" error={state.fieldErrors?.description?.[0]}>
         <textarea
           id="description"
           name="description"
           rows={3}
           defaultValue={deck?.description ?? ''}
-          className="mt-1 w-full rounded border px-3 py-2"
+          className={inputClass}
         />
-      </div>
+      </Field>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <label htmlFor="ordinal" className="block text-sm font-medium">
-            Ordinal *
-          </label>
+      <div className="grid grid-cols-3 gap-5">
+        <Field label="Ordinal" htmlFor="ordinal" required error={state.fieldErrors?.ordinal?.[0]}>
           <input
             id="ordinal"
             name="ordinal"
@@ -78,29 +63,24 @@ export function DeckForm({
             min={1}
             defaultValue={deck?.ordinal ?? nextOrdinal ?? 1}
             required
-            className="mt-1 w-full rounded border px-3 py-2"
+            className={inputClass}
           />
-          {state.fieldErrors?.ordinal && (
-            <p className="mt-1 text-sm text-red-600">{state.fieldErrors.ordinal[0]}</p>
-          )}
-        </div>
-        <div>
-          <label htmlFor="cardsPerSession" className="block text-sm font-medium">
-            Cards/Session
-          </label>
+        </Field>
+        <Field
+          label="Cards / session"
+          htmlFor="cardsPerSession"
+          error={state.fieldErrors?.cardsPerSession?.[0]}
+        >
           <input
             id="cardsPerSession"
             name="cardsPerSession"
             type="number"
             min={1}
             defaultValue={deck?.cardsPerSession ?? 20}
-            className="mt-1 w-full rounded border px-3 py-2"
+            className={inputClass}
           />
-        </div>
-        <div>
-          <label htmlFor="passingScore" className="block text-sm font-medium">
-            Pass %
-          </label>
+        </Field>
+        <Field label="Pass %" htmlFor="passingScore" error={state.fieldErrors?.passingScore?.[0]}>
           <input
             id="passingScore"
             name="passingScore"
@@ -108,30 +88,20 @@ export function DeckForm({
             min={0}
             max={100}
             defaultValue={deck?.passingScore ?? 80}
-            className="mt-1 w-full rounded border px-3 py-2"
+            className={inputClass}
           />
-        </div>
+        </Field>
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          id="isOptional"
-          name="isOptional"
-          type="checkbox"
-          value="true"
-          defaultChecked={deck?.isOptional ?? false}
-        />
-        <label htmlFor="isOptional" className="text-sm font-medium">
-          Optional
-        </label>
-      </div>
+      <CheckField
+        id="isOptional"
+        name="isOptional"
+        label="Optional"
+        defaultChecked={deck?.isOptional ?? false}
+      />
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-      >
-        {isPending ? 'Saving...' : deck ? 'Update Deck' : 'Create Deck'}
+      <button type="submit" disabled={isPending} className={btnSolid}>
+        {isPending ? 'Saving…' : deck ? 'Update deck' : 'Create deck'}
       </button>
     </form>
   )

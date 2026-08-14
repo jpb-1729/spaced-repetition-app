@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { deleteCourse } from '@/actions/course'
+import { EmptyState, Td, TdNum, Th, btnDanger, btnQuiet } from '@/components/admin/ui'
 
 type Course = {
   id: string
@@ -24,52 +25,56 @@ export function CourseList({ courses }: { courses: Course[] }) {
   }
 
   if (courses.length === 0) {
-    return <p className="text-gray-500">No courses yet. Create one to get started.</p>
+    return <EmptyState>No courses yet. Create one to get started.</EmptyState>
   }
 
   return (
-    <table className="w-full text-left">
+    <table className="w-full">
       <thead>
-        <tr className="border-b text-sm text-gray-500">
-          <th className="pb-2">Name</th>
-          <th className="pb-2">Subject</th>
-          <th className="pb-2">Level</th>
-          <th className="pb-2">Decks</th>
-          <th className="pb-2">Enrollments</th>
-          <th className="pb-2">Published</th>
-          <th className="pb-2">Actions</th>
+        <tr className="border-ink border-b">
+          <Th>Name</Th>
+          <Th>Subject</Th>
+          <Th>Level</Th>
+          <Th className="text-right">Decks</Th>
+          <Th className="text-right">Enrolled</Th>
+          <Th>Status</Th>
+          <Th className="text-right">Actions</Th>
         </tr>
       </thead>
       <tbody>
         {courses.map((course) => (
-          <tr key={course.id} className="border-b">
-            <td className="py-3">
-              <Link href={`/admin/courses/${course.id}`} className="text-blue-600 hover:underline">
+          <tr key={course.id} className="border-ink/12 border-b">
+            <Td>
+              <Link
+                href={`/admin/courses/${course.id}`}
+                className="hover:text-vermillion font-serif text-[17px] transition-colors"
+              >
                 {course.name}
               </Link>
-            </td>
-            <td className="py-3">{course.subject || '-'}</td>
-            <td className="py-3">{course.level || '-'}</td>
-            <td className="py-3">{course._count.decks}</td>
-            <td className="py-3">{course._count.enrollments}</td>
-            <td className="py-3">{course.isPublished ? 'Yes' : 'No'}</td>
-            <td className="py-3">
-              <div className="flex gap-2">
-                <Link
-                  href={`/admin/courses/${course.id}/edit`}
-                  className="text-sm text-blue-600 hover:underline"
-                >
+            </Td>
+            <Td className="text-ink-soft">{course.subject || '—'}</Td>
+            <Td className="text-ink-soft">{course.level || '—'}</Td>
+            <TdNum>{course._count.decks}</TdNum>
+            <TdNum>{course._count.enrollments}</TdNum>
+            <Td>
+              <span className={course.isPublished ? 'label text-moss' : 'label text-ink-mute'}>
+                {course.isPublished ? 'Published' : 'Draft'}
+              </span>
+            </Td>
+            <Td>
+              <div className="flex justify-end gap-4">
+                <Link href={`/admin/courses/${course.id}/edit`} className={btnQuiet}>
                   Edit
                 </Link>
                 <button
                   onClick={() => handleDelete(course.id, course.name)}
                   disabled={isPending}
-                  className="text-sm text-red-600 hover:underline disabled:opacity-50"
+                  className={btnDanger}
                 >
                   Delete
                 </button>
               </div>
-            </td>
+            </Td>
           </tr>
         ))}
       </tbody>

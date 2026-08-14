@@ -1,5 +1,6 @@
 import { getCourse } from '@/actions/course'
 import { DeckForm } from '@/components/admin/DeckForm'
+import { PageHead } from '@/components/admin/ui'
 import { notFound } from 'next/navigation'
 
 export default async function NewDeckPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,9 +16,8 @@ export default async function NewDeckPage({ params }: { params: Promise<{ id: st
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">New Deck</h1>
-      <p className="mt-1 text-gray-600">Adding deck to: {course.name}</p>
-      <div className="mt-6">
+      <PageHead eyebrow={`Course · ${course.name}`} title="New deck" />
+      <div className="mt-8">
         <DeckForm courseId={course.id} nextOrdinal={nextOrdinal} />
       </div>
     </div>

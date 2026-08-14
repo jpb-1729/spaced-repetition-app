@@ -2,17 +2,14 @@ import Link from 'next/link'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <nav className="border-border mb-8 flex gap-6 border-b-3 pb-4">
-        <Link
-          href="/admin"
-          className="text-foreground text-sm font-bold tracking-wider uppercase decoration-3 underline-offset-4 hover:underline"
-        >
+    <div className="mx-auto max-w-[1680px] px-5 py-10 sm:px-8 lg:px-10">
+      <nav className="border-ink/12 mb-9 flex gap-7 border-b pb-3">
+        <Link href="/admin" className="label text-ink hover:text-vermillion transition-colors">
           Dashboard
         </Link>
         <Link
           href="/admin/courses"
-          className="text-foreground text-sm font-bold tracking-wider uppercase decoration-3 underline-offset-4 hover:underline"
+          className="label text-ink hover:text-vermillion transition-colors"
         >
           Courses
         </Link>
