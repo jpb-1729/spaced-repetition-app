@@ -4,8 +4,7 @@ import { PrismaClient, UserRole, EnrollmentStatus, CardState, Rating } from '@pr
 // Use a direct (non-pooler) connection for seeding to avoid PgBouncer
 // cached-plan errors after migrations. Falls back to DATABASE_URL if not set.
 const datasourceUrl =
-  process.env.DIRECT_DATABASE_URL ??
-  process.env.DATABASE_URL?.replace(/-pooler(\.\w)/, '$1')
+  process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL?.replace(/-pooler(\.\w)/, '$1')
 
 const prisma = new PrismaClient({ datasourceUrl })
 

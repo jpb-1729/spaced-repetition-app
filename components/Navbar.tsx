@@ -1,31 +1,30 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { signOut } from '@/auth'
+import ThemeToggle from '@/components/ThemeToggle'
 
 type Props = { user?: { name?: string | null; image?: string | null } }
 
 export default function Navbar({ user }: Props) {
   const navigation = [
-    { name: 'Study', href: '/view_decks' },
-    { name: 'Stats', href: '/stats' },
+    { name: 'Study', href: '/study' },
     { name: 'Decks', href: '/decks' },
   ]
   const isLoggedIn = !!user
 
   return (
-    <nav className="border-b-3 border-border bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/">
-            <Image src="/logo.svg" alt="Spaced Repetition Logo" width={64} height={64} priority />
-          </Link>
+    <nav className="border-ink border-b">
+      <div className="mx-auto flex h-14 max-w-[1680px] items-center justify-between px-5 sm:px-8">
+        <Link href="/" className="font-serif text-[22px] leading-none tracking-tight">
+          Olivero Recall<span className="text-vermillion">.</span>
+        </Link>
+        <div className="flex items-center gap-7">
           {isLoggedIn && (
-            <div className="flex items-center space-x-6">
+            <>
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-foreground text-sm font-bold uppercase tracking-wider transition-colors hover:bg-primary hover:text-white px-3 py-1"
+                  className="label text-ink hover:text-vermillion transition-colors"
                 >
                   {item.name}
                 </Link>
@@ -38,13 +37,14 @@ export default function Navbar({ user }: Props) {
               >
                 <button
                   type="submit"
-                  className="text-sm font-bold uppercase tracking-wider px-3 py-1 bg-danger text-danger-foreground hover:translate-x-0.5 hover:translate-y-0.5 transition-transform brutal-border brutal-shadow-sm"
+                  className="label text-ink-mute hover:text-vermillion cursor-pointer transition-colors"
                 >
                   Sign Out
                 </button>
               </form>
-            </div>
+            </>
           )}
+          <ThemeToggle />
         </div>
       </div>
     </nav>

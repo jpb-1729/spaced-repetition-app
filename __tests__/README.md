@@ -20,27 +20,27 @@ pnpm test:coverage     # Run tests with coverage report
 ## Example Test Structure
 
 ```tsx
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import MyComponent from "@/components/MyComponent";
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import MyComponent from '@/components/MyComponent'
 
-describe("MyComponent", () => {
-  it("renders correctly", () => {
-    render(<MyComponent />);
-    expect(screen.getByText("Hello")).toBeInTheDocument();
-  });
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    render(<MyComponent />)
+    expect(screen.getByText('Hello')).toBeInTheDocument()
+  })
 
-  it("handles user interactions", async () => {
-    const user = userEvent.setup();
-    render(<MyComponent />);
+  it('handles user interactions', async () => {
+    const user = userEvent.setup()
+    render(<MyComponent />)
 
-    const button = screen.getByRole("button", { name: /click me/i });
-    await user.click(button);
+    const button = screen.getByRole('button', { name: /click me/i })
+    await user.click(button)
 
-    expect(screen.getByText("Clicked!")).toBeInTheDocument();
-  });
-});
+    expect(screen.getByText('Clicked!')).toBeInTheDocument()
+  })
+})
 ```
 
 ## Common Testing Library Queries
@@ -58,15 +58,15 @@ describe("MyComponent", () => {
 For Next.js specific components like `Image`, `Link`, you may need to mock them:
 
 ```tsx
-import { vi } from "vitest";
+import { vi } from 'vitest'
 
-vi.mock("next/image", () => ({
+vi.mock('next/image', () => ({
   default: (props: any) => <img {...props} />,
-}));
+}))
 
-vi.mock("next/link", () => ({
+vi.mock('next/link', () => ({
   default: ({ children, href }: any) => <a href={href}>{children}</a>,
-}));
+}))
 ```
 
 ## Tips

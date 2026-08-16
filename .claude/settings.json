@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc -b --noEmit)",
+      "Bash(npm run lint)",
+      "Bash(npm run check:format)",
+      "Bash(npm run test:run)",
+      "Bash(gh run watch *)",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude-in-chrome__read_page",
+      "mcp__claude-in-chrome__get_page_text",
+      "mcp__claude-in-chrome__read_console_messages",
+      "mcp__claude-in-chrome__find"
+    ]
+  }
+}

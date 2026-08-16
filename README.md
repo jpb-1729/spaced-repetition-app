@@ -21,15 +21,15 @@ Olivero Recall is a spaced repetition flashcard app powered by the **FSRS-6 algo
 
 ## Tech Stack
 
-| Layer | Tech |
-|---|---|
-| Framework | Next.js 16 (App Router + Turbopack) |
-| Database ORM | Prisma + PostgreSQL |
-| Auth | Auth.js v5 (Google OAuth) |
-| Styling | Tailwind CSS v4, neo-brutalist theme |
-| Algorithm | FSRS-6 (open-source spaced repetition) |
-| Testing | Vitest + Testing Library |
-| Language | TypeScript |
+| Layer        | Tech                                   |
+| ------------ | -------------------------------------- |
+| Framework    | Next.js 16 (App Router + Turbopack)    |
+| Database ORM | Prisma + PostgreSQL                    |
+| Auth         | Auth.js v5 (Google OAuth)              |
+| Styling      | Tailwind CSS v4, neo-brutalist theme   |
+| Algorithm    | FSRS-6 (open-source spaced repetition) |
+| Testing      | Vitest + Testing Library               |
+| Language     | TypeScript                             |
 
 ---
 
@@ -55,11 +55,33 @@ Create `.env.local`:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/olivero
-AUTH_SECRET=your-secret-here
+AUTH_SECRET=your-secret-here          # openssl rand -base64 32
+AUTH_URL=http://localhost:3000
+ADMIN_EMAIL=you@example.com           # seeded as ADMIN; dev login grants ADMIN
+
+# Optional locally — only needed to exercise the real Google sign-in path.
+# The dev login below works without them.
 AUTH_GOOGLE_ID=your-google-client-id
 AUTH_GOOGLE_SECRET=your-google-client-secret
-AUTH_URL=http://localhost:3000
 ```
+
+`AUTH_SECRET` is not optional. Without it every request throws
+`MissingSecret`, and in dev that surfaces as a page that reloads forever
+rather than as a readable error.
+
+### Signing in locally
+
+When `NODE_ENV === 'development'`, the sign-in page shows a **Dev login**
+form that signs you in as any email with no password, creating the user if
+needed. That is the fastest path — no OAuth client required.
+
+The provider is registered only in development (see `auth.ts`), so it does
+not exist in a production build.
+
+To test real Google sign-in instead, create an OAuth client with:
+
+- Authorized JavaScript origin: `http://localhost:3000`
+- Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
 
 ### Database
 
@@ -67,6 +89,16 @@ AUTH_URL=http://localhost:3000
 pnpm prisma migrate dev
 pnpm prisma db seed   # optional: seed with sample data
 ```
+
+> **`db:seed` is destructive.** `prisma/seed.ts` begins by deleting every
+> row in every table — users, reviews, progress, decks, courses. Only run it
+> against a database you are willing to empty. If you develop against a Neon
+> branch of production, do not seed it.
+
+Switching `DATABASE_URL` between databases invalidates any session you are
+already holding: the JWT stays valid (same `AUTH_SECRET`) but its user id
+belongs to the old database, which renders as an empty study index rather
+than a logged-out state. Sign out and back in after switching.
 
 ### Run
 

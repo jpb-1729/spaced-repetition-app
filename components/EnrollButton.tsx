@@ -1,4 +1,3 @@
-// app/decks/enroll-button.tsx
 'use client'
 
 import { useState } from 'react'
@@ -11,7 +10,12 @@ interface EnrollButtonProps {
   isEnrolled?: boolean
 }
 
-export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }: EnrollButtonProps) {
+export function EnrollButton({
+  courseId,
+  deckId,
+  deckName,
+  isEnrolled = false,
+}: EnrollButtonProps) {
   const [loading, setLoading] = useState(false)
   const [enrolled, setEnrolled] = useState(isEnrolled)
 
@@ -25,7 +29,7 @@ export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }:
       } else {
         setEnrolled(true)
       }
-    } catch (error) {
+    } catch {
       alert('Failed to enroll')
     } finally {
       setLoading(false)
@@ -33,23 +37,16 @@ export function EnrollButton({ courseId, deckId, deckName, isEnrolled = false }:
   }
 
   if (enrolled) {
-    return (
-      <button
-        disabled
-        className="brutal-btn bg-success text-success-foreground px-4 py-2"
-      >
-        Enrolled
-      </button>
-    )
+    return <span className="label border-moss/40 text-moss border px-4 py-2.5">Enrolled</span>
   }
 
   return (
     <button
       onClick={handleEnroll}
       disabled={loading}
-      className="brutal-btn brutal-btn-hover bg-primary text-primary-foreground px-4 py-2 disabled:opacity-50"
+      className="label border-ink text-ink hover:bg-ink hover:text-paper cursor-pointer border px-4 py-2.5 transition-colors disabled:opacity-50"
     >
-      {loading ? 'Enrolling...' : 'Enroll'}
+      {loading ? 'Enrolling…' : 'Enroll'}
     </button>
   )
 }

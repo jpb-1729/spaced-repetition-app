@@ -10,9 +10,8 @@ export default async function NewDeckPage({ params }: { params: Promise<{ id: st
     notFound()
   }
 
-  const nextOrdinal = course.decks.length > 0
-    ? Math.max(...course.decks.map((d) => d.ordinal)) + 1
-    : 1
+  const nextOrdinal =
+    course.decks.length > 0 ? Math.max(...course.decks.map((d) => d.ordinal)) + 1 : 1
 
   return (
     <div>

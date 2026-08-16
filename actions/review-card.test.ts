@@ -73,7 +73,11 @@ function expectedFsrsResults(cardProgress: ReturnType<typeof makeLearningCardPro
   const correctResult = f.repeat(correctCard, now)[FSRSRating.Hard].card
   const brokenResult = f.repeat(brokenCard, now)[FSRSRating.Hard].card
 
-  return { correctResult, brokenResult, differ: correctResult.due.getTime() !== brokenResult.due.getTime() }
+  return {
+    correctResult,
+    brokenResult,
+    differ: correctResult.due.getTime() !== brokenResult.due.getTime(),
+  }
 }
 
 // ── Tests ──────────────────────────────────────────────────────────
