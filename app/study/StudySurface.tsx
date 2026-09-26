@@ -241,7 +241,8 @@ function Complete({
 }) {
   return (
     <div className="flex max-w-[760px] flex-1 flex-col justify-center py-16">
-      <span className="text-good inline-flex -rotate-2 items-center self-start border-2 border-current px-3 pt-2 pb-[7px] text-[12px] leading-none font-extrabold tracking-[0.12em] uppercase">
+      <span className="label text-good inline-flex items-center gap-2">
+        <span className="bg-good size-2 rounded-full" aria-hidden />
         Session complete
       </span>
       <h2 className="mt-6 max-w-[18ch] text-[clamp(34px,4.6vw,58px)] leading-[1.02] font-extrabold tracking-[-0.04em]">
