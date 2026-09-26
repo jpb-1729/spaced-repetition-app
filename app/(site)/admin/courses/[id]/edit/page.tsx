@@ -1,5 +1,6 @@
 import { getCourse } from '@/actions/course'
 import { CourseForm } from '@/components/admin/CourseForm'
+import { PageHead } from '@/components/admin/ui'
 import { notFound } from 'next/navigation'
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,8 +13,8 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">Edit Course</h1>
-      <div className="mt-6">
+      <PageHead eyebrow={`Course · ${course.name}`} title="Edit course" />
+      <div className="mt-8">
         <CourseForm course={course} />
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { getDeck } from '@/actions/deck'
 import { BulkCardForm } from '@/components/admin/BulkCardForm'
+import { PageHead } from '@/components/admin/ui'
 import { notFound } from 'next/navigation'
 
 export default async function BulkCardsPage({
@@ -16,11 +17,12 @@ export default async function BulkCardsPage({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">Import Cards</h1>
-      <p className="mt-1 text-gray-600">
-        Adding cards to: {deck.name} ({deck._count.cards} existing)
-      </p>
-      <div className="mt-6">
+      <PageHead
+        eyebrow={`Deck · ${deck.name}`}
+        title="Import cards"
+        meta={`${deck._count.cards} existing`}
+      />
+      <div className="mt-8">
         <BulkCardForm deckId={deckId} />
       </div>
     </div>

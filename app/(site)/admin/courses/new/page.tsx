@@ -1,10 +1,11 @@
 import { CourseForm } from '@/components/admin/CourseForm'
+import { PageHead } from '@/components/admin/ui'
 
 export default function NewCoursePage() {
   return (
     <div>
-      <h1 className="text-3xl font-bold">New Course</h1>
-      <div className="mt-6">
+      <PageHead eyebrow="Courses" title="New course" />
+      <div className="mt-8">
         <CourseForm />
       </div>
     </div>

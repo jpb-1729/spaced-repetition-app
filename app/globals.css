@@ -70,29 +70,6 @@
   --color-cobalt: var(--cobalt);
   --color-moss: var(--moss);
   --color-on-accent: var(--on-accent);
-
-  /* Compatibility aliases so pages still using the old token names
-     (admin, stock Tailwind pages) inherit the Swiss palette. */
-  --color-background: var(--paper);
-  --color-foreground: var(--ink);
-  --color-border: var(--rule);
-  --color-muted: var(--paper-2);
-  --color-muted-foreground: var(--ink-soft);
-  --color-subtle-foreground: var(--ink-mute);
-
-  --color-primary: var(--vermillion);
-  --color-primary-foreground: var(--on-accent);
-  --color-accent: var(--paper-2);
-  --color-accent-foreground: var(--ink);
-
-  --color-success: var(--moss);
-  --color-success-foreground: var(--on-accent);
-  --color-danger: var(--vermillion);
-  --color-danger-foreground: var(--on-accent);
-  --color-warn: var(--ink-mute);
-  --color-warn-foreground: var(--on-accent);
-  --color-info: var(--cobalt);
-  --color-info-foreground: var(--on-accent);
 }
 
 @layer base {
@@ -194,41 +171,4 @@
 .hide-scroll::-webkit-scrollbar {
   width: 0;
   height: 0;
-}
-
-/* Legacy brutalist utilities — still referenced by admin pages.
-   They now render as ink-on-paper via the aliased tokens. */
-@utility brutal-border {
-  border: 3px solid var(--color-border);
-}
-
-@utility brutal-shadow {
-  box-shadow: 4px 4px 0 var(--color-border);
-}
-
-@utility brutal-shadow-sm {
-  box-shadow: 2px 2px 0 var(--color-border);
-}
-
-@utility brutal-btn {
-  border: 3px solid var(--color-border);
-  box-shadow: 4px 4px 0 var(--color-border);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition:
-    transform 0.1s,
-    box-shadow 0.1s;
-  cursor: pointer;
-}
-
-@utility brutal-btn-hover {
-  &:hover {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0 var(--color-border);
-  }
-  &:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0 0 0 var(--color-border);
-  }
 }

@@ -2,6 +2,8 @@
 
 import { useActionState } from 'react'
 import { bulkInsertCards, type BulkCardActionState } from '@/actions/card'
+import { Field, FormError, btnSolid, inputClass } from '@/components/admin/ui'
+import { cn } from '@/lib/cn'
 
 export function BulkCardForm({ deckId }: { deckId: string }) {
   const [state, formAction, isPending] = useActionState<BulkCardActionState, FormData>(
@@ -10,19 +12,22 @@ export function BulkCardForm({ deckId }: { deckId: string }) {
   )
 
   return (
-    <form action={formAction} className="max-w-2xl space-y-4">
+    <form action={formAction} className="max-w-[72ch] space-y-7">
       <input type="hidden" name="deckId" value={deckId} />
 
-      {state.error && (
-        <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-          {state.error}
-        </div>
-      )}
+      {state.error && <FormError>{state.error}</FormError>}
 
-      <div>
-        <label htmlFor="json" className="block text-sm font-medium">
-          Card JSON *
-        </label>
+      <Field
+        label="Card JSON"
+        htmlFor="json"
+        required
+        hint={
+          <>
+            Paste JSON with a &quot;test&quot; array of objects, each with &quot;Question&quot; and
+            &quot;Answer&quot; fields.
+          </>
+        }
+      >
         <textarea
           id="json"
           name="json"
@@ -34,20 +39,15 @@ export function BulkCardForm({ deckId }: { deckId: string }) {
     { "Question": "Capital of France?", "Answer": "Paris" }
   ]
 }`}
-          className="mt-1 w-full rounded border px-3 py-2 font-mono text-sm"
+          className={cn(
+            inputClass,
+            'placeholder:text-ink-mute/60 font-mono text-[13px] leading-relaxed'
+          )}
         />
-        <p className="mt-1 text-xs text-gray-500">
-          Paste JSON with a &quot;test&quot; array of objects, each with &quot;Question&quot; and
-          &quot;Answer&quot; fields.
-        </p>
-      </div>
+      </Field>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-      >
-        {isPending ? 'Importing...' : 'Import Cards'}
+      <button type="submit" disabled={isPending} className={btnSolid}>
+        {isPending ? 'Importing…' : 'Import cards'}
       </button>
     </form>
   )
