@@ -1,9 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
+const authFlags = vi.hoisted(() => ({ devLoginEnabled: false }))
+
 vi.mock('@/auth', () => ({
   auth: vi.fn(),
   signIn: vi.fn(),
+  get devLoginEnabled() {
+    return authFlags.devLoginEnabled
+  },
 }))
 
 import { auth } from '@/auth'
@@ -42,5 +47,19 @@ describe('Home page', () => {
 
     expect(screen.getByText('Olivero Recall')).toBeInTheDocument()
     expect(screen.getByText(/learn smarter, not harder/i)).toBeInTheDocument()
+  })
+
+  it('sends both buttons to /sign-in when the dev login is enabled', async () => {
+    authFlags.devLoginEnabled = true
+    mockedAuth.mockResolvedValue(null as any)
+
+    const { default: Home } = await import('@/app/(site)/page')
+    render(await Home())
+
+    expect(screen.getByRole('link', { name: /log in/i })).toHaveAttribute('href', '/sign-in')
+    expect(screen.getByRole('link', { name: /sign up/i })).toHaveAttribute('href', '/sign-in')
+    expect(screen.queryByRole('button', { name: /log in/i })).not.toBeInTheDocument()
+
+    authFlags.devLoginEnabled = false
   })
 })

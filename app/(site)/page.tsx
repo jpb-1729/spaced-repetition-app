@@ -1,4 +1,5 @@
-import { signIn, auth } from '@/auth'
+import Link from 'next/link'
+import { signIn, auth, devLoginEnabled } from '@/auth'
 
 export default async function Home() {
   const session = await auth()
@@ -19,26 +20,38 @@ export default async function Home() {
         </p>
       </header>
 
-      {!isLoggedIn && (
-        <div className="flex flex-wrap gap-2.5 py-8">
-          <form
-            action={async () => {
-              'use server'
-              await signIn('google')
-            }}
-          >
-            <button className="btn">Log In</button>
-          </form>
-          <form
-            action={async () => {
-              'use server'
-              await signIn('google')
-            }}
-          >
-            <button className="btn-ghost">Sign Up</button>
-          </form>
-        </div>
-      )}
+      {!isLoggedIn &&
+        (devLoginEnabled ? (
+          // Locally there is usually no Google client configured, so send both
+          // buttons to /sign-in, which also offers the passwordless dev login.
+          <div className="flex flex-wrap gap-2.5 py-8">
+            <Link href="/sign-in" className="btn">
+              Log In
+            </Link>
+            <Link href="/sign-in" className="btn-ghost">
+              Sign Up
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2.5 py-8">
+            <form
+              action={async () => {
+                'use server'
+                await signIn('google')
+              }}
+            >
+              <button className="btn">Log In</button>
+            </form>
+            <form
+              action={async () => {
+                'use server'
+                await signIn('google')
+              }}
+            >
+              <button className="btn-ghost">Sign Up</button>
+            </form>
+          </div>
+        ))}
     </div>
   )
 }
