@@ -2,7 +2,7 @@ import type { Rating } from '@prisma/client'
 import type { DeckInfo, QueueCard } from '@/lib/study'
 import { cardStateLabel, formatInterval, previewIntervals } from '@/lib/fsrs'
 import { cn } from '@/lib/cn'
-import { Kbd, SectionHead } from './ui'
+import { SectionHead } from './ui'
 
 export const GRADES: { key: Rating; digit: string; label: string; gloss: string }[] = [
   { key: 'AGAIN', digit: '1', label: 'Again', gloss: 'Forgotten' },
@@ -10,6 +10,14 @@ export const GRADES: { key: Rating; digit: string; label: string; gloss: string 
   { key: 'GOOD', digit: '3', label: 'Good', gloss: 'Recalled' },
   { key: 'EASY', digit: '4', label: 'Easy', gloss: 'Immediate' },
 ]
+
+/* Static class strings per grade, so Tailwind can see every one of them. */
+const GRADE_TONE: Record<Rating, { fill: string; border: string }> = {
+  AGAIN: { fill: 'bg-grade-again', border: 'hover:border-grade-again' },
+  HARD: { fill: 'bg-grade-hard', border: 'hover:border-grade-hard' },
+  GOOD: { fill: 'bg-grade-good', border: 'hover:border-grade-good' },
+  EASY: { fill: 'bg-grade-easy', border: 'hover:border-grade-easy' },
+}
 
 export interface SessionSummary {
   reviewed: number
@@ -59,9 +67,10 @@ export function StudySurface({
         meta={
           <span className="flex items-center gap-3">
             <span>{deck.courseName}</span>
-            <span className="text-vermillion">
-              {String(Math.min(position + 1, total)).padStart(2, '0')} /{' '}
-              {String(total).padStart(2, '0')}
+            <span className="text-ink font-bold tabular-nums">
+              {Math.min(position + 1, total)}
+              <span className="text-rule-2 font-normal"> / </span>
+              {total}
             </span>
           </span>
         }
@@ -73,51 +82,50 @@ export function StudySurface({
         <article key={card.progressId} className="flex min-h-0 flex-1 flex-col">
           <div className="hide-scroll min-h-0 flex-1 overflow-y-auto">
             {/* Prompt */}
-            <div className="anim-rise relative overflow-hidden pt-8 pb-7 sm:pt-12">
+            <div className="anim-rise relative max-w-[720px] overflow-hidden pt-8 pb-2 sm:pt-10">
               <span
                 aria-hidden
-                className="text-ink/[0.055] pointer-events-none absolute -top-3 right-0 font-serif text-[110px] leading-none select-none sm:text-[150px]"
+                className="text-paper-2 pointer-events-none absolute -top-2 right-0 text-[110px] leading-none font-extrabold tracking-[-0.05em] select-none sm:text-[150px]"
               >
                 {String(position + 1).padStart(2, '0')}
               </span>
               <div className="relative">
-                <div className="mb-5 flex items-center gap-2">
-                  <span className="bg-vermillion h-[7px] w-[7px]" />
-                  <span className="label text-ink-mute">
-                    {cardStateLabel(card.state)}
-                    {' · '}
-                    {deck.name}
-                  </span>
+                <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2">
+                  <span className="label text-accent">{cardStateLabel(card.state)}</span>
+                  <span className="bg-rule-2 h-3 w-px" aria-hidden />
+                  <span className="text-ink-mute text-[13px]">{deck.name}</span>
                 </div>
-                <h2 className="max-w-[22ch] font-serif text-[26px] leading-[1.06] font-light tracking-[-0.025em] text-balance sm:text-[36px] lg:text-[44px]">
+                <h2 className="mt-[18px] font-serif text-[clamp(26px,3.4vw,40px)] leading-[1.18] font-semibold tracking-[-0.015em] text-balance [font-variation-settings:'opsz'_60]">
                   {card.front}
                 </h2>
-                <p className="label text-ink-mute mt-6">
-                  {deck.courseName} · {deck.name}
+                <p className="text-ink-soft mt-[18px] text-[13.5px]">
+                  <b className="text-ink font-bold">{deck.courseName}</b> · {deck.name}
                 </p>
               </div>
             </div>
 
             {/* Answer */}
-            <div className="border-ink border-t">
+            <div className="max-w-[720px] pb-6">
               {revealed ? (
-                <div className="anim-fade grid gap-6 py-7 lg:grid-cols-[1fr_auto] lg:gap-10">
-                  <div className="relative pl-5">
-                    <span
-                      aria-hidden
-                      className="anim-draw bg-vermillion absolute inset-y-0 -left-[2px] w-[2px]"
-                    />
-                    <p className="label text-vermillion mb-3">Answer</p>
-                    <p className="text-ink max-w-[58ch] font-serif text-[18px] leading-[1.55] sm:text-[21px]">
-                      {card.back}
-                    </p>
-                    {card.notes && (
-                      <p className="text-ink-soft mt-4 max-w-[58ch] font-serif text-[15px] leading-[1.55]">
+                <div className="anim-fade mt-9">
+                  <h3 className="border-ink flex justify-between gap-3 border-b-2 pb-3 text-[13px] leading-none font-extrabold tracking-[0.1em] uppercase">
+                    Answer
+                    <span className="text-ink-mute text-[12.5px] font-semibold tracking-[0.04em] normal-case">
+                      {cardStateLabel(card.state)}
+                    </span>
+                  </h3>
+                  <p className="mt-5 font-serif text-[19px] leading-[1.65]">{card.back}</p>
+                  {card.notes && (
+                    <div className="border-rule mt-7 border-t pt-4">
+                      <p className="text-ink-mute mb-2.5 text-[12px] leading-none font-extrabold tracking-[0.09em] uppercase">
+                        Notes
+                      </p>
+                      <p className="text-ink-soft font-serif text-[15.5px] leading-relaxed">
                         {card.notes}
                       </p>
-                    )}
-                  </div>
-                  <dl className="border-ink/12 lg:border-ink/12 grid grid-cols-2 gap-x-8 gap-y-3 self-start border-t pt-4 lg:w-[186px] lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+                    </div>
+                  )}
+                  <dl className="border-rule mt-7 grid grid-cols-2 border-y sm:grid-cols-4">
                     <Field k="Difficulty" v={card.difficulty.toFixed(2)} />
                     <Field
                       k="Interval"
@@ -128,75 +136,75 @@ export function StudySurface({
                   </dl>
                 </div>
               ) : (
-                <button
-                  onClick={onReveal}
-                  className="group hover:bg-paper-2 flex w-full items-center justify-between py-7 text-left transition-colors duration-200"
+                <div
+                  className="border-rule mt-9 grid place-items-center gap-3.5 border px-6 py-11 text-center"
+                  style={{
+                    background:
+                      'repeating-linear-gradient(135deg, transparent 0 9px, var(--rule) 9px 10px), var(--paper-2)',
+                  }}
                 >
-                  <span className="label text-ink transition-transform duration-200 group-hover:translate-x-1">
+                  <p className="text-ink-soft max-w-[44ch] font-serif text-[17px] italic">
+                    Recall the answer before you reveal it.
+                  </p>
+                  <button onClick={onReveal} className="btn h-[50px] px-[26px]">
                     Reveal answer
-                  </span>
-                  <span className="flex items-center gap-3">
-                    <span className="label text-ink-mute">press</span>
-                    <Kbd>Space</Kbd>
-                  </span>
-                </button>
+                    <kbd className="rounded-[3px] border border-b-2 border-current/40 px-[5px] pt-[3px] pb-[2px] font-mono text-[11px] leading-none font-medium">
+                      Space
+                    </kbd>
+                  </button>
+                </div>
               )}
             </div>
           </div>
 
           {/* Grading */}
-          <div className="shrink-0">
+          <div className="border-rule shrink-0 border-t pt-3.5">
             <div
               className={cn(
-                'border-ink grid grid-cols-2 border-t transition-opacity duration-300 sm:grid-cols-4',
+                'grid grid-cols-2 gap-2.5 transition-opacity duration-300 sm:grid-cols-4',
                 revealed ? 'opacity-100' : 'pointer-events-none opacity-0'
               )}
             >
-              {GRADES.map((g, i) => (
+              {GRADES.map((g) => (
                 <button
                   key={g.key}
                   onClick={() => onGrade(g.key)}
                   disabled={!revealed}
+                  title={g.gloss}
                   className={cn(
-                    'group border-ink/12 hover:bg-ink hover:text-paper flex flex-col justify-between gap-6 px-3.5 py-4 text-left transition-all duration-150 active:translate-y-px',
-                    i > 0 && 'sm:border-l',
-                    i === 1 && 'border-l',
-                    i > 1 && 'border-t sm:border-t-0',
-                    i === 3 && 'border-l'
+                    'group border-rule-2 bg-paper relative grid grid-cols-[auto_1fr_auto] items-center gap-x-2.5 gap-y-0.5 overflow-hidden rounded border px-3.5 pt-2.5 pb-[11px] text-left transition-[border-color,transform] duration-100 active:translate-y-px',
+                    GRADE_TONE[g.key].border
                   )}
                 >
-                  <div className="flex w-full items-center justify-between">
-                    <span className="label opacity-60">{g.digit}</span>
-                    <span
-                      className={cn(
-                        'font-mono text-[11px] tabular-nums',
-                        g.key === 'AGAIN'
-                          ? 'text-vermillion group-hover:text-paper'
-                          : 'text-ink-mute group-hover:text-paper/70'
-                      )}
-                    >
-                      {previews?.[g.key]}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="font-serif text-[21px] leading-none tracking-[-0.02em]">
-                      {g.label}
-                    </div>
-                    <div className="label text-ink-mute group-hover:text-paper/60 mt-2">
-                      {g.gloss}
-                    </div>
-                  </div>
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-[0.08] group-active:opacity-[0.16]',
+                      GRADE_TONE[g.key].fill
+                    )}
+                  />
+                  <span
+                    aria-hidden
+                    className={cn('row-span-2 size-[9px] rounded-full', GRADE_TONE[g.key].fill)}
+                  />
+                  <b className="text-[15px] leading-[1.1] font-bold">{g.label}</b>
+                  <kbd className="border-rule-2 text-ink-soft bg-paper row-span-2 rounded-[3px] border border-b-2 px-[5px] pt-[3px] pb-[2px] font-mono text-[11px] leading-none font-medium">
+                    {g.digit}
+                  </kbd>
+                  <small className="text-ink-soft col-start-2 font-mono text-[12.5px] leading-[1.1] font-medium tabular-nums">
+                    {previews?.[g.key]}
+                  </small>
                 </button>
               ))}
             </div>
-            <div className="border-ink/12 flex items-center justify-between border-t py-2.5">
-              <span className="label text-ink-mute">
-                Queue remaining {String(Math.max(0, total - position)).padStart(2, '0')}
+            <div className="flex items-center justify-between py-3 text-[13px]">
+              <span className="text-ink-mute">
+                <span className="tabular-nums">{Math.max(0, total - position)}</span> left in queue
               </span>
               {failedCount > 0 && (
                 <button
                   onClick={onRetryFailed}
-                  className="label text-vermillion hover:text-ink cursor-pointer transition-colors"
+                  className="text-bad hover:decoration-bad decoration-rule-2 cursor-pointer font-semibold underline underline-offset-[3px] transition-colors"
                 >
                   {failedCount} {failedCount === 1 ? 'review' : 'reviews'} not saved · Retry
                 </button>
@@ -211,9 +219,11 @@ export function StudySurface({
 
 function Field({ k, v }: { k: string; v: string }) {
   return (
-    <div>
-      <dt className="label text-ink-mute">{k}</dt>
-      <dd className="mt-1.5 font-mono text-[13px] tabular-nums">{v}</dd>
+    <div className="border-rule py-3.5 pr-4 even:border-l even:pl-4 sm:[&:nth-child(3)]:border-l sm:[&:nth-child(3)]:pl-4 [&:nth-child(n+3)]:border-t sm:[&:nth-child(n+3)]:border-t-0">
+      <dd className="text-[22px] leading-none font-extrabold tracking-[-0.02em] tabular-nums">
+        {v}
+      </dd>
+      <dt className="text-ink-mute mt-1.5 text-[12.5px]">{k}</dt>
     </div>
   )
 }
@@ -230,31 +240,27 @@ function Complete({
   deck: DeckInfo
 }) {
   return (
-    <div className="flex flex-1 flex-col justify-center py-16">
-      <span className="label text-vermillion mb-5">Session complete</span>
-      <h2 className="max-w-[16ch] font-serif text-[38px] leading-[0.98] font-light tracking-[-0.03em] sm:text-[56px]">
+    <div className="flex max-w-[760px] flex-1 flex-col justify-center py-16">
+      <span className="text-good inline-flex -rotate-2 items-center self-start border-2 border-current px-3 pt-2 pb-[7px] text-[12px] leading-none font-extrabold tracking-[0.12em] uppercase">
+        Session complete
+      </span>
+      <h2 className="mt-6 max-w-[18ch] text-[clamp(34px,4.6vw,58px)] leading-[1.02] font-extrabold tracking-[-0.04em]">
         The session for {deck.name} is closed.
       </h2>
-      <div className="border-ink mt-10 grid grid-cols-2 border-t sm:grid-cols-4">
-        <Cell k="Reviewed" v={String(summary.reviewed).padStart(2, '0')} />
-        <Cell k="Forgotten" v={String(summary.again).padStart(2, '0')} />
+      <div className="border-t-ink border-b-rule mt-9 grid grid-cols-2 border-t-2 border-b sm:grid-cols-4">
+        <Cell k="Reviewed" v={String(summary.reviewed)} />
+        <Cell k="Forgotten" v={String(summary.again)} />
         <Cell k="Accuracy" v={`${Math.round(summary.accuracy * 100)}%`} accent />
         <Cell
           k="Seconds / card"
           v={summary.reviewed ? (summary.elapsed / summary.reviewed).toFixed(1) : '—'}
         />
       </div>
-      <div className="mt-10 flex flex-wrap gap-3">
-        <button
-          onClick={onRestart}
-          className="label border-ink bg-ink text-paper hover:text-ink border px-6 py-3.5 transition-colors hover:bg-transparent"
-        >
+      <div className="mt-9 flex flex-wrap gap-2.5">
+        <button onClick={onRestart} className="btn">
           Study again
         </button>
-        <button
-          onClick={onNextDeck}
-          className="label border-ink hover:bg-ink hover:text-paper border px-6 py-3.5 transition-colors"
-        >
+        <button onClick={onNextDeck} className="btn-ghost">
           Advance to next collection →
         </button>
       </div>
@@ -264,16 +270,16 @@ function Complete({
 
 function Cell({ k, v, accent }: { k: string; v: string; accent?: boolean }) {
   return (
-    <div className="border-ink/12 border-b py-4 pr-4">
-      <div className="label text-ink-mute">{k}</div>
+    <div className="border-rule py-[18px] pr-4 even:border-l even:pl-4 sm:[&:nth-child(3)]:border-l sm:[&:nth-child(3)]:pl-4 [&:nth-child(n+3)]:border-t sm:[&:nth-child(n+3)]:border-t-0">
       <div
         className={cn(
-          'mt-2.5 font-serif text-[30px] leading-none tabular-nums',
-          accent && 'text-vermillion'
+          'text-[34px] leading-none font-extrabold tracking-[-0.03em] tabular-nums',
+          accent && 'text-accent'
         )}
       >
         {v}
       </div>
+      <div className="text-ink-mute mt-2 text-[13px]">{k}</div>
     </div>
   )
 }

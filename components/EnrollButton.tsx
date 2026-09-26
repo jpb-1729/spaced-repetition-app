@@ -37,15 +37,16 @@ export function EnrollButton({
   }
 
   if (enrolled) {
-    return <span className="label border-moss/40 text-moss border px-4 py-2.5">Enrolled</span>
+    return (
+      <span className="border-rule-2 text-ink-soft inline-flex h-[34px] items-center gap-2 rounded border px-3 text-[13px] font-semibold whitespace-nowrap">
+        <span className="bg-good size-2 rounded-full" aria-hidden />
+        Enrolled
+      </span>
+    )
   }
 
   return (
-    <button
-      onClick={handleEnroll}
-      disabled={loading}
-      className="label border-ink text-ink hover:bg-ink hover:text-paper cursor-pointer border px-4 py-2.5 transition-colors disabled:opacity-50"
-    >
+    <button onClick={handleEnroll} disabled={loading} className="btn h-[34px] px-3 text-[13px]">
       {loading ? 'Enrolling…' : 'Enroll'}
     </button>
   )

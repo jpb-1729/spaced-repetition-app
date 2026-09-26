@@ -13,6 +13,7 @@ import {
   type StudyDashboardData,
 } from '@/lib/study'
 import { StudyDashboard } from './StudyDashboard'
+import { Wordmark } from '@/components/Wordmark'
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -45,22 +46,23 @@ export default async function StudyPage(props: Props) {
   if (decksRaw.length === 0) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-[1680px] flex-col px-5 sm:px-8 lg:px-10">
-        <header className="border-ink border-b pt-5 pb-3">
-          <h1 className="font-serif text-[28px] leading-[0.82] font-normal tracking-[-0.035em] sm:text-[38px]">
-            Olivero Recall<span className="text-vermillion">.</span>
-          </h1>
+        <header className="border-rule flex h-16 items-center border-b">
+          <Link href="/">
+            <h1>
+              <Wordmark />
+            </h1>
+          </Link>
         </header>
         <div className="flex flex-1 flex-col justify-center py-16">
-          <span className="label text-vermillion mb-5">Nothing enrolled</span>
-          <h2 className="max-w-[18ch] font-serif text-[38px] leading-[0.98] font-light tracking-[-0.03em] sm:text-[56px]">
+          <span className="label text-accent mb-4">Nothing enrolled</span>
+          <h2 className="max-w-[18ch] text-[clamp(36px,5vw,58px)] leading-[1.02] font-extrabold tracking-[-0.04em]">
             Your study index is empty.
           </h2>
-          <p className="label text-ink-mute mt-6">Enroll in a collection to begin.</p>
-          <div className="mt-10">
-            <Link
-              href="/decks"
-              className="label border-ink bg-ink text-paper hover:text-ink inline-block border px-6 py-3.5 transition-colors hover:bg-transparent"
-            >
+          <p className="text-ink-soft mt-4 font-serif text-[20px]">
+            Enroll in a collection to begin.
+          </p>
+          <div className="mt-8">
+            <Link href="/decks" className="btn">
               Browse decks →
             </Link>
           </div>

@@ -1,6 +1,6 @@
 import { getCourse } from '@/actions/course'
 import { DeckList } from '@/components/admin/DeckList'
-import { PageHead, btnOutline, btnSolid } from '@/components/admin/ui'
+import { PageHead, StatusChip, btnOutline, btnSolid } from '@/components/admin/ui'
 import { SectionHead } from '@/app/study/ui'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -37,19 +37,17 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         }
       />
 
-      <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-2">
-        <span className={course.isPublished ? 'label text-moss' : 'label text-ink-mute'}>
-          {course.isPublished ? 'Published' : 'Draft'}
-        </span>
+      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <StatusChip published={course.isPublished} />
         {facts.map((f) => (
-          <span key={f} className="label text-ink-mute">
+          <span key={f} className="text-ink-soft text-[13.5px]">
             {f}
           </span>
         ))}
       </div>
 
       {course.description && (
-        <p className="text-ink-soft mt-5 max-w-[62ch] text-[15px] leading-relaxed">
+        <p className="text-ink-soft mt-5 max-w-[64ch] font-serif text-[19px] leading-normal">
           {course.description}
         </p>
       )}

@@ -11,12 +11,12 @@ export default async function SiteLayout({
     <>
       <Navbar user={session?.user} />
       <main className="flex-1">{children}</main>
-      <footer className="border-ink border-t px-5 py-5 sm:px-8">
-        <div className="mx-auto flex max-w-[1680px] flex-wrap items-center justify-between gap-3">
-          <span className="label text-ink-mute">
-            &copy; {new Date().getFullYear()} Nunya Business
+      <footer className="border-rule mt-16 border-t">
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3 px-[clamp(16px,3.2vw,40px)] py-6">
+          <span className="text-[15px] font-extrabold tracking-[-0.02em]">Olivero Recall</span>
+          <span className="text-ink-mute text-[13px]">
+            {`© ${new Date().getFullYear()} Nunya Business · Set in Schibsted Grotesk & Source Serif`}
           </span>
-          <span className="label text-ink-mute">Set in Newsreader &amp; Inter Tight</span>
         </div>
       </footer>
     </>

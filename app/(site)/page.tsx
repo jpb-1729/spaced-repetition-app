@@ -5,34 +5,29 @@ export default async function Home() {
   const isLoggedIn = !!session?.user
 
   return (
-    <div className="mx-auto max-w-[1680px] px-5 sm:px-8 lg:px-10">
-      <header className="border-ink border-b pt-14 pb-10 sm:pt-20">
-        <p className="label text-vermillion">Spaced repetition</p>
-        <h1 className="mt-4 font-serif text-[52px] leading-[0.98] font-medium tracking-tight text-balance sm:text-[76px]">
-          Olivero Recall<span className="text-vermillion">.</span>
+    <div className="mx-auto max-w-[1280px] px-[clamp(16px,3.2vw,40px)]">
+      <header className="border-rule border-b pt-12 pb-10 sm:pt-16">
+        <p className="label text-accent">Spaced repetition</p>
+        <h1 className="mt-4 text-[clamp(44px,6.4vw,78px)] leading-[0.98] font-extrabold tracking-[-0.045em] text-balance">
+          Olivero Recall<span className="text-accent">.</span>
         </h1>
-        <p className="text-ink-soft mt-5 font-serif text-2xl italic sm:text-[28px]">
+        <p className="text-ink-soft mt-5 max-w-[58ch] font-serif text-[20px] leading-normal sm:text-[22px]">
           Learn smarter, not harder.
+        </p>
+        <p className="text-ink-soft mt-3 max-w-[58ch] font-serif text-[18px] leading-normal">
+          This app uses spaced repetition to burn knowledge into your memory with minimal effort.
         </p>
       </header>
 
-      <div className="border-ink/12 max-w-[52ch] border-b py-8">
-        <p className="text-ink-soft text-[15px] leading-relaxed">
-          This app uses spaced repetition to burn knowledge into your memory with minimal effort.
-        </p>
-      </div>
-
       {!isLoggedIn && (
-        <div className="flex flex-col gap-3 py-10 sm:flex-row">
+        <div className="flex flex-wrap gap-2.5 py-8">
           <form
             action={async () => {
               'use server'
               await signIn('google')
             }}
           >
-            <button className="label border-ink bg-ink text-paper hover:bg-vermillion hover:border-vermillion cursor-pointer border px-8 py-4 transition-colors">
-              Log In
-            </button>
+            <button className="btn">Log In</button>
           </form>
           <form
             action={async () => {
@@ -40,9 +35,7 @@ export default async function Home() {
               await signIn('google')
             }}
           >
-            <button className="label border-ink text-ink hover:bg-ink hover:text-paper cursor-pointer border px-8 py-4 transition-colors">
-              Sign Up
-            </button>
+            <button className="btn-ghost">Sign Up</button>
           </form>
         </div>
       )}

@@ -1,22 +1,23 @@
 import type { Metadata } from 'next'
-import { Newsreader, Inter_Tight, JetBrains_Mono } from 'next/font/google'
+import { Schibsted_Grotesk, Source_Serif_4, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
 
-const newsreader = Newsreader({
-  variable: '--font-newsreader',
+const schibsted = Schibsted_Grotesk({
+  variable: '--font-schibsted',
+  subsets: ['latin'],
+})
+
+const sourceSerif = Source_Serif_4({
+  variable: '--font-source-serif',
   subsets: ['latin'],
   style: ['normal', 'italic'],
   axes: ['opsz'],
 })
 
-const interTight = Inter_Tight({
-  variable: '--font-inter-tight',
+const plexMono = IBM_Plex_Mono({
+  variable: '--font-plex-mono',
   subsets: ['latin'],
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-jetbrains-mono',
-  subsets: ['latin'],
+  weight: ['400', '500', '600'],
 })
 
 export const metadata: Metadata = {
@@ -41,7 +42,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${newsreader.variable} ${interTight.variable} ${jetbrainsMono.variable} bg-paper text-ink grain flex min-h-screen flex-col font-sans antialiased`}
+        className={`${schibsted.variable} ${sourceSerif.variable} ${plexMono.variable} bg-paper text-ink flex min-h-screen flex-col font-sans antialiased`}
       >
         {children}
       </body>

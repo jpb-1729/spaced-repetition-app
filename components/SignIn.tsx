@@ -9,10 +9,7 @@ export default function SignIn() {
           await signIn('google')
         }}
       >
-        <button
-          type="submit"
-          className="border-ink bg-paper hover:bg-paper-2 flex w-full cursor-pointer items-center justify-center gap-3 border px-4 py-3 text-sm transition-colors"
-        >
+        <button type="submit" className="btn-ghost w-full gap-3">
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
@@ -44,21 +41,18 @@ export default function SignIn() {
               redirectTo: '/study',
             })
           }}
-          className="border-ink/12 mt-6 border-t pt-6"
+          className="border-rule mt-6 border-t pt-6"
         >
-          <p className="label text-ink-mute">Dev login — local only</p>
+          <p className="label text-ink-mute">Dev login · local only</p>
           <input
             type="email"
             name="email"
             required
             defaultValue={process.env.ADMIN_EMAIL ?? ''}
             placeholder="you@example.com"
-            className="border-ink/30 bg-paper focus:border-ink mt-3 w-full border px-3 py-2.5 text-sm outline-none"
+            className="field mt-3"
           />
-          <button
-            type="submit"
-            className="label border-ink bg-ink text-paper hover:bg-vermillion hover:border-vermillion mt-3 w-full cursor-pointer border px-4 py-3 transition-colors"
-          >
+          <button type="submit" className="btn mt-3 w-full">
             Sign in without password
           </button>
         </form>

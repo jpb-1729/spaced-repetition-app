@@ -32,7 +32,7 @@ export function DeckList({ decks, courseId }: { decks: Deck[]; courseId: string 
   return (
     <table className="w-full">
       <thead>
-        <tr className="border-ink/12 border-b">
+        <tr>
           <Th className="w-10">№</Th>
           <Th>Name</Th>
           <Th className="text-right">Cards</Th>
@@ -44,19 +44,19 @@ export function DeckList({ decks, courseId }: { decks: Deck[]; courseId: string 
       </thead>
       <tbody>
         {decks.map((deck) => (
-          <tr key={deck.id} className="border-ink/12 border-b">
-            <Td className="text-ink-mute font-mono text-[13px] tabular-nums">
+          <tr key={deck.id} className="border-rule border-b">
+            <Td className="text-ink-mute font-mono text-[12.5px] tabular-nums">
               {String(deck.ordinal).padStart(2, '0')}
             </Td>
-            <Td className="font-serif text-[17px]">{deck.name}</Td>
+            <Td className="font-serif text-[17px] font-semibold">{deck.name}</Td>
             <TdNum>{deck._count.cards}</TdNum>
             <TdNum>{deck.cardsPerSession}</TdNum>
             <TdNum>{deck.passingScore}%</TdNum>
             <Td>
               {deck.isOptional ? (
-                <span className="label text-ink-mute">Optional</span>
+                <span className="text-ink-soft text-[13px]">Optional</span>
               ) : (
-                <span className="text-ink-mute/50">—</span>
+                <span className="text-rule-2">—</span>
               )}
             </Td>
             <Td>
