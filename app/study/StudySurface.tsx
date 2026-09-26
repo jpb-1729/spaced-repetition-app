@@ -245,7 +245,7 @@ function Complete({
         <span className="bg-good size-2 rounded-full" aria-hidden />
         Session complete
       </span>
-      <h2 className="mt-6 max-w-[18ch] text-[clamp(34px,4.6vw,58px)] leading-[1.02] font-extrabold tracking-[-0.04em]">
+      <h2 className="mt-5 max-w-[20ch] font-serif text-[clamp(32px,4.2vw,52px)] leading-[1.1] font-semibold tracking-[-0.015em] text-balance [font-variation-settings:'opsz'_60]">
         The session for {deck.name} is closed.
       </h2>
       <div className="border-t-ink border-b-rule mt-9 grid grid-cols-2 border-t-2 border-b sm:grid-cols-4">
