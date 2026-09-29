@@ -57,7 +57,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={() => apply(ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length])}
       aria-label={`Colour theme: ${theme}. Activate to switch.`}
-      className="label text-ink-mute hover:text-vermillion cursor-pointer transition-colors"
+      className="border-rule-2 bg-paper text-ink-soft hover:bg-paper-2 hover:border-ink-soft hover:text-ink h-9 cursor-pointer rounded border px-3 text-[13px] font-semibold capitalize transition-colors"
     >
       {theme}
     </button>

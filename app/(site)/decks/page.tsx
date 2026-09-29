@@ -41,40 +41,43 @@ export default async function DecksPage() {
   })
 
   return (
-    <div className="mx-auto max-w-[1680px] px-5 py-10 sm:px-8 lg:px-10">
-      <div className="border-ink flex items-baseline justify-between gap-3 border-b pb-3">
-        <h1 className="flex items-baseline gap-2">
-          <span className="label text-vermillion">Index</span>
-          <span className="label text-ink">All decks</span>
+    <div className="mx-auto max-w-[1280px] px-[clamp(16px,3.2vw,40px)]">
+      <header className="border-rule border-b pt-11 pb-7">
+        <p className="label text-accent">Index</p>
+        <h1 className="mt-3 text-[clamp(34px,4.6vw,52px)] leading-[1.04] font-extrabold tracking-[-0.035em]">
+          All decks
         </h1>
-        <span className="label text-ink-mute">
-          {decks.length} {decks.length === 1 ? 'collection' : 'collections'}
-        </span>
-      </div>
+        <p className="text-ink-soft mt-3.5 font-serif text-[19px] leading-normal">
+          {decks.length} {decks.length === 1 ? 'collection' : 'collections'} open for enrollment.
+        </p>
+      </header>
 
       <div>
         {decks.map((deck, i) => (
           <div
             key={deck.id}
-            className="border-ink/12 flex items-start justify-between gap-6 border-b py-6"
+            className="border-rule flex items-start justify-between gap-6 border-b py-5"
           >
-            <div className="flex min-w-0 gap-5">
-              <span className="label text-ink-mute pt-1.5">{String(i + 1).padStart(2, '0')}</span>
+            <div className="flex min-w-0 gap-4">
+              <span className="bg-ink text-paper flex h-[52px] w-10 shrink-0 flex-col justify-between rounded-[1px] p-[5px] pb-1 text-[13px] leading-none font-extrabold tracking-[-0.02em]">
+                <b>{String(i + 1).padStart(2, '0')}</b>
+                <i className="font-mono text-[7px] font-medium not-italic opacity-85">
+                  {deck._count.cards}
+                </i>
+              </span>
               <div className="min-w-0">
-                <h2 className="font-serif text-[22px] leading-tight font-medium tracking-tight">
+                <h2 className="text-[17.5px] leading-tight font-bold tracking-[-0.01em]">
                   {deck.name}
                 </h2>
-                <p className="label text-ink-mute mt-2">
-                  {deck.course.name} · {deck.course.creator.name || 'Unknown'}
+                <p className="text-ink-mute mt-1 text-[13px]">
+                  {deck.course.name} · {deck.course.creator.name || 'Unknown'} ·{' '}
+                  <span className="tabular-nums">{deck._count.cards} cards</span>
                 </p>
                 {deck.description && (
-                  <p className="text-ink-soft mt-3 max-w-[52ch] text-[14px] leading-relaxed">
+                  <p className="text-ink-soft mt-2.5 max-w-[60ch] font-serif text-[16px] leading-normal">
                     {deck.description}
                   </p>
                 )}
-                <p className="text-ink-mute mt-3 font-mono text-[11px] tabular-nums">
-                  {deck._count.cards} cards
-                </p>
               </div>
             </div>
 

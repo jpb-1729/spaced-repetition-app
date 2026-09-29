@@ -362,7 +362,7 @@ export function StudyDashboard({
         />
 
         <main className="grid grid-cols-1 lg:min-h-0 lg:flex-1 lg:grid-cols-[262px_minmax(0,1fr)_290px]">
-          <div className="border-ink/20 order-2 border-t py-7 lg:order-none lg:min-h-0 lg:border-t-0 lg:pr-7">
+          <div className="border-rule order-2 border-t py-8 lg:order-none lg:min-h-0 lg:border-t-0 lg:pr-8">
             <div className="hide-scroll h-full overflow-y-auto">
               <DeckIndex
                 decks={decks}
@@ -388,7 +388,7 @@ export function StudyDashboard({
             </div>
           </div>
 
-          <div className="lg:border-ink/20 order-1 py-7 lg:order-none lg:min-h-0 lg:border-l lg:px-8">
+          <div className="lg:border-rule order-1 py-8 lg:order-none lg:min-h-0 lg:border-l lg:px-10">
             <StudySurface
               card={current}
               deck={deck}
@@ -410,7 +410,7 @@ export function StudyDashboard({
             />
           </div>
 
-          <div className="border-ink/20 order-3 border-t py-7 lg:order-none lg:min-h-0 lg:border-t-0 lg:border-l lg:pl-7">
+          <div className="border-rule order-3 border-t py-8 lg:order-none lg:min-h-0 lg:border-t-0 lg:border-l lg:pl-8">
             <div className="hide-scroll h-full overflow-y-auto">
               <Metrics
                 summary={summary}
@@ -424,15 +424,11 @@ export function StudyDashboard({
           </div>
         </main>
 
-        <footer className="border-ink flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t py-4">
-          <span className="label text-ink-mute">
-            Olivero Recall — FSRS-6 scheduler, retention-targeted intervals
-          </span>
-          <span className="label text-ink-mute">
-            Set in Newsreader &amp; Inter Tight · Grid 3 : 7 : 3
-          </span>
-          <span className="label text-ink-mute">
-            Ed. IV / № {String(totalEntries + 12).padStart(3, '0')}
+        <footer className="border-rule text-ink-mute flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t py-4 text-[13px]">
+          <span>Olivero Recall · FSRS-6 scheduler, retention-targeted intervals</span>
+          <span>Set in Schibsted Grotesk &amp; Source Serif</span>
+          <span className="font-mono text-[11.5px]">
+            Vol. 4 · No. {String(totalEntries + 12).padStart(3, '0')}
           </span>
         </footer>
       </div>

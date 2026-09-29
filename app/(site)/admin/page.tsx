@@ -27,13 +27,18 @@ export default async function AdminDashboard() {
         }
       />
 
-      <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
-        {figures.map((f) => (
-          <div key={f.label} className="border-ink border-t pt-3">
-            <span className="label text-ink-mute">{f.label}</span>
-            <p className="text-ink mt-3 font-mono text-[44px] leading-none tabular-nums">
-              {String(f.value).padStart(2, '0')}
+      <div className="border-t-ink border-b-rule mt-10 grid grid-cols-1 border-t-2 border-b sm:grid-cols-3">
+        {figures.map((f, i) => (
+          <div
+            key={f.label}
+            className={
+              i > 0 ? 'border-rule border-t py-5 sm:border-t-0 sm:border-l sm:pl-6' : 'py-5 sm:pr-6'
+            }
+          >
+            <p className="text-ink text-[52px] leading-none font-extrabold tracking-[-0.04em] tabular-nums">
+              {f.value}
             </p>
+            <span className="text-ink-soft mt-2.5 block text-[13px] font-semibold">{f.label}</span>
           </div>
         ))}
       </div>

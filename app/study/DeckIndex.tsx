@@ -46,47 +46,49 @@ export function DeckIndex({
                 <button
                   onClick={() => onSelect(d.id)}
                   className={cn(
-                    'group border-ink/12 relative w-full border-b py-3 pr-1 pl-3 text-left transition-colors duration-200',
-                    isActive ? 'bg-paper-2' : 'hover:bg-paper-2/60'
+                    'group border-rule relative w-full border-b py-3.5 pr-1 pl-3 text-left transition-colors duration-150',
+                    isActive ? 'bg-paper-2' : 'hover:bg-paper-2'
                   )}
                 >
                   <span
                     className={cn(
                       'absolute top-0 bottom-0 left-0 w-[3px] transition-colors',
-                      isActive ? 'bg-vermillion' : 'bg-transparent'
+                      isActive ? 'bg-accent' : 'bg-transparent'
                     )}
                   />
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-baseline gap-2">
-                        <span className="label text-ink-mute">{d.index}</span>
-                        <h3 className="font-serif text-[19px] leading-tight tracking-[-0.015em]">
+                        <span className="text-ink-mute font-mono text-[11px] tabular-nums">
+                          {d.index}
+                        </span>
+                        <h3 className="text-[16px] leading-tight font-bold tracking-[-0.01em]">
                           {d.name}
                         </h3>
                       </div>
-                      <p className="label text-ink-mute mt-1.5 pl-[22px]">{d.courseName}</p>
+                      <p className="text-ink-mute mt-1 pl-[22px] text-[12.5px]">{d.courseName}</p>
                     </div>
                     <div className="shrink-0 text-right">
                       <div
                         className={cn(
-                          'font-mono text-[17px] leading-none tabular-nums',
-                          s.due > 0 ? 'text-vermillion' : 'text-ink-mute'
+                          'text-[18px] leading-none font-bold tabular-nums',
+                          s.due > 0 ? 'text-accent' : 'text-rule-2'
                         )}
                       >
-                        {String(s.due).padStart(2, '0')}
+                        {s.due}
                       </div>
-                      <div className="label text-ink-mute mt-1.5">due</div>
+                      <div className="text-ink-mute mt-1 text-[11.5px]">due</div>
                     </div>
                   </div>
-                  <div className="mt-3 flex items-center gap-2 pl-[22px]">
-                    <div className="bg-ink/12 h-[2px] flex-1">
+                  <div className="mt-2.5 flex items-center gap-2 pl-[22px]">
+                    <div className="bg-paper-3 h-1 flex-1 overflow-hidden rounded-sm">
                       <div
-                        className={cn('h-full', isActive ? 'bg-vermillion' : 'bg-ink/60')}
+                        className={cn('h-full rounded-sm', isActive ? 'bg-accent' : 'bg-ink-soft')}
                         style={{ width: `${s.maturity * 100}%` }}
                       />
                     </div>
-                    <span className="label text-ink-mute">
-                      {Math.round(s.maturity * 100)}% learned · {s.total} cards
+                    <span className="text-ink-soft text-[12px] whitespace-nowrap tabular-nums">
+                      {Math.round(s.maturity * 100)}% · {s.total} cards
                     </span>
                   </div>
                 </button>
@@ -100,16 +102,16 @@ export function DeckIndex({
         <SectionHead n="02" title="Settings" />
         <div className="pt-3">
           <div className="mb-4">
-            <p className="label text-ink-mute mb-2">Queue order</p>
-            <div className="border-ink grid grid-cols-2 border">
+            <p className="text-ink mb-2 text-[13px] font-semibold">Queue order</p>
+            <div className="border-rule-2 grid grid-cols-2 overflow-hidden rounded border">
               {(['sequential', 'shuffled'] as const).map((o) => (
                 <button
                   key={o}
                   onClick={() => onOrder(o)}
                   className={cn(
-                    'label py-2.5 transition-colors duration-150',
-                    order === o ? 'bg-ink text-paper' : 'text-ink hover:bg-paper-2 bg-transparent',
-                    o === 'shuffled' && 'border-ink border-l'
+                    'h-8 text-[13px] font-semibold capitalize transition-colors duration-150',
+                    order === o ? 'bg-ink text-paper' : 'text-ink-soft hover:bg-paper-2 bg-paper',
+                    o === 'shuffled' && 'border-rule-2 border-l'
                   )}
                 >
                   {o}
@@ -119,22 +121,22 @@ export function DeckIndex({
           </div>
 
           <div>
-            <p className="label text-ink-mute mb-2">Session limit</p>
-            <div className="border-ink flex items-stretch border">
+            <p className="text-ink mb-2 text-[13px] font-semibold">Session limit</p>
+            <div className="border-rule-2 flex items-stretch overflow-hidden rounded border">
               <button
                 onClick={() => onLimit(Math.max(4, limit - 4))}
-                className="border-ink hover:bg-ink hover:text-paper w-11 border-r font-mono text-[15px] transition-colors"
+                className="border-rule-2 text-ink-soft hover:bg-paper-2 hover:text-ink w-10 border-r text-[16px] font-semibold transition-colors"
                 aria-label="decrease"
               >
                 −
               </button>
-              <div className="flex flex-1 items-baseline justify-center gap-1.5 py-2.5">
-                <span className="font-mono text-[15px] tabular-nums">{limit}</span>
-                <span className="label text-ink-mute">cards</span>
+              <div className="flex h-9 flex-1 items-center justify-center gap-1.5">
+                <span className="text-[15px] font-bold tabular-nums">{limit}</span>
+                <span className="text-ink-mute text-[13px]">cards</span>
               </div>
               <button
                 onClick={() => onLimit(Math.min(40, limit + 4))}
-                className="border-ink hover:bg-ink hover:text-paper w-11 border-l font-mono text-[15px] transition-colors"
+                className="border-rule-2 text-ink-soft hover:bg-paper-2 hover:text-ink w-10 border-l text-[16px] font-semibold transition-colors"
                 aria-label="increase"
               >
                 +
@@ -142,17 +144,17 @@ export function DeckIndex({
             </div>
           </div>
 
-          <div className="border-ink/12 mt-5 border-t pt-4">
+          <div className="border-rule mt-5 border-t pt-4">
             <Link
               href="/decks"
-              className="label text-ink-mute decoration-ink/30 hover:text-ink block underline underline-offset-4 transition-colors"
+              className="text-ink decoration-rule-2 hover:text-accent hover:decoration-accent block text-[14px] font-semibold underline underline-offset-[3px] transition-colors"
             >
               Browse decks →
             </Link>
             {isAdmin && (
               <Link
                 href="/admin"
-                className="label text-ink-mute decoration-ink/30 hover:text-ink mt-3 block underline underline-offset-4 transition-colors"
+                className="text-ink decoration-rule-2 hover:text-accent hover:decoration-accent mt-2.5 block text-[14px] font-semibold underline underline-offset-[3px] transition-colors"
               >
                 Admin
               </Link>
@@ -160,7 +162,7 @@ export function DeckIndex({
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="label text-ink-mute decoration-ink/30 hover:text-vermillion mt-3 block cursor-pointer underline underline-offset-4 transition-colors"
+                className="text-ink-soft decoration-rule-2 hover:text-accent hover:decoration-accent mt-2.5 block cursor-pointer text-[14px] font-semibold underline underline-offset-[3px] transition-colors"
               >
                 Sign out
               </button>

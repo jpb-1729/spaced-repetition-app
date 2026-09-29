@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { deleteCourse } from '@/actions/course'
-import { EmptyState, Td, TdNum, Th, btnDanger, btnQuiet } from '@/components/admin/ui'
+import { EmptyState, StatusChip, Td, TdNum, Th, btnDanger, btnQuiet } from '@/components/admin/ui'
 
 type Course = {
   id: string
@@ -31,7 +31,7 @@ export function CourseList({ courses }: { courses: Course[] }) {
   return (
     <table className="w-full">
       <thead>
-        <tr className="border-ink border-b">
+        <tr>
           <Th>Name</Th>
           <Th>Subject</Th>
           <Th>Level</Th>
@@ -43,11 +43,11 @@ export function CourseList({ courses }: { courses: Course[] }) {
       </thead>
       <tbody>
         {courses.map((course) => (
-          <tr key={course.id} className="border-ink/12 border-b">
+          <tr key={course.id} className="border-rule border-b">
             <Td>
               <Link
                 href={`/admin/courses/${course.id}`}
-                className="hover:text-vermillion font-serif text-[17px] transition-colors"
+                className="hover:text-accent font-serif text-[17px] font-semibold transition-colors"
               >
                 {course.name}
               </Link>
@@ -57,9 +57,7 @@ export function CourseList({ courses }: { courses: Course[] }) {
             <TdNum>{course._count.decks}</TdNum>
             <TdNum>{course._count.enrollments}</TdNum>
             <Td>
-              <span className={course.isPublished ? 'label text-moss' : 'label text-ink-mute'}>
-                {course.isPublished ? 'Published' : 'Draft'}
-              </span>
+              <StatusChip published={course.isPublished} />
             </Td>
             <Td>
               <div className="flex justify-end gap-4">

@@ -4,40 +4,49 @@
  *
  *   node scripts/check-contrast.mjs
  *
- * Exits non-zero if any pair in the DARK theme regresses. The LIGHT theme is
- * reported but not enforced: it has four pre-existing failures (ink-mute is
- * 3.26:1 on paper and is used by `.label` at 9.5px). Fixing those is a visual
- * change to every page, so it is tracked separately rather than blocking here.
+ * Exits non-zero if any pair fails in either theme.
+ *
+ * `rule` and `rule-2` are not checked: they are decorative hairlines between
+ * rows and sections, which WCAG 1.4.11 does not cover. Form controls, which
+ * must be seen to be used, are bordered with `field`, and that is checked.
  *
  * Keep the values below in sync with the light-dark() pairs in globals.css.
  */
 
 const LIGHT = {
-  paper: '#f1efe9',
-  'paper-2': '#e8e5dd',
-  card: '#f8f7f4',
-  ink: '#16150f',
-  'ink-soft': '#4b4a42',
-  'ink-mute': '#86847a',
-  rule: '#16150f',
-  vermillion: '#c1402a',
-  cobalt: '#2c4a86',
-  moss: '#4a6141',
-  'on-accent': '#f1efe9',
+  paper: '#ffffff',
+  'paper-2': '#f5f7fa',
+  ink: '#0b1a33',
+  'ink-soft': '#3f4b63',
+  'ink-mute': '#677287',
+  'ink-hover': '#1c2d4d',
+  field: '#7f899c',
+  accent: '#b8520a',
+  'on-accent': '#ffffff',
+  good: '#1a7f37',
+  bad: '#b42822',
+  'grade-again': '#c8342f',
+  'grade-hard': '#7a6a55',
+  'grade-good': '#1a7f37',
+  'grade-easy': '#2a78d6',
 }
 
 const DARK = {
-  paper: '#14130f',
-  'paper-2': '#201d18',
-  card: '#1a1712',
-  ink: '#ece9e1',
-  'ink-soft': '#b5b1a5',
-  'ink-mute': '#8b8879',
-  rule: '#767065',
-  vermillion: '#e2664a',
-  cobalt: '#7fa3e0',
-  moss: '#93b184',
-  'on-accent': '#14130f',
+  paper: '#0c121c',
+  'paper-2': '#131b28',
+  ink: '#e8ecf3',
+  'ink-soft': '#b3bccb',
+  'ink-mute': '#8a94a7',
+  'ink-hover': '#ffffff',
+  field: '#5d6a82',
+  accent: '#f08a3c',
+  'on-accent': '#0c121c',
+  good: '#4cc474',
+  bad: '#f08080',
+  'grade-again': '#e66767',
+  'grade-hard': '#b49c7c',
+  'grade-good': '#3fb862',
+  'grade-easy': '#5b9cf0',
 }
 
 const AA_TEXT = 4.5
@@ -58,15 +67,22 @@ function ratio(a, b) {
 
 function pairs(p) {
   const out = []
-  for (const fg of ['ink', 'ink-soft', 'ink-mute', 'vermillion', 'cobalt', 'moss']) {
-    for (const bg of ['paper', 'paper-2', 'card']) {
+  for (const fg of ['ink', 'ink-soft', 'ink-mute', 'accent', 'good', 'bad']) {
+    for (const bg of ['paper', 'paper-2']) {
       out.push([`${fg} on ${bg}`, ratio(p[fg], p[bg]), AA_TEXT])
     }
   }
-  out.push(['rule on paper', ratio(p.rule, p.paper), AA_UI])
-  for (const accent of ['vermillion', 'cobalt', 'moss']) {
-    out.push([`on-accent on ${accent}`, ratio(p['on-accent'], p[accent]), AA_TEXT])
+  for (const bg of ['paper', 'paper-2']) {
+    out.push([`field on ${bg}`, ratio(p.field, p[bg]), AA_UI])
   }
+  // Grade dots and forecast bars are non-text marks.
+  for (const grade of ['again', 'hard', 'good', 'easy']) {
+    out.push([`grade-${grade} on paper`, ratio(p[`grade-${grade}`], p.paper), AA_UI])
+  }
+  // Solid buttons: paper text on an ink fill, at rest and on hover.
+  out.push(['paper on ink', ratio(p.paper, p.ink), AA_TEXT])
+  out.push(['paper on ink-hover', ratio(p.paper, p['ink-hover']), AA_TEXT])
+  out.push(['on-accent on accent', ratio(p['on-accent'], p.accent), AA_TEXT])
   return out
 }
 
@@ -82,12 +98,12 @@ function report(title, palette) {
   return failures
 }
 
-const lightFailures = report('LIGHT (reported, not enforced)', LIGHT)
-const darkFailures = report('DARK (enforced)', DARK)
+const lightFailures = report('LIGHT', LIGHT)
+const darkFailures = report('DARK', DARK)
 
-console.log(`\nlight: ${lightFailures} known failure(s)   dark: ${darkFailures} failure(s)\n`)
+console.log(`\nlight: ${lightFailures} failure(s)   dark: ${darkFailures} failure(s)\n`)
 
-if (darkFailures > 0) {
-  console.error(`Dark theme has ${darkFailures} contrast failure(s).`)
+if (lightFailures + darkFailures > 0) {
+  console.error(`Palette has ${lightFailures + darkFailures} contrast failure(s).`)
   process.exit(1)
 }

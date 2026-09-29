@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { signOut } from '@/auth'
 import ThemeToggle from '@/components/ThemeToggle'
+import { NavLinks } from '@/components/NavLinks'
+import { Wordmark } from '@/components/Wordmark'
 
 type Props = { user?: { name?: string | null; image?: string | null } }
 
@@ -12,39 +14,29 @@ export default function Navbar({ user }: Props) {
   const isLoggedIn = !!user
 
   return (
-    <nav className="border-ink border-b">
-      <div className="mx-auto flex h-14 max-w-[1680px] items-center justify-between px-5 sm:px-8">
-        <Link href="/" className="font-serif text-[22px] leading-none tracking-tight">
-          Olivero Recall<span className="text-vermillion">.</span>
+    <nav className="border-rule bg-paper/92 sticky top-0 z-40 border-b backdrop-blur-md backdrop-saturate-150">
+      <div className="mx-auto flex h-16 max-w-[1280px] items-stretch gap-5 px-[clamp(16px,3.2vw,40px)]">
+        <Link href="/" className="flex items-center">
+          <Wordmark />
         </Link>
-        <div className="flex items-center gap-7">
-          {isLoggedIn && (
-            <>
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="label text-ink hover:text-vermillion transition-colors"
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <form
-                action={async () => {
-                  'use server'
-                  await signOut()
-                }}
-              >
-                <button
-                  type="submit"
-                  className="label text-ink-mute hover:text-vermillion cursor-pointer transition-colors"
-                >
-                  Sign Out
-                </button>
-              </form>
-            </>
-          )}
+        {isLoggedIn && <NavLinks items={navigation} />}
+        <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
+          {isLoggedIn && (
+            <form
+              action={async () => {
+                'use server'
+                await signOut()
+              }}
+            >
+              <button
+                type="submit"
+                className="border-rule-2 bg-paper hover:bg-paper-2 hover:border-ink-soft text-ink-soft hover:text-ink h-9 cursor-pointer rounded border px-3 text-[13px] font-semibold transition-colors"
+              >
+                Sign out
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </nav>
