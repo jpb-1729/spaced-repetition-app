@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Rating } from '@prisma/client'
 import { reviewCard } from '@/actions/review-card'
-import { suspendCard } from '@/actions/suspend-card'
+import { restoreCard, suspendCard } from '@/actions/suspend-card'
 import {
   DAY_MS,
   formatInterval,
@@ -13,7 +13,7 @@ import {
   scheduler,
   toFsrsCard,
 } from '@/lib/fsrs'
-import type { LogRow, ProgressRow, QueueCard, StudyDashboardData } from '@/lib/study'
+import type { LogRow, ProgressRow, QueueCard, StudyDashboardData, SuspendedRow } from '@/lib/study'
 import { Masthead } from './Masthead'
 import { DeckIndex, type DeckStat } from './DeckIndex'
 import { StudySurface } from './StudySurface'
@@ -100,6 +100,7 @@ export function StudyDashboard({
   const [sessionLog, setSessionLog] = useState<LogRow[]>([])
   const [elapsed, setElapsed] = useState(0)
   const [failed, setFailed] = useState<FailedReview[]>([])
+  const [suspended, setSuspended] = useState<SuspendedRow[]>(data.suspended)
 
   // Serialized submission chain: reviews post one at a time, in order, so the
   // AGAIN-requeue second grade can never race the first on the same row.
@@ -115,6 +116,7 @@ export function StudyDashboard({
     for (const rows of Object.values(data.queues))
       for (const r of rows) textCache.set(r.progressId, r)
     setSnapshot(buildSnapshotMap(data.snapshot))
+    setSuspended(data.suspended)
   }
 
   useEffect(() => {
@@ -233,6 +235,7 @@ export function StudyDashboard({
       next.delete(id)
       return next
     })
+    setSuspended((l) => [{ progressId: id, deckId: current.deckId, front: current.front }, ...l])
     setRevealed(false)
     setNow(new Date())
     // Serialized behind any in-flight grade on the same row. On failure the
@@ -245,6 +248,22 @@ export function StudyDashboard({
       }
     })
   }, [current, queue, pos])
+
+  const restore = useCallback(
+    (id: string) => {
+      setSuspended((l) => l.filter((r) => r.progressId !== id))
+      // The row's progress isn't held client-side, so refresh to re-adopt the
+      // server snapshot; the card joins the queue on the next rebuild.
+      chainRef.current = chainRef.current.then(async () => {
+        try {
+          await restoreCard(id)
+        } finally {
+          router.refresh()
+        }
+      })
+    },
+    [router]
+  )
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -416,6 +435,8 @@ export function StudyDashboard({
                 }}
                 isAdmin={data.isAdmin}
                 signOutAction={signOutAction}
+                suspended={suspended.filter((r) => r.deckId === activeDeck)}
+                onRestore={restore}
               />
             </div>
           </div>

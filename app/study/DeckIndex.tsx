@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import type { DeckInfo } from '@/lib/study'
+import type { DeckInfo, SuspendedRow } from '@/lib/study'
+import { Inline } from '@/components/Inline'
 import { cn } from '@/lib/cn'
 import { SectionHead } from './ui'
 
@@ -21,6 +22,8 @@ export function DeckIndex({
   onLimit,
   isAdmin,
   signOutAction,
+  suspended,
+  onRestore,
 }: {
   decks: DeckInfo[]
   stats: Record<string, DeckStat>
@@ -32,6 +35,9 @@ export function DeckIndex({
   onLimit: (n: number) => void
   isAdmin: boolean
   signOutAction: () => Promise<void>
+  /** Suspended cards in the active deck, newest first. */
+  suspended: SuspendedRow[]
+  onRestore: (progressId: string) => void
 }) {
   return (
     <div className="flex h-full flex-col gap-8">
@@ -97,6 +103,37 @@ export function DeckIndex({
           })}
         </ul>
       </section>
+
+      {suspended.length > 0 && (
+        <section aria-labelledby="suspended-heading">
+          <div className="border-rule flex items-baseline justify-between border-b pb-2">
+            <h3 id="suspended-heading" className="text-[13px] font-semibold">
+              Suspended
+            </h3>
+            <span className="text-ink-mute text-[12.5px] tabular-nums">
+              {suspended.length} {suspended.length === 1 ? 'card' : 'cards'}
+            </span>
+          </div>
+          <ul>
+            {suspended.map((r) => (
+              <li
+                key={r.progressId}
+                className="border-rule flex items-start justify-between gap-3 border-b py-2.5"
+              >
+                <span className="text-ink-soft min-w-0 flex-1 truncate font-serif text-[14px] leading-snug">
+                  <Inline text={r.front} />
+                </span>
+                <button
+                  onClick={() => onRestore(r.progressId)}
+                  className="text-ink decoration-rule-2 hover:text-accent hover:decoration-accent shrink-0 cursor-pointer text-[12.5px] font-semibold underline underline-offset-[3px] transition-colors"
+                >
+                  Restore
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section>
         <SectionHead n="02" title="Settings" />

@@ -7,7 +7,7 @@ vi.mock('@/lib/prisma', () => ({
 
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { suspendCard } from '@/actions/suspend-card'
+import { suspendCard, restoreCard } from '@/actions/suspend-card'
 
 const mockedAuth = vi.mocked(auth)
 const mockedUpdateMany = vi.mocked(prisma.cardProgress.updateMany)
@@ -39,5 +39,16 @@ describe('suspendCard', () => {
     mockedUpdateMany.mockResolvedValue({ count: 0 })
 
     expect(await suspendCard('cp-9')).toEqual({ error: 'Card progress not found' })
+  })
+
+  it("restores by clearing the flag on the caller's own row", async () => {
+    mockedAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
+    mockedUpdateMany.mockResolvedValue({ count: 1 })
+
+    expect(await restoreCard('cp-1')).toEqual({ success: true })
+    expect(mockedUpdateMany).toHaveBeenCalledWith({
+      where: { id: 'cp-1', userId: 'user-1' },
+      data: { suspended: false },
+    })
   })
 })
