@@ -12,8 +12,14 @@ vi.mock('@/actions/review-card', () => ({
   reviewCard: vi.fn().mockResolvedValue({ success: true }),
 }))
 
+vi.mock('@/actions/suspend-card', () => ({
+  suspendCard: vi.fn().mockResolvedValue({ success: true }),
+}))
+
 import { reviewCard } from '@/actions/review-card'
+import { suspendCard } from '@/actions/suspend-card'
 const mockedReviewCard = vi.mocked(reviewCard)
+const mockedSuspendCard = vi.mocked(suspendCard)
 
 const NOW = new Date('2026-08-11T12:00:00Z').getTime()
 const DAY = 86_400_000
@@ -97,6 +103,7 @@ function expectPrompt(front: string) {
 
 beforeEach(() => {
   mockedReviewCard.mockClear()
+  mockedSuspendCard.mockClear()
 })
 
 describe('StudyDashboard', () => {
@@ -139,6 +146,44 @@ describe('StudyDashboard', () => {
 
     expect(screen.getByText(/session complete/i)).toBeInTheDocument()
     await waitFor(() => expect(mockedReviewCard).toHaveBeenCalledTimes(5))
+  })
+
+  it('suspends the current card with S, before reveal, and moves on', async () => {
+    renderDashboard()
+
+    expectPrompt('Alpha question')
+    fireEvent.keyDown(window, { key: 's' })
+
+    expectPrompt('Beta question')
+    expect(screen.getByText(/left in queue/)).toHaveTextContent('3 left in queue')
+    await waitFor(() => expect(mockedSuspendCard).toHaveBeenCalledWith('pd11'))
+    expect(mockedReviewCard).not.toHaveBeenCalled()
+  })
+
+  it('suspending a requeued AGAIN card removes both copies without skipping', async () => {
+    renderDashboard()
+
+    // Alpha is graded AGAIN and requeued at the end: [A, B, C, D, A]
+    reveal()
+    pressGrade('1')
+    expectPrompt('Beta question')
+    reveal()
+    pressGrade('3')
+    expectPrompt('Gamma question')
+
+    // Suspend Gamma mid-session; Delta must follow, not be skipped.
+    fireEvent.keyDown(window, { key: 's' })
+    expectPrompt('Delta question')
+    reveal()
+    pressGrade('3')
+
+    // Alpha's requeued copy is still there; suspend it now that it's current.
+    expectPrompt('Alpha question')
+    fireEvent.keyDown(window, { key: 's' })
+    expect(screen.getByText(/session complete/i)).toBeInTheDocument()
+
+    await waitFor(() => expect(mockedSuspendCard).toHaveBeenCalledTimes(2))
+    expect(mockedSuspendCard.mock.calls.map((c) => c[0])).toEqual(['pd13', 'pd11'])
   })
 
   it('uses a fresh clientReviewId per submitted review', async () => {

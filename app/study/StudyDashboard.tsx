@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Rating } from '@prisma/client'
 import { reviewCard } from '@/actions/review-card'
+import { suspendCard } from '@/actions/suspend-card'
 import {
   DAY_MS,
   formatInterval,
@@ -219,6 +220,32 @@ export function StudyDashboard({
     [current, revealed, submit]
   )
 
+  const suspend = useCallback(() => {
+    if (!current) return
+    const id = current.progressId
+    // Drop every occurrence (an AGAIN requeue may have added one) and pull
+    // `pos` back by the number removed ahead of it so no card is skipped.
+    const removedBefore = queue.slice(0, pos).filter((x) => x === id).length
+    setQueue(queue.filter((x) => x !== id))
+    setPos(pos - removedBefore)
+    setSnapshot((m) => {
+      const next = new Map(m)
+      next.delete(id)
+      return next
+    })
+    setRevealed(false)
+    setNow(new Date())
+    // Serialized behind any in-flight grade on the same row. On failure the
+    // card simply reappears after the next refresh.
+    chainRef.current = chainRef.current.then(async () => {
+      try {
+        await suspendCard(id)
+      } catch {
+        /* reappears on refresh */
+      }
+    })
+  }, [current, queue, pos])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return
@@ -233,6 +260,11 @@ export function StudyDashboard({
         if (!revealed && current) setRevealed(true)
         return
       }
+      if (e.key === 's' || e.key === 'S') {
+        e.preventDefault()
+        suspend()
+        return
+      }
       const map: Record<string, Rating> = { '1': 'AGAIN', '2': 'HARD', '3': 'GOOD', '4': 'EASY' }
       if (map[e.key]) {
         e.preventDefault()
@@ -241,7 +273,7 @@ export function StudyDashboard({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [revealed, current, grade])
+  }, [revealed, current, grade, suspend])
 
   /* ---------- derived statistics ---------- */
 
@@ -407,6 +439,7 @@ export function StudyDashboard({
               now={now}
               failedCount={failed.length}
               onRetryFailed={retryFailed}
+              onSuspend={suspend}
             />
           </div>
 

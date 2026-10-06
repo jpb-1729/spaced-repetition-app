@@ -42,6 +42,7 @@ export function StudySurface({
   now,
   failedCount,
   onRetryFailed,
+  onSuspend,
 }: {
   card: QueueCard | null
   deck: DeckInfo
@@ -57,6 +58,7 @@ export function StudySurface({
   now: Date
   failedCount: number
   onRetryFailed: () => void
+  onSuspend: () => void
 }) {
   const previews = card ? previewIntervals(card, now) : null
 
@@ -200,10 +202,20 @@ export function StudySurface({
                 </button>
               ))}
             </div>
-            <div className="flex items-center justify-between py-3 text-[13px]">
+            <div className="flex items-center justify-between gap-4 py-3 text-[13px]">
               <span className="text-ink-mute">
                 <span className="tabular-nums">{Math.max(0, total - position)}</span> left in queue
               </span>
+              <button
+                onClick={onSuspend}
+                title="Drop this card from your reviews. It stays in the deck for everyone else."
+                className="text-ink-mute hover:text-ink decoration-rule-2 hover:decoration-ink ml-auto inline-flex cursor-pointer items-center gap-1.5 underline underline-offset-[3px] transition-colors"
+              >
+                Suspend card
+                <kbd className="border-rule-2 bg-paper rounded-[3px] border border-b-2 px-[5px] pt-[3px] pb-[2px] font-mono text-[11px] leading-none font-medium no-underline">
+                  S
+                </kbd>
+              </button>
               {failedCount > 0 && (
                 <button
                   onClick={onRetryFailed}
