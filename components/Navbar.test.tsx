@@ -41,4 +41,16 @@ describe('Navbar', () => {
     expect(studyLink).toHaveAttribute('href', '/study')
     expect(decksLink).toHaveAttribute('href', '/decks')
   })
+
+  it('hides the admin link from students', () => {
+    render(<Navbar user={{ name: 'Student', role: 'STUDENT' }} />)
+
+    expect(screen.queryByRole('link', { name: /admin/i })).not.toBeInTheDocument()
+  })
+
+  it('shows the admin link to admins', () => {
+    render(<Navbar user={{ name: 'Admin', role: 'ADMIN' }} />)
+
+    expect(screen.getByRole('link', { name: /admin/i })).toHaveAttribute('href', '/admin')
+  })
 })

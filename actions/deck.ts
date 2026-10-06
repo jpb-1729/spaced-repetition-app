@@ -109,3 +109,15 @@ export async function getDeck(id: string) {
     },
   })
 }
+
+export async function getDeckWithCards(id: string) {
+  await requireAdmin()
+  return prisma.deck.findUnique({
+    where: { id },
+    include: {
+      course: { select: { id: true, name: true } },
+      // Bulk imports share one createdAt, so id breaks the tie.
+      cards: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
+    },
+  })
+}

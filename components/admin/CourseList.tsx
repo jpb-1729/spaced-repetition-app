@@ -61,6 +61,9 @@ export function CourseList({ courses }: { courses: Course[] }) {
             </Td>
             <Td>
               <div className="flex justify-end gap-4">
+                <Link href={`/admin/courses/${course.id}`} className={btnQuiet}>
+                  Decks
+                </Link>
                 <Link href={`/admin/courses/${course.id}/edit`} className={btnQuiet}>
                   Edit
                 </Link>

@@ -48,7 +48,14 @@ export function DeckList({ decks, courseId }: { decks: Deck[]; courseId: string 
             <Td className="text-ink-mute font-mono text-[12.5px] tabular-nums">
               {String(deck.ordinal).padStart(2, '0')}
             </Td>
-            <Td className="font-serif text-[17px] font-semibold">{deck.name}</Td>
+            <Td>
+              <Link
+                href={`/admin/courses/${courseId}/decks/${deck.id}`}
+                className="hover:text-accent font-serif text-[17px] font-semibold transition-colors"
+              >
+                {deck.name}
+              </Link>
+            </Td>
             <TdNum>{deck._count.cards}</TdNum>
             <TdNum>{deck.cardsPerSession}</TdNum>
             <TdNum>{deck.passingScore}%</TdNum>
@@ -61,11 +68,8 @@ export function DeckList({ decks, courseId }: { decks: Deck[]; courseId: string 
             </Td>
             <Td>
               <div className="flex justify-end gap-4">
-                <Link
-                  href={`/admin/courses/${courseId}/decks/${deck.id}/cards/bulk`}
-                  className={btnQuiet}
-                >
-                  Import
+                <Link href={`/admin/courses/${courseId}/decks/${deck.id}`} className={btnQuiet}>
+                  Cards
                 </Link>
                 <Link
                   href={`/admin/courses/${courseId}/decks/${deck.id}/edit`}
