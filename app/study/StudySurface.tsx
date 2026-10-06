@@ -2,6 +2,7 @@ import type { Rating } from '@prisma/client'
 import type { DeckInfo, QueueCard } from '@/lib/study'
 import { cardStateLabel, formatInterval, previewIntervals } from '@/lib/fsrs'
 import { cn } from '@/lib/cn'
+import { Inline } from '@/components/Inline'
 import { SectionHead } from './ui'
 
 export const GRADES: { key: Rating; digit: string; label: string; gloss: string }[] = [
@@ -96,7 +97,7 @@ export function StudySurface({
                   <span className="text-ink-mute text-[13px]">{deck.name}</span>
                 </div>
                 <h2 className="mt-[18px] font-serif text-[clamp(26px,3.4vw,40px)] leading-[1.18] font-semibold tracking-[-0.015em] text-balance [font-variation-settings:'opsz'_60]">
-                  {card.front}
+                  <Inline text={card.front} />
                 </h2>
                 <p className="text-ink-soft mt-[18px] text-[13.5px]">
                   <b className="text-ink font-bold">{deck.courseName}</b> · {deck.name}
@@ -114,14 +115,16 @@ export function StudySurface({
                       {cardStateLabel(card.state)}
                     </span>
                   </h3>
-                  <p className="mt-5 font-serif text-[19px] leading-[1.65]">{card.back}</p>
+                  <p className="mt-5 font-serif text-[19px] leading-[1.65]">
+                    <Inline text={card.back} />
+                  </p>
                   {card.notes && (
                     <div className="border-rule mt-7 border-t pt-4">
                       <p className="text-ink-mute mb-2.5 text-[12px] leading-none font-extrabold tracking-[0.09em] uppercase">
                         Notes
                       </p>
                       <p className="text-ink-soft font-serif text-[15.5px] leading-relaxed">
-                        {card.notes}
+                        <Inline text={card.notes} />
                       </p>
                     </div>
                   )}

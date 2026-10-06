@@ -1,6 +1,7 @@
 import type { Rating } from '@prisma/client'
 import type { LogRow } from '@/lib/study'
 import { cn } from '@/lib/cn'
+import { Inline } from '@/components/Inline'
 import { DataRow, SectionHead } from './ui'
 
 const GRADE_MARK: Record<Rating, string> = {
@@ -132,7 +133,7 @@ export function Metrics({
                   className={cn('mt-[5px] size-2.5 shrink-0 rounded-[2px]', GRADE_MARK[e.grade])}
                 />
                 <span className="min-w-0 flex-1 truncate font-serif text-[14.5px] leading-snug font-medium">
-                  {e.front}
+                  <Inline text={e.front} />
                 </span>
                 <span className="text-ink-mute shrink-0 pt-0.5 font-mono text-[11.5px]">
                   {e.interval}

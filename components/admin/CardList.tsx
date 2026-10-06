@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { deleteCard } from '@/actions/card'
+import { Inline } from '@/components/Inline'
 import { EmptyState, Td, Th, btnDanger, btnQuiet } from '@/components/admin/ui'
 
 type Card = {
@@ -53,13 +54,17 @@ export function CardList({
               {String(i + 1).padStart(2, '0')}
             </Td>
             <Td className="font-serif text-[16px] font-semibold">
-              <p className="line-clamp-3 whitespace-pre-line">{card.front}</p>
+              <p className="line-clamp-3 whitespace-pre-line">
+                <Inline text={card.front} />
+              </p>
             </Td>
             <Td className="text-ink-soft">
-              <p className="line-clamp-3 whitespace-pre-line">{card.back}</p>
+              <p className="line-clamp-3 whitespace-pre-line">
+                <Inline text={card.back} />
+              </p>
               {card.notes && (
                 <p className="text-ink-mute mt-1.5 line-clamp-2 text-[12.5px] italic">
-                  {card.notes}
+                  <Inline text={card.notes} />
                 </p>
               )}
             </Td>
