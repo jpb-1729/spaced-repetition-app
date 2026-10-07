@@ -28,6 +28,10 @@ function loadEnvFile(file: string) {
 loadEnvFile('.env')
 loadEnvFile('.env.local')
 
+// Migrations need a session-level (non-pooled) connection for Prisma's advisory
+// lock. Fall back to DATABASE_URL so local setups with one URL keep working.
+process.env.DIRECT_DATABASE_URL ??= process.env.DATABASE_URL
+
 export default defineConfig({
   migrations: {
     seed: 'tsx prisma/seed.ts',
