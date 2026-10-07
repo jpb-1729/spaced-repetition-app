@@ -13,6 +13,7 @@
     "check:format": "prettier --check .",
     "postinstall": "prisma generate",
     "build": "prisma generate && next build --turbopack",
+    "vercel-build": "if [ \"$VERCEL_ENV\" = \"production\" ]; then prisma migrate deploy; fi && next build --turbopack",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
