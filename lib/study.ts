@@ -83,10 +83,18 @@ export interface LogRow {
   interval: string
 }
 
+export interface SuspendedRow {
+  progressId: string
+  deckId: string
+  front: string
+}
+
 export interface StudyDashboardData {
   serverNow: number
   decks: DeckInfo[]
   snapshot: ProgressRow[]
+  /** Cards the user has suspended, newest first; they're absent from `snapshot`. */
+  suspended: SuspendedRow[]
   /** Per deck id: the 40 soonest-due cards with text. */
   queues: Record<string, QueueCard[]>
   /** Timestamps of the last 126 days of reviews (heatmap/streak source). */

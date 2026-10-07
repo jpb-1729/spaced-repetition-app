@@ -73,40 +73,46 @@ export default async function StudyPage(props: Props) {
 
   const serverNow = new Date()
 
-  const [snapshotRaw, queuesRaw, recentRaw, latestRaw, totalReviews] = await Promise.all([
-    prisma.cardProgress.findMany({
-      where: { userId, suspended: false, card: { deck: enrolledCourseFilter } },
-      select: progressSnapshotSelect,
-    }),
-    Promise.all(
-      decksRaw.map((d) =>
-        prisma.cardProgress.findMany({
-          where: { userId, suspended: false, card: { deckId: d.id } },
-          orderBy: { due: 'asc' },
-          take: 40,
-          select: studyCardSelect,
-        })
-      )
-    ),
-    prisma.review.findMany({
-      where: { userId, reviewedAt: { gte: new Date(serverNow.getTime() - 126 * DAY_MS) } },
-      select: { reviewedAt: true, rating: true },
-      orderBy: { reviewedAt: 'desc' },
-    }),
-    prisma.review.findMany({
-      where: { userId },
-      orderBy: { reviewedAt: 'desc' },
-      take: 8,
-      select: {
-        id: true,
-        rating: true,
-        reviewedAt: true,
-        newDue: true,
-        cardProgress: { select: { card: { select: { front: true } } } },
-      },
-    }),
-    prisma.review.count({ where: { userId } }),
-  ])
+  const [snapshotRaw, suspendedRaw, queuesRaw, recentRaw, latestRaw, totalReviews] =
+    await Promise.all([
+      prisma.cardProgress.findMany({
+        where: { userId, suspended: false, card: { deck: enrolledCourseFilter } },
+        select: progressSnapshotSelect,
+      }),
+      prisma.cardProgress.findMany({
+        where: { userId, suspended: true, card: { deck: enrolledCourseFilter } },
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, card: { select: { deckId: true, front: true } } },
+      }),
+      Promise.all(
+        decksRaw.map((d) =>
+          prisma.cardProgress.findMany({
+            where: { userId, suspended: false, card: { deckId: d.id } },
+            orderBy: { due: 'asc' },
+            take: 40,
+            select: studyCardSelect,
+          })
+        )
+      ),
+      prisma.review.findMany({
+        where: { userId, reviewedAt: { gte: new Date(serverNow.getTime() - 126 * DAY_MS) } },
+        select: { reviewedAt: true, rating: true },
+        orderBy: { reviewedAt: 'desc' },
+      }),
+      prisma.review.findMany({
+        where: { userId },
+        orderBy: { reviewedAt: 'desc' },
+        take: 8,
+        select: {
+          id: true,
+          rating: true,
+          reviewedAt: true,
+          newDue: true,
+          cardProgress: { select: { card: { select: { front: true } } } },
+        },
+      }),
+      prisma.review.count({ where: { userId } }),
+    ])
 
   const queues: Record<string, QueueCard[]> = {}
   decksRaw.forEach((d, i) => {
@@ -124,6 +130,11 @@ export default async function StudyPage(props: Props) {
       cardsPerSession: d.cardsPerSession,
     })),
     snapshot: snapshotRaw.map(toProgressRow),
+    suspended: suspendedRaw.map((r) => ({
+      progressId: r.id,
+      deckId: r.card.deckId,
+      front: r.card.front,
+    })),
     queues,
     recentReviews: recentRaw.map((r) => ({ ts: r.reviewedAt.getTime(), rating: r.rating })),
     latestLog: latestRaw.map((r) => ({

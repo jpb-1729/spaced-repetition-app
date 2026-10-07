@@ -2,6 +2,7 @@
   "name": "spaced-repetition-app",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.23.0",
   "scripts": {
     "dev": "next dev --turbopack",
     "start": "next start",
@@ -12,6 +13,7 @@
     "check:format": "prettier --check .",
     "postinstall": "prisma generate",
     "build": "prisma generate && next build --turbopack",
+    "vercel-build": "if [ \"$VERCEL_ENV\" = \"production\" ]; then prisma migrate deploy; fi && next build --turbopack",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",

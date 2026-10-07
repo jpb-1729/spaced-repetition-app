@@ -2,6 +2,7 @@ import type { Rating } from '@prisma/client'
 import type { DeckInfo, QueueCard } from '@/lib/study'
 import { cardStateLabel, formatInterval, previewIntervals } from '@/lib/fsrs'
 import { cn } from '@/lib/cn'
+import { Inline } from '@/components/Inline'
 import { SectionHead } from './ui'
 
 export const GRADES: { key: Rating; digit: string; label: string; gloss: string }[] = [
@@ -41,6 +42,7 @@ export function StudySurface({
   now,
   failedCount,
   onRetryFailed,
+  onSuspend,
 }: {
   card: QueueCard | null
   deck: DeckInfo
@@ -56,6 +58,7 @@ export function StudySurface({
   now: Date
   failedCount: number
   onRetryFailed: () => void
+  onSuspend: () => void
 }) {
   const previews = card ? previewIntervals(card, now) : null
 
@@ -96,7 +99,7 @@ export function StudySurface({
                   <span className="text-ink-mute text-[13px]">{deck.name}</span>
                 </div>
                 <h2 className="mt-[18px] font-serif text-[clamp(26px,3.4vw,40px)] leading-[1.18] font-semibold tracking-[-0.015em] text-balance [font-variation-settings:'opsz'_60]">
-                  {card.front}
+                  <Inline text={card.front} />
                 </h2>
                 <p className="text-ink-soft mt-[18px] text-[13.5px]">
                   <b className="text-ink font-bold">{deck.courseName}</b> · {deck.name}
@@ -114,14 +117,16 @@ export function StudySurface({
                       {cardStateLabel(card.state)}
                     </span>
                   </h3>
-                  <p className="mt-5 font-serif text-[19px] leading-[1.65]">{card.back}</p>
+                  <p className="mt-5 font-serif text-[19px] leading-[1.65]">
+                    <Inline text={card.back} />
+                  </p>
                   {card.notes && (
                     <div className="border-rule mt-7 border-t pt-4">
                       <p className="text-ink-mute mb-2.5 text-[12px] leading-none font-extrabold tracking-[0.09em] uppercase">
                         Notes
                       </p>
                       <p className="text-ink-soft font-serif text-[15.5px] leading-relaxed">
-                        {card.notes}
+                        <Inline text={card.notes} />
                       </p>
                     </div>
                   )}
@@ -197,10 +202,20 @@ export function StudySurface({
                 </button>
               ))}
             </div>
-            <div className="flex items-center justify-between py-3 text-[13px]">
+            <div className="flex items-center justify-between gap-4 py-3 text-[13px]">
               <span className="text-ink-mute">
                 <span className="tabular-nums">{Math.max(0, total - position)}</span> left in queue
               </span>
+              <button
+                onClick={onSuspend}
+                title="Drop this card from your reviews. It stays in the deck for everyone else."
+                className="text-ink-mute hover:text-ink decoration-rule-2 hover:decoration-ink ml-auto inline-flex cursor-pointer items-center gap-1.5 underline underline-offset-[3px] transition-colors"
+              >
+                Suspend card
+                <kbd className="border-rule-2 bg-paper rounded-[3px] border border-b-2 px-[5px] pt-[3px] pb-[2px] font-mono text-[11px] leading-none font-medium no-underline">
+                  S
+                </kbd>
+              </button>
               {failedCount > 0 && (
                 <button
                   onClick={onRetryFailed}

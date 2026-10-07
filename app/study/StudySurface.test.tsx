@@ -50,6 +50,7 @@ function renderSurface(revealed: boolean) {
       now={new Date(NOW)}
       failedCount={0}
       onRetryFailed={vi.fn()}
+      onSuspend={vi.fn()}
     />
   )
 }
@@ -88,6 +89,7 @@ describe('StudySurface', () => {
         now={new Date(NOW)}
         failedCount={0}
         onRetryFailed={vi.fn()}
+        onSuspend={vi.fn()}
       />
     )
 
@@ -127,5 +129,31 @@ describe('StudySurface', () => {
     const scrollRegion = container.querySelector('article .hide-scroll')
     expect(scrollRegion).not.toBeNull()
     expect(scrollRegion!.className).toContain('overflow-y-auto')
+  })
+
+  it('offers suspend before and after reveal', async () => {
+    const onSuspend = vi.fn()
+    render(
+      <StudySurface
+        card={card}
+        deck={deck}
+        revealed={false}
+        onReveal={vi.fn()}
+        onGrade={vi.fn()}
+        position={0}
+        total={4}
+        complete={false}
+        onRestart={vi.fn()}
+        onNextDeck={vi.fn()}
+        summary={{ reviewed: 0, again: 0, accuracy: 0, elapsed: 0 }}
+        now={new Date(NOW)}
+        failedCount={0}
+        onRetryFailed={vi.fn()}
+        onSuspend={onSuspend}
+      />
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: /suspend card/i }))
+    expect(onSuspend).toHaveBeenCalledOnce()
   })
 })

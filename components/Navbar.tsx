@@ -4,12 +4,13 @@ import ThemeToggle from '@/components/ThemeToggle'
 import { NavLinks } from '@/components/NavLinks'
 import { Wordmark } from '@/components/Wordmark'
 
-type Props = { user?: { name?: string | null; image?: string | null } }
+type Props = { user?: { name?: string | null; image?: string | null; role?: string } }
 
 export default function Navbar({ user }: Props) {
   const navigation = [
     { name: 'Study', href: '/study' },
     { name: 'Decks', href: '/decks' },
+    ...(user?.role === 'ADMIN' ? [{ name: 'Admin', href: '/admin' }] : []),
   ]
   const isLoggedIn = !!user
 
