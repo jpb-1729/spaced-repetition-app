@@ -152,15 +152,27 @@ export default async function StudyPage(props: Props) {
   // falls back to that course's first deck.
   const deckParam = typeof searchParams.deckId === 'string' ? searchParams.deckId : undefined
   const courseParam = typeof searchParams.courseId === 'string' ? searchParams.courseId : undefined
-  const initialDeckId =
+  const linkedDeckId =
     (deckParam && data.decks.find((d) => d.id === deckParam)?.id) ||
     (courseParam && data.decks.find((d) => d.courseId === courseParam)?.id) ||
-    data.decks[0].id
+    undefined
+  const initialDeckId = linkedDeckId ?? data.decks[0].id
 
   async function signOutAction() {
     'use server'
     await signOut()
   }
 
-  return <StudyDashboard data={data} initialDeckId={initialDeckId} signOutAction={signOutAction} />
+  // A deep link is a deliberate choice of collection, so it opens straight on
+  // the first card; a plain visit lands on the session briefing.
+  const autoStart = linkedDeckId !== undefined
+
+  return (
+    <StudyDashboard
+      data={data}
+      initialDeckId={initialDeckId}
+      autoStart={autoStart}
+      signOutAction={signOutAction}
+    />
+  )
 }

@@ -85,10 +85,17 @@ function makeData(): StudyDashboardData {
   }
 }
 
-function renderDashboard() {
+function renderBriefing(data: StudyDashboardData = makeData()) {
   return render(
-    <StudyDashboard data={makeData()} initialDeckId="d1" signOutAction={vi.fn(async () => {})} />
+    <StudyDashboard data={data} initialDeckId="d1" signOutAction={vi.fn(async () => {})} />
   )
+}
+
+/** Render and press Enter on the briefing so the first card is showing. */
+function renderDashboard() {
+  const r = renderBriefing()
+  fireEvent.keyDown(window, { key: 'Enter' })
+  return r
 }
 
 function reveal() {
@@ -108,6 +115,80 @@ beforeEach(() => {
   mockedReviewCard.mockClear()
   mockedSuspendCard.mockClear()
   mockedRestoreCard.mockClear()
+})
+
+describe('StudyDashboard briefing', () => {
+  it('opens on a briefing with no card showing and does not grade or reveal', () => {
+    renderBriefing()
+
+    expect(screen.getByText(/session ready/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: /4 cards are waiting in Memory/ }))
+    expect(screen.queryByRole('heading', { level: 2, name: 'Alpha question' })).toBeNull()
+    expect(screen.queryByText('Answer to Alpha question')).toBeNull()
+
+    pressGrade('3')
+    expect(mockedReviewCard).not.toHaveBeenCalled()
+  })
+
+  it('starts the session from the Begin button', async () => {
+    renderBriefing()
+
+    await userEvent.click(screen.getByRole('button', { name: /begin session/i }))
+    expectPrompt('Alpha question')
+  })
+
+  it('starts the session with Space as well as Enter', () => {
+    renderBriefing()
+    fireEvent.keyDown(window, { key: ' ' })
+    expectPrompt('Alpha question')
+    // The first Space only began the session; the answer is still hidden.
+    expect(screen.queryByText('Answer to Alpha question')).toBeNull()
+  })
+
+  it('switching decks while briefing updates the briefing without starting', async () => {
+    renderBriefing()
+
+    await userEvent.click(screen.getByRole('button', { name: /typography/i }))
+    expect(screen.getByRole('heading', { level: 2, name: /2 cards are waiting in Typography/ }))
+    expect(screen.queryByRole('heading', { level: 2, name: 'Omega question' })).toBeNull()
+
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expectPrompt('Omega question')
+  })
+
+  it('reports the session size after the limit stepper changes', async () => {
+    renderBriefing()
+    // d1 has 4 due cards and a limit of 4; raising the limit cannot exceed the pool.
+    await userEvent.click(screen.getByRole('button', { name: 'increase' }))
+    expect(
+      screen.getByText(
+        (_, el) => el?.tagName === 'P' && /covers 4 of them/.test(el.textContent ?? '')
+      )
+    ).toBeInTheDocument()
+  })
+
+  it('offers to study ahead when nothing is due', () => {
+    const data = makeData()
+    data.snapshot = data.snapshot.map((r) => ({ ...r, due: NOW + 2 * DAY }))
+    renderBriefing(data)
+
+    expect(screen.getByText(/nothing due/i)).toBeInTheDocument()
+    expect(screen.getByText(/next card comes due in 2 d/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /study ahead/i }))
+    expectPrompt('Alpha question')
+  })
+
+  it('skips the briefing when autoStart is set', () => {
+    render(
+      <StudyDashboard
+        data={makeData()}
+        initialDeckId="d2"
+        autoStart
+        signOutAction={vi.fn(async () => {})}
+      />
+    )
+    expectPrompt('Omega question')
+  })
 })
 
 describe('StudyDashboard', () => {
@@ -211,7 +292,7 @@ describe('StudyDashboard', () => {
       { progressId: 'pd19', deckId: 'd1', front: 'Shelved alpha' },
       { progressId: 'pd29', deckId: 'd2', front: 'Shelved omega' },
     ]
-    render(<StudyDashboard data={data} initialDeckId="d1" signOutAction={vi.fn()} />)
+    renderBriefing(data)
 
     const section = screen.getByRole('region', { name: /suspended/i })
     expect(within(section).getByText('Shelved alpha')).toBeInTheDocument()

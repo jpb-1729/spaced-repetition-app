@@ -17,9 +17,30 @@ import type { LogRow, ProgressRow, QueueCard, StudyDashboardData, SuspendedRow }
 import { Masthead } from './Masthead'
 import { DeckIndex, type DeckStat } from './DeckIndex'
 import { StudySurface } from './StudySurface'
+import { Briefing, type BriefingStats } from './Briefing'
 import { Metrics } from './Metrics'
 
 type Order = 'sequential' | 'shuffled'
+type Phase = 'briefing' | 'studying'
+
+/** Fallback pace when there is too little history to measure one. */
+const DEFAULT_SECONDS_PER_CARD = 8
+
+/**
+ * Median gap between consecutive reviews that plausibly belong to the same
+ * sitting. Reviews are stored without a duration, so this is the best proxy.
+ */
+function estimateSecondsPerCard(reviews: { ts: number }[]): number {
+  const ts = reviews.map((r) => r.ts).sort((a, b) => a - b)
+  const gaps: number[] = []
+  for (let i = 1; i < ts.length; i++) {
+    const gap = (ts[i] - ts[i - 1]) / 1000
+    if (gap > 1 && gap < 120) gaps.push(gap)
+  }
+  if (gaps.length < 5) return DEFAULT_SECONDS_PER_CARD
+  gaps.sort((a, b) => a - b)
+  return gaps[Math.floor(gaps.length / 2)]
+}
 
 interface FailedReview {
   progressId: string
@@ -41,9 +62,18 @@ function buildSnapshotMap(rows: ProgressRow[]): Map<string, ProgressRow> {
   return new Map(rows.map((r) => [r.progressId, r]))
 }
 
+/**
+ * The cards a session draws from: everything due, or — when nothing is due —
+ * the six soonest so the deck can still be studied ahead.
+ */
+function buildPool(rows: ProgressRow[], nowMs: number): { pool: ProgressRow[]; ahead: boolean } {
+  const due = rows.filter((r) => r.due <= nowMs)
+  if (due.length > 0) return { pool: due, ahead: false }
+  return { pool: [...rows].sort((a, b) => a.due - b.due).slice(0, 6), ahead: rows.length > 0 }
+}
+
 function buildQueue(rows: ProgressRow[], order: Order, limit: number, nowMs: number): string[] {
-  let pool = rows.filter((r) => r.due <= nowMs)
-  if (pool.length === 0) pool = [...rows].sort((a, b) => a.due - b.due).slice(0, 6)
+  const { pool } = buildPool(rows, nowMs)
   const sorted =
     order === 'shuffled'
       ? [...pool].sort(() => Math.random() - 0.5)
@@ -59,10 +89,13 @@ function buildQueue(rows: ProgressRow[], order: Order, limit: number, nowMs: num
 export function StudyDashboard({
   data,
   initialDeckId,
+  autoStart = false,
   signOutAction,
 }: {
   data: StudyDashboardData
   initialDeckId: string
+  /** Skip the briefing and open the first card immediately (deep links). */
+  autoStart?: boolean
   signOutAction: () => Promise<void>
 }) {
   const router = useRouter()
@@ -87,13 +120,18 @@ export function StudyDashboard({
   // the server timestamp (identical on the SSR pass and the hydration pass)
   // and only advances on mount and on user actions — hydration-safe.
   const [now, setNow] = useState<Date>(() => new Date(data.serverNow))
+  // The page opens on a briefing; the queue is only built when the user
+  // begins, so loading /study never exposes a card or starts the clock.
+  const [phase, setPhase] = useState<Phase>(autoStart ? 'studying' : 'briefing')
   const [queue, setQueue] = useState<string[]>(() =>
-    buildQueue(
-      data.snapshot.filter((r) => r.deckId === initialDeck.id && textCache.has(r.progressId)),
-      'sequential',
-      clampLimit(initialDeck.cardsPerSession),
-      data.serverNow
-    )
+    autoStart
+      ? buildQueue(
+          data.snapshot.filter((r) => r.deckId === initialDeck.id && textCache.has(r.progressId)),
+          'sequential',
+          clampLimit(initialDeck.cardsPerSession),
+          data.serverNow
+        )
+      : []
   )
   const [pos, setPos] = useState(0)
   const [revealed, setRevealed] = useState(false)
@@ -123,16 +161,20 @@ export function StudyDashboard({
     // Adopt the real client clock right after hydration (the SSR pass rendered
     // from the server timestamp).
     const syncNow = window.setTimeout(() => setNow(new Date()), 0)
-    const t = window.setInterval(() => setElapsed((e) => e + 1), 1000)
-    return () => {
-      window.clearTimeout(syncNow)
-      window.clearInterval(t)
-    }
+    return () => window.clearTimeout(syncNow)
   }, [])
 
+  // The session clock only runs while studying.
+  useEffect(() => {
+    if (phase !== 'studying') return
+    const t = window.setInterval(() => setElapsed((e) => e + 1), 1000)
+    return () => window.clearInterval(t)
+  }, [phase])
+
   const nowMs = now.getTime()
-  const complete = pos >= queue.length
-  const currentId = complete ? null : queue[pos]
+  const studying = phase === 'studying'
+  const complete = studying && pos >= queue.length
+  const currentId = !studying || complete ? null : queue[pos]
   const current: QueueCard | null = useMemo(() => {
     if (!currentId) return null
     const text = textCache.get(currentId)
@@ -158,6 +200,23 @@ export function StudyDashboard({
     },
     [deckRows]
   )
+
+  // While briefing, index changes only update the briefing; the queue is
+  // built on begin. While studying they restart the session as before.
+  const reconfigure = useCallback(
+    (deckId: string, o: Order, l: number) => {
+      if (phase === 'studying') rebuild(deckId, o, l)
+      else setNow(new Date())
+    },
+    [phase, rebuild]
+  )
+
+  const begin = useCallback(() => {
+    setPhase('studying')
+    setElapsed(0)
+    setSessionLog([])
+    rebuild(activeDeck, order, limit)
+  }, [activeDeck, order, limit, rebuild])
 
   const submit = useCallback(
     (progressId: string, rating: Rating, clientReviewId: string = crypto.randomUUID()) => {
@@ -276,7 +335,8 @@ export function StudyDashboard({
         return
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault()
-        if (!revealed && current) setRevealed(true)
+        if (phase === 'briefing') begin()
+        else if (!revealed && current) setRevealed(true)
         return
       }
       if (e.key === 's' || e.key === 'S') {
@@ -292,7 +352,7 @@ export function StudyDashboard({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [revealed, current, grade, suspend])
+  }, [phase, begin, revealed, current, grade, suspend])
 
   /* ---------- derived statistics ---------- */
 
@@ -382,6 +442,22 @@ export function StudyDashboard({
   }
 
   const dueToday = allRows.filter((r) => r.due <= nowMs).length
+
+  const briefing: BriefingStats = useMemo(() => {
+    const rows = deckRows(activeDeck)
+    const { pool, ahead } = buildPool(rows, nowMs)
+    const due = rows.filter((r) => r.due <= nowMs)
+    const dueNew = due.filter((r) => collapsedState(r.state) === 'new').length
+    return {
+      dueReviews: due.length - dueNew,
+      dueNew,
+      total: rows.length,
+      sessionSize: Math.min(limit, pool.length),
+      studyingAhead: ahead,
+      nextDue: rows.length ? Math.min(...rows.map((r) => r.due)) : null,
+      secondsPerCard: estimateSecondsPerCard(data.recentReviews),
+    }
+  }, [deckRows, activeDeck, nowMs, limit, data.recentReviews])
   const displayLog = useMemo(
     () => [...unsyncedLog, ...data.latestLog],
     [unsyncedLog, data.latestLog]
@@ -421,17 +497,17 @@ export function StudyDashboard({
                 active={activeDeck}
                 onSelect={(id) => {
                   setActiveDeck(id)
-                  rebuild(id, order, limit)
+                  reconfigure(id, order, limit)
                 }}
                 order={order}
                 onOrder={(o) => {
                   setOrder(o)
-                  rebuild(activeDeck, o, limit)
+                  reconfigure(activeDeck, o, limit)
                 }}
                 limit={limit}
                 onLimit={(n) => {
                   setLimit(n)
-                  rebuild(activeDeck, order, n)
+                  reconfigure(activeDeck, order, n)
                 }}
                 isAdmin={data.isAdmin}
                 signOutAction={signOutAction}
@@ -442,26 +518,30 @@ export function StudyDashboard({
           </div>
 
           <div className="lg:border-rule order-1 py-8 lg:order-none lg:min-h-0 lg:border-l lg:px-10">
-            <StudySurface
-              card={current}
-              deck={deck}
-              revealed={revealed}
-              onReveal={() => setRevealed(true)}
-              onGrade={grade}
-              position={pos}
-              total={queue.length}
-              complete={complete}
-              onRestart={() => {
-                rebuild(activeDeck, order, limit)
-                refreshWhenSynced()
-              }}
-              onNextDeck={nextDeck}
-              summary={summary}
-              now={now}
-              failedCount={failed.length}
-              onRetryFailed={retryFailed}
-              onSuspend={suspend}
-            />
+            {phase === 'briefing' ? (
+              <Briefing deck={deck} stats={briefing} onBegin={begin} nowMs={nowMs} />
+            ) : (
+              <StudySurface
+                card={current}
+                deck={deck}
+                revealed={revealed}
+                onReveal={() => setRevealed(true)}
+                onGrade={grade}
+                position={pos}
+                total={queue.length}
+                complete={complete}
+                onRestart={() => {
+                  rebuild(activeDeck, order, limit)
+                  refreshWhenSynced()
+                }}
+                onNextDeck={nextDeck}
+                summary={summary}
+                now={now}
+                failedCount={failed.length}
+                onRetryFailed={retryFailed}
+                onSuspend={suspend}
+              />
+            )}
           </div>
 
           <div className="border-rule order-3 border-t py-8 lg:order-none lg:min-h-0 lg:border-t-0 lg:border-l lg:pl-8">
