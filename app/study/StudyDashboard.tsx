@@ -58,6 +58,20 @@ function clampLimit(n: number) {
   return Math.min(40, Math.max(4, Math.round(n / 4) * 4))
 }
 
+/** New-card cap: 0 (reviews only) to 40, in steps of 5. */
+function clampNewLimit(n: number) {
+  return Math.min(40, Math.max(0, Math.round(n / 5) * 5))
+}
+
+function shuffle<T>(xs: T[]): T[] {
+  const a = [...xs]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 function buildSnapshotMap(rows: ProgressRow[]): Map<string, ProgressRow> {
   return new Map(rows.map((r) => [r.progressId, r]))
 }
@@ -72,18 +86,39 @@ function buildPool(rows: ProgressRow[], nowMs: number): { pool: ProgressRow[]; a
   return { pool: [...rows].sort((a, b) => a.due - b.due).slice(0, 6), ahead: rows.length > 0 }
 }
 
-function buildQueue(rows: ProgressRow[], order: Order, limit: number, nowMs: number): string[] {
+/**
+ * Picks a session: seen cards (learning/review) take priority, then unseen
+ * cards fill the remaining room up to `newLimit`. Sequential order runs seen
+ * cards first, soonest-due first; shuffled order draws each group at random
+ * and mixes the picks.
+ */
+function selectSession(
+  rows: ProgressRow[],
+  order: Order,
+  limit: number,
+  newLimit: number,
+  nowMs: number
+): ProgressRow[] {
   const { pool } = buildPool(rows, nowMs)
-  const sorted =
-    order === 'shuffled'
-      ? [...pool].sort(() => Math.random() - 0.5)
-      : [...pool].sort((a, b) => {
-          const sa = collapsedState(a.state)
-          const sb = collapsedState(b.state)
-          if (sa === sb) return a.due - b.due
-          return sa === 'new' ? 1 : -1
-        })
-  return sorted.slice(0, limit).map((r) => r.progressId)
+  const arrange = (xs: ProgressRow[]) =>
+    order === 'shuffled' ? shuffle(xs) : [...xs].sort((a, b) => a.due - b.due)
+  const seen = arrange(pool.filter((r) => collapsedState(r.state) !== 'new')).slice(0, limit)
+  const unseen = arrange(pool.filter((r) => collapsedState(r.state) === 'new')).slice(
+    0,
+    Math.min(newLimit, limit - seen.length)
+  )
+  const picked = [...seen, ...unseen]
+  return order === 'shuffled' ? shuffle(picked) : picked
+}
+
+function buildQueue(
+  rows: ProgressRow[],
+  order: Order,
+  limit: number,
+  newLimit: number,
+  nowMs: number
+): string[] {
+  return selectSession(rows, order, limit, newLimit, nowMs).map((r) => r.progressId)
 }
 
 export function StudyDashboard({
@@ -116,6 +151,7 @@ export function StudyDashboard({
   const [activeDeck, setActiveDeck] = useState(initialDeck.id)
   const [order, setOrder] = useState<Order>('sequential')
   const [limit, setLimit] = useState(() => clampLimit(initialDeck.cardsPerSession))
+  const [newLimit, setNewLimit] = useState(() => clampNewLimit(initialDeck.cardsPerSession))
   // Every time-derived computation renders from this state. It is seeded with
   // the server timestamp (identical on the SSR pass and the hydration pass)
   // and only advances on mount and on user actions — hydration-safe.
@@ -129,6 +165,7 @@ export function StudyDashboard({
           data.snapshot.filter((r) => r.deckId === initialDeck.id && textCache.has(r.progressId)),
           'sequential',
           clampLimit(initialDeck.cardsPerSession),
+          clampNewLimit(initialDeck.cardsPerSession),
           data.serverNow
         )
       : []
@@ -191,10 +228,10 @@ export function StudyDashboard({
   )
 
   const rebuild = useCallback(
-    (deckId: string, o: Order, l: number) => {
+    (deckId: string, o: Order, l: number, nl: number) => {
       const nowD = new Date()
       setNow(nowD)
-      setQueue(buildQueue(deckRows(deckId), o, l, nowD.getTime()))
+      setQueue(buildQueue(deckRows(deckId), o, l, nl, nowD.getTime()))
       setPos(0)
       setRevealed(false)
     },
@@ -204,8 +241,8 @@ export function StudyDashboard({
   // While briefing, index changes only update the briefing; the queue is
   // built on begin. While studying they restart the session as before.
   const reconfigure = useCallback(
-    (deckId: string, o: Order, l: number) => {
-      if (phase === 'studying') rebuild(deckId, o, l)
+    (deckId: string, o: Order, l: number, nl: number) => {
+      if (phase === 'studying') rebuild(deckId, o, l, nl)
       else setNow(new Date())
     },
     [phase, rebuild]
@@ -215,8 +252,8 @@ export function StudyDashboard({
     setPhase('studying')
     setElapsed(0)
     setSessionLog([])
-    rebuild(activeDeck, order, limit)
-  }, [activeDeck, order, limit, rebuild])
+    rebuild(activeDeck, order, limit, newLimit)
+  }, [activeDeck, order, limit, newLimit, rebuild])
 
   const submit = useCallback(
     (progressId: string, rating: Rating, clientReviewId: string = crypto.randomUUID()) => {
@@ -445,19 +482,22 @@ export function StudyDashboard({
 
   const briefing: BriefingStats = useMemo(() => {
     const rows = deckRows(activeDeck)
-    const { pool, ahead } = buildPool(rows, nowMs)
+    const { ahead } = buildPool(rows, nowMs)
     const due = rows.filter((r) => r.due <= nowMs)
     const dueNew = due.filter((r) => collapsedState(r.state) === 'new').length
+    // Sequential order picks the same cards a shuffled session would count.
+    const session = selectSession(rows, 'sequential', limit, newLimit, nowMs)
     return {
       dueReviews: due.length - dueNew,
       dueNew,
       total: rows.length,
-      sessionSize: Math.min(limit, pool.length),
+      sessionSize: session.length,
+      sessionNew: session.filter((r) => collapsedState(r.state) === 'new').length,
       studyingAhead: ahead,
       nextDue: rows.length ? Math.min(...rows.map((r) => r.due)) : null,
       secondsPerCard: estimateSecondsPerCard(data.recentReviews),
     }
-  }, [deckRows, activeDeck, nowMs, limit, data.recentReviews])
+  }, [deckRows, activeDeck, nowMs, limit, newLimit, data.recentReviews])
   const displayLog = useMemo(
     () => [...unsyncedLog, ...data.latestLog],
     [unsyncedLog, data.latestLog]
@@ -473,9 +513,9 @@ export function StudyDashboard({
     const i = decks.findIndex((d) => d.id === activeDeck)
     const n = decks[(i + 1) % decks.length]
     setActiveDeck(n.id)
-    rebuild(n.id, order, limit)
+    rebuild(n.id, order, limit, newLimit)
     refreshWhenSynced()
-  }, [decks, activeDeck, order, limit, rebuild, refreshWhenSynced])
+  }, [decks, activeDeck, order, limit, newLimit, rebuild, refreshWhenSynced])
 
   return (
     <div className="min-h-screen lg:flex lg:h-screen lg:flex-col">
@@ -497,17 +537,22 @@ export function StudyDashboard({
                 active={activeDeck}
                 onSelect={(id) => {
                   setActiveDeck(id)
-                  reconfigure(id, order, limit)
+                  reconfigure(id, order, limit, newLimit)
                 }}
                 order={order}
                 onOrder={(o) => {
                   setOrder(o)
-                  reconfigure(activeDeck, o, limit)
+                  reconfigure(activeDeck, o, limit, newLimit)
                 }}
                 limit={limit}
                 onLimit={(n) => {
                   setLimit(n)
-                  reconfigure(activeDeck, order, n)
+                  reconfigure(activeDeck, order, n, newLimit)
+                }}
+                newLimit={newLimit}
+                onNewLimit={(n) => {
+                  setNewLimit(n)
+                  reconfigure(activeDeck, order, limit, n)
                 }}
                 isAdmin={data.isAdmin}
                 signOutAction={signOutAction}
@@ -531,7 +576,7 @@ export function StudyDashboard({
                 total={queue.length}
                 complete={complete}
                 onRestart={() => {
-                  rebuild(activeDeck, order, limit)
+                  rebuild(activeDeck, order, limit, newLimit)
                   refreshWhenSynced()
                 }}
                 onNextDeck={nextDeck}

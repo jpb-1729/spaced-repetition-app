@@ -20,6 +20,8 @@ export function DeckIndex({
   onOrder,
   limit,
   onLimit,
+  newLimit,
+  onNewLimit,
   isAdmin,
   signOutAction,
   suspended,
@@ -33,6 +35,9 @@ export function DeckIndex({
   onOrder: (o: 'sequential' | 'shuffled') => void
   limit: number
   onLimit: (n: number) => void
+  /** Most unseen cards a session will introduce. */
+  newLimit: number
+  onNewLimit: (n: number) => void
   isAdmin: boolean
   signOutAction: () => Promise<void>
   /** Suspended cards in the active deck, newest first. */
@@ -157,28 +162,24 @@ export function DeckIndex({
             </div>
           </div>
 
-          <div>
-            <p className="text-ink mb-2 text-[13px] font-semibold">Session limit</p>
-            <div className="border-rule-2 flex items-stretch overflow-hidden rounded border">
-              <button
-                onClick={() => onLimit(Math.max(4, limit - 4))}
-                className="border-rule-2 text-ink-soft hover:bg-paper-2 hover:text-ink w-10 border-r text-[16px] font-semibold transition-colors"
-                aria-label="decrease"
-              >
-                −
-              </button>
-              <div className="flex h-9 flex-1 items-center justify-center gap-1.5">
-                <span className="text-[15px] font-bold tabular-nums">{limit}</span>
-                <span className="text-ink-mute text-[13px]">cards</span>
-              </div>
-              <button
-                onClick={() => onLimit(Math.min(40, limit + 4))}
-                className="border-rule-2 text-ink-soft hover:bg-paper-2 hover:text-ink w-10 border-l text-[16px] font-semibold transition-colors"
-                aria-label="increase"
-              >
-                +
-              </button>
-            </div>
+          <Stepper
+            label="Session limit"
+            value={limit}
+            unit="cards"
+            onDecrease={() => onLimit(Math.max(4, limit - 4))}
+            onIncrease={() => onLimit(Math.min(40, limit + 4))}
+          />
+
+          <div className="mt-4">
+            <Stepper
+              label="New cards"
+              value={newLimit}
+              unit="per session"
+              decreaseLabel="fewer new cards"
+              increaseLabel="more new cards"
+              onDecrease={() => onNewLimit(Math.max(0, newLimit - 5))}
+              onIncrease={() => onNewLimit(Math.min(40, newLimit + 5))}
+            />
           </div>
 
           <div className="border-rule mt-5 border-t pt-4">
@@ -207,6 +208,50 @@ export function DeckIndex({
           </div>
         </div>
       </section>
+    </div>
+  )
+}
+
+function Stepper({
+  label,
+  value,
+  unit,
+  decreaseLabel = 'decrease',
+  increaseLabel = 'increase',
+  onDecrease,
+  onIncrease,
+}: {
+  label: string
+  value: number
+  unit: string
+  decreaseLabel?: string
+  increaseLabel?: string
+  onDecrease: () => void
+  onIncrease: () => void
+}) {
+  return (
+    <div>
+      <p className="text-ink mb-2 text-[13px] font-semibold">{label}</p>
+      <div className="border-rule-2 flex items-stretch overflow-hidden rounded border">
+        <button
+          onClick={onDecrease}
+          className="border-rule-2 text-ink-soft hover:bg-paper-2 hover:text-ink w-10 border-r text-[16px] font-semibold transition-colors"
+          aria-label={decreaseLabel}
+        >
+          −
+        </button>
+        <div className="flex h-9 flex-1 items-center justify-center gap-1.5">
+          <span className="text-[15px] font-bold tabular-nums">{value}</span>
+          <span className="text-ink-mute text-[13px]">{unit}</span>
+        </div>
+        <button
+          onClick={onIncrease}
+          className="border-rule-2 text-ink-soft hover:bg-paper-2 hover:text-ink w-10 border-l text-[16px] font-semibold transition-colors"
+          aria-label={increaseLabel}
+        >
+          +
+        </button>
+      </div>
     </div>
   )
 }

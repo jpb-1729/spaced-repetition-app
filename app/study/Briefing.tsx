@@ -12,6 +12,8 @@ export interface BriefingStats {
   total: number
   /** How many cards the session will actually contain. */
   sessionSize: number
+  /** How many of the session's cards are unseen (capped by the new-card limit). */
+  sessionNew: number
   /** Whether the session pulls not-yet-due cards forward because nothing is due. */
   studyingAhead: boolean
   /** Epoch ms of the soonest due card, or null when the deck is empty. */
@@ -87,9 +89,19 @@ export function Briefing({
             ) : (
               <>This collection has no cards yet.</>
             )
+          ) : stats.sessionSize === 0 ? (
+            <>
+              Your new-card limit is set to 0, so there is nothing to study. Raise it in the index
+              to introduce some.
+            </>
           ) : (
             <>
               This session covers <span className="tabular-nums">{stats.sessionSize}</span> of them
+              {stats.sessionNew > 0 && (
+                <>
+                  , <span className="tabular-nums">{stats.sessionNew}</span> new,
+                </>
+              )}{' '}
               and should take about {estimate} at your recent pace.
             </>
           )}
@@ -97,7 +109,14 @@ export function Briefing({
 
         <dl className="border-t-ink border-b-rule mt-9 grid grid-cols-2 border-t-2 border-b sm:grid-cols-4">
           <Cell k="Due for review" v={String(stats.dueReviews)} accent={stats.dueReviews > 0} />
-          <Cell k="New today" v={String(stats.dueNew)} />
+          <Cell
+            k="New this session"
+            v={
+              stats.sessionNew < stats.dueNew
+                ? `${stats.sessionNew}/${stats.dueNew}`
+                : String(stats.sessionNew)
+            }
+          />
           <Cell k="This session" v={String(stats.sessionSize)} />
           <Cell k="Est. time" v={stats.sessionSize ? estimate : '—'} />
         </dl>
@@ -117,8 +136,8 @@ export function Briefing({
         </div>
 
         <p className="text-ink-mute mt-8 text-[13px]">
-          Pick a different collection, order, or session size in the index. The queue is built when
-          you begin.
+          Pick a different collection, order, session size, or new-card limit in the index. The
+          queue is built when you begin.
         </p>
       </div>
     </div>
