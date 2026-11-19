@@ -322,6 +322,48 @@ describe('StudyDashboard', () => {
     expect(activeDeckButton.className).toContain('bg-paper-2')
   })
 
+  it('caps unseen cards with the new-card limit, keeping reviews first', async () => {
+    const reviews = [qc(1, 'd1', 'Review one'), qc(2, 'd1', 'Review two')]
+    const unseen = Array.from({ length: 12 }, (_, i) => ({
+      ...qc(i + 3, 'd1', `New ${i + 1}`),
+      state: 'NEW' as const,
+      reps: 0,
+      stability: 0,
+      lastReviewedAt: null,
+      due: NOW - DAY + i * 1000,
+    }))
+    const data = makeData()
+    data.decks[0].cardsPerSession = 20
+    data.snapshot = [...reviews, ...unseen, ...deckTwoCards]
+    data.queues.d1 = [...reviews, ...unseen]
+    renderBriefing(data)
+
+    // Defaults follow cardsPerSession: all 12 unseen fit under 20.
+    expect(screen.getByText('This session').previousSibling).toHaveTextContent('14')
+
+    // 20 -> 10 new cards
+    await userEvent.click(screen.getByRole('button', { name: 'fewer new cards' }))
+    await userEvent.click(screen.getByRole('button', { name: 'fewer new cards' }))
+    expect(screen.getByText('This session').previousSibling).toHaveTextContent('12')
+    expect(screen.getByText('New this session').previousSibling).toHaveTextContent('10/12')
+
+    // Reviews still lead the queue.
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expectPrompt('Review one')
+  })
+
+  it('disables Begin when only unseen cards are due and the new-card limit is 0', async () => {
+    const data = makeData()
+    data.snapshot = data.snapshot.map((r) => (r.deckId === 'd1' ? { ...r, state: 'NEW' } : r))
+    data.queues.d1 = data.queues.d1.map((r) => ({ ...r, state: 'NEW' }))
+    renderBriefing(data)
+
+    // cardsPerSession 4 -> new limit 5; one step reaches 0
+    await userEvent.click(screen.getByRole('button', { name: 'fewer new cards' }))
+    expect(screen.getByRole('button', { name: /begin session/i })).toBeDisabled()
+    expect(screen.getByText(/new-card limit is set to 0/i)).toBeInTheDocument()
+  })
+
   it('clamps the session limit stepper to 4..40', async () => {
     renderDashboard()
 
