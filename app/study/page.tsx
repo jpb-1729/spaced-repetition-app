@@ -39,6 +39,7 @@ export default async function StudyPage(props: Props) {
       id: true,
       name: true,
       cardsPerSession: true,
+      _count: { select: { cards: true } },
       course: { select: { id: true, name: true } },
     },
   })
@@ -73,7 +74,7 @@ export default async function StudyPage(props: Props) {
 
   const serverNow = new Date()
 
-  const [snapshotRaw, suspendedRaw, queuesRaw, recentRaw, latestRaw, totalReviews] =
+  const [snapshotRaw, suspendedRaw, queuesRaw, recentRaw, latestRaw, totalReviews, enrolledRaw] =
     await Promise.all([
       prisma.cardProgress.findMany({
         where: { userId, suspended: false, card: { deck: enrolledCourseFilter } },
@@ -112,7 +113,14 @@ export default async function StudyPage(props: Props) {
         },
       }),
       prisma.review.count({ where: { userId } }),
+      // Enrollment is per deck, but the index lists every deck in an enrolled
+      // course, so the briefing needs to know which decks the user joined.
+      prisma.deckProgress.findMany({
+        where: { userId, deckId: { in: decksRaw.map((d) => d.id) } },
+        select: { deckId: true },
+      }),
     ])
+  const enrolledDeckIds = new Set(enrolledRaw.map((r) => r.deckId))
 
   const queues: Record<string, QueueCard[]> = {}
   decksRaw.forEach((d, i) => {
@@ -128,6 +136,8 @@ export default async function StudyPage(props: Props) {
       courseName: d.course.name,
       index: String(i + 1).padStart(2, '0'),
       cardsPerSession: d.cardsPerSession,
+      cardCount: d._count.cards,
+      enrolled: enrolledDeckIds.has(d.id),
     })),
     snapshot: snapshotRaw.map(toProgressRow),
     suspended: suspendedRaw.map((r) => ({

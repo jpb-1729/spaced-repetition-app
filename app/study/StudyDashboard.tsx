@@ -157,9 +157,10 @@ export function StudyDashboard({
   // and only advances on mount and on user actions — hydration-safe.
   const [now, setNow] = useState<Date>(() => new Date(data.serverNow))
   // The page opens on a briefing; the queue is only built when the user
-  // begins, so loading /study never exposes a card or starts the clock.
-  const [phase, setPhase] = useState<Phase>(autoStart ? 'studying' : 'briefing')
-  const [queue, setQueue] = useState<string[]>(() =>
+  // begins, so loading /study never exposes a card or starts the clock. A
+  // deep link (autoStart) skips the briefing, unless its session would be
+  // empty, in which case the briefing explains why.
+  const [initialQueue] = useState<string[]>(() =>
     autoStart
       ? buildQueue(
           data.snapshot.filter((r) => r.deckId === initialDeck.id && textCache.has(r.progressId)),
@@ -170,6 +171,8 @@ export function StudyDashboard({
         )
       : []
   )
+  const [phase, setPhase] = useState<Phase>(initialQueue.length > 0 ? 'studying' : 'briefing')
+  const [queue, setQueue] = useState<string[]>(initialQueue)
   const [pos, setPos] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [sessionLog, setSessionLog] = useState<LogRow[]>([])
@@ -201,16 +204,17 @@ export function StudyDashboard({
     return () => window.clearTimeout(syncNow)
   }, [])
 
-  // The session clock only runs while studying.
-  useEffect(() => {
-    if (phase !== 'studying') return
-    const t = window.setInterval(() => setElapsed((e) => e + 1), 1000)
-    return () => window.clearInterval(t)
-  }, [phase])
-
   const nowMs = now.getTime()
   const studying = phase === 'studying'
   const complete = studying && pos >= queue.length
+
+  // The session clock only runs while cards remain; it stops on the
+  // completion screen so the summary's sec/card stays accurate.
+  useEffect(() => {
+    if (!studying || complete) return
+    const t = window.setInterval(() => setElapsed((e) => e + 1), 1000)
+    return () => window.clearInterval(t)
+  }, [studying, complete])
   const currentId = !studying || complete ? null : queue[pos]
   const current: QueueCard | null = useMemo(() => {
     if (!currentId) return null
@@ -227,33 +231,49 @@ export function StudyDashboard({
     [snapshot, textCache]
   )
 
-  const rebuild = useCallback(
-    (deckId: string, o: Order, l: number, nl: number) => {
+  const toBriefing = useCallback(() => {
+    setPhase('briefing')
+    setNow(new Date())
+  }, [])
+
+  /**
+   * The single way a session's queue gets built. An empty queue never opens
+   * the study surface (that would show an instantly complete session); it
+   * returns to the briefing, which explains why there is nothing to study.
+   */
+  const startSession = useCallback(
+    (deckId: string, o: Order, l: number, nl: number): boolean => {
       const nowD = new Date()
+      const q = buildQueue(deckRows(deckId), o, l, nl, nowD.getTime())
       setNow(nowD)
-      setQueue(buildQueue(deckRows(deckId), o, l, nl, nowD.getTime()))
+      if (q.length === 0) {
+        setPhase('briefing')
+        return false
+      }
+      setQueue(q)
       setPos(0)
       setRevealed(false)
+      setPhase('studying')
+      return true
     },
     [deckRows]
   )
 
-  // While briefing, index changes only update the briefing; the queue is
-  // built on begin. While studying they restart the session as before.
+  // Order and limit changes mid-session rebuild it; otherwise (briefing, or a
+  // finished session) they lead to the briefing, where the user begins.
   const reconfigure = useCallback(
     (deckId: string, o: Order, l: number, nl: number) => {
-      if (phase === 'studying') rebuild(deckId, o, l, nl)
-      else setNow(new Date())
+      if (phase === 'studying' && pos < queue.length) startSession(deckId, o, l, nl)
+      else toBriefing()
     },
-    [phase, rebuild]
+    [phase, pos, queue.length, startSession, toBriefing]
   )
 
   const begin = useCallback(() => {
-    setPhase('studying')
+    if (!startSession(activeDeck, order, limit, newLimit)) return
     setElapsed(0)
     setSessionLog([])
-    rebuild(activeDeck, order, limit, newLimit)
-  }, [activeDeck, order, limit, newLimit, rebuild])
+  }, [activeDeck, order, limit, newLimit, startSession])
 
   const submit = useCallback(
     (progressId: string, rating: Rating, clientReviewId: string = crypto.randomUUID()) => {
@@ -491,13 +511,14 @@ export function StudyDashboard({
       dueReviews: due.length - dueNew,
       dueNew,
       total: rows.length,
+      suspended: suspended.filter((r) => r.deckId === activeDeck).length,
       sessionSize: session.length,
       sessionNew: session.filter((r) => collapsedState(r.state) === 'new').length,
       studyingAhead: ahead,
       nextDue: rows.length ? Math.min(...rows.map((r) => r.due)) : null,
       secondsPerCard: estimateSecondsPerCard(data.recentReviews),
     }
-  }, [deckRows, activeDeck, nowMs, limit, newLimit, data.recentReviews])
+  }, [deckRows, activeDeck, nowMs, limit, newLimit, data.recentReviews, suspended])
   const displayLog = useMemo(
     () => [...unsyncedLog, ...data.latestLog],
     [unsyncedLog, data.latestLog]
@@ -509,13 +530,12 @@ export function StudyDashboard({
     chainRef.current.then(() => router.refresh())
   }, [router])
 
-  const nextDeck = useCallback(() => {
-    const i = decks.findIndex((d) => d.id === activeDeck)
-    const n = decks[(i + 1) % decks.length]
-    setActiveDeck(n.id)
-    rebuild(n.id, order, limit, newLimit)
+  // Leaving the completion screen goes back to the briefing, from which the
+  // user picks the next deck or begins again with full information.
+  const done = useCallback(() => {
+    toBriefing()
     refreshWhenSynced()
-  }, [decks, activeDeck, order, limit, newLimit, rebuild, refreshWhenSynced])
+  }, [toBriefing, refreshWhenSynced])
 
   return (
     <div className="min-h-screen lg:flex lg:h-screen lg:flex-col">
@@ -536,8 +556,9 @@ export function StudyDashboard({
                 stats={deckStats}
                 active={activeDeck}
                 onSelect={(id) => {
+                  // Switching decks always lands on that deck's briefing.
                   setActiveDeck(id)
-                  reconfigure(id, order, limit, newLimit)
+                  toBriefing()
                 }}
                 order={order}
                 onOrder={(o) => {
@@ -575,11 +596,7 @@ export function StudyDashboard({
                 position={pos}
                 total={queue.length}
                 complete={complete}
-                onRestart={() => {
-                  rebuild(activeDeck, order, limit, newLimit)
-                  refreshWhenSynced()
-                }}
-                onNextDeck={nextDeck}
+                onDone={done}
                 summary={summary}
                 now={now}
                 failedCount={failed.length}

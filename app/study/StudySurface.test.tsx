@@ -13,6 +13,8 @@ const deck: DeckInfo = {
   courseName: 'Cognitive Science',
   index: '01',
   cardsPerSession: 12,
+  cardCount: 4,
+  enrolled: true,
 }
 
 const card: QueueCard = {
@@ -44,8 +46,7 @@ function renderSurface(revealed: boolean) {
       position={0}
       total={4}
       complete={false}
-      onRestart={vi.fn()}
-      onNextDeck={vi.fn()}
+      onDone={vi.fn()}
       summary={{ reviewed: 0, again: 0, accuracy: 0, elapsed: 0 }}
       now={new Date(NOW)}
       failedCount={0}
@@ -83,8 +84,7 @@ describe('StudySurface', () => {
         position={0}
         total={4}
         complete={false}
-        onRestart={vi.fn()}
-        onNextDeck={vi.fn()}
+        onDone={vi.fn()}
         summary={{ reviewed: 0, again: 0, accuracy: 0, elapsed: 0 }}
         now={new Date(NOW)}
         failedCount={0}
@@ -143,8 +143,7 @@ describe('StudySurface', () => {
         position={0}
         total={4}
         complete={false}
-        onRestart={vi.fn()}
-        onNextDeck={vi.fn()}
+        onDone={vi.fn()}
         summary={{ reviewed: 0, again: 0, accuracy: 0, elapsed: 0 }}
         now={new Date(NOW)}
         failedCount={0}

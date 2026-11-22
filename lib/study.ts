@@ -67,6 +67,10 @@ export interface DeckInfo {
   /** Position in the flat enrolled-deck list, padded: "01", "02", … */
   index: string
   cardsPerSession: number
+  /** Cards in the deck, whether or not the user has progress rows for them. */
+  cardCount: number
+  /** Whether the user enrolled in this deck (has a DeckProgress row). */
+  enrolled: boolean
 }
 
 export interface HistoryReview {
