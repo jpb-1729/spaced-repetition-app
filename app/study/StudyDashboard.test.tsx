@@ -66,6 +66,7 @@ function makeData(): StudyDashboardData {
         index: '01',
         cardsPerSession: 4,
         cardCount: 4,
+        enrolled: true,
       },
       {
         id: 'd2',
@@ -75,6 +76,7 @@ function makeData(): StudyDashboardData {
         index: '02',
         cardsPerSession: 4,
         cardCount: 4,
+        enrolled: true,
       },
     ],
     snapshot: [...deckOneCards, ...deckTwoCards],
@@ -178,6 +180,36 @@ describe('StudyDashboard briefing', () => {
     expect(screen.getByText(/next card comes due in 2 d/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /study ahead/i }))
     expectPrompt('Alpha question')
+  })
+
+  it('opens a deep link on the briefing when its session would be empty', () => {
+    const data = makeData()
+    data.decks[1] = { ...data.decks[1], enrolled: false }
+    data.snapshot = data.snapshot.filter((r) => r.deckId !== 'd2')
+    data.queues.d2 = []
+    render(
+      <StudyDashboard
+        data={data}
+        initialDeckId="d2"
+        autoStart
+        signOutAction={vi.fn(async () => {})}
+      />
+    )
+    expect(screen.getByText(/not enrolled/i)).toBeInTheDocument()
+    expect(screen.queryByText(/session complete/i)).toBeNull()
+  })
+
+  it('says when every card in an enrolled deck is suspended', () => {
+    const data = makeData()
+    data.snapshot = data.snapshot.filter((r) => r.deckId !== 'd2')
+    data.queues.d2 = []
+    data.suspended = [
+      { progressId: 'pd21', deckId: 'd2', front: 'Omega question' },
+      { progressId: 'pd22', deckId: 'd2', front: 'Sigma question' },
+    ]
+    render(<StudyDashboard data={data} initialDeckId="d2" signOutAction={vi.fn(async () => {})} />)
+    expect(screen.getByText(/all suspended/i)).toBeInTheDocument()
+    expect(screen.queryByText(/not enrolled/i)).toBeNull()
   })
 
   it('skips the briefing when autoStart is set', () => {
@@ -336,14 +368,34 @@ describe('StudyDashboard', () => {
     expect(firstId).not.toBe(secondId)
   })
 
-  it('switches decks and rebuilds the queue', async () => {
+  it("switching decks lands on that deck's briefing", async () => {
     renderDashboard()
 
     await userEvent.click(screen.getByRole('button', { name: /typography/i }))
 
-    expectPrompt('Omega question')
+    expect(screen.getByRole('heading', { level: 2, name: /2 cards are waiting in Typography/ }))
     const activeDeckButton = screen.getByRole('button', { name: /typography/i })
     expect(activeDeckButton.className).toContain('bg-paper-2')
+
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expectPrompt('Omega question')
+  })
+
+  it('returns to the briefing with Done after the session completes', async () => {
+    renderDashboard()
+    for (const front of ['Alpha question', 'Beta question', 'Gamma question', 'Delta question']) {
+      expectPrompt(front)
+      reveal()
+      pressGrade('3')
+    }
+    expect(screen.getByText(/session complete/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /next collection|study again/i })).toBeNull()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Done' }))
+    // Everything was just graded, so the briefing offers to study ahead
+    // (with its warning) rather than silently starting another session.
+    expect(screen.getByText(/nothing due/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /study ahead/i })).toBeInTheDocument()
   })
 
   it('caps unseen cards with the new-card limit, keeping reviews first', async () => {
@@ -403,6 +455,7 @@ describe('StudyDashboard', () => {
       index: '03',
       cardsPerSession: 20,
       cardCount: 19,
+      enrolled: false,
     })
     data.queues.d3 = []
     render(<StudyDashboard data={data} initialDeckId="d3" signOutAction={vi.fn(async () => {})} />)

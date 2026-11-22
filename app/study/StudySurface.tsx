@@ -36,8 +36,7 @@ export function StudySurface({
   position,
   total,
   complete,
-  onRestart,
-  onNextDeck,
+  onDone,
   summary,
   now,
   failedCount,
@@ -52,8 +51,7 @@ export function StudySurface({
   position: number
   total: number
   complete: boolean
-  onRestart: () => void
-  onNextDeck: () => void
+  onDone: () => void
   summary: SessionSummary
   now: Date
   failedCount: number
@@ -80,7 +78,7 @@ export function StudySurface({
       />
 
       {complete || !card ? (
-        <Complete summary={summary} onRestart={onRestart} onNextDeck={onNextDeck} deck={deck} />
+        <Complete summary={summary} onDone={onDone} deck={deck} />
       ) : (
         <article key={card.progressId} className="flex min-h-0 flex-1 flex-col">
           <div className="hide-scroll min-h-0 flex-1 overflow-y-auto">
@@ -245,13 +243,11 @@ function Field({ k, v }: { k: string; v: string }) {
 
 function Complete({
   summary,
-  onRestart,
-  onNextDeck,
+  onDone,
   deck,
 }: {
   summary: SessionSummary
-  onRestart: () => void
-  onNextDeck: () => void
+  onDone: () => void
   deck: DeckInfo
 }) {
   return (
@@ -273,11 +269,8 @@ function Complete({
         />
       </div>
       <div className="mt-9 flex flex-wrap gap-2.5">
-        <button onClick={onRestart} className="btn">
-          Study again
-        </button>
-        <button onClick={onNextDeck} className="btn-ghost">
-          Advance to next collection →
+        <button onClick={onDone} className="btn">
+          Done
         </button>
       </div>
     </div>
