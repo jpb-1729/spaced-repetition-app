@@ -201,16 +201,17 @@ export function StudyDashboard({
     return () => window.clearTimeout(syncNow)
   }, [])
 
-  // The session clock only runs while studying.
-  useEffect(() => {
-    if (phase !== 'studying') return
-    const t = window.setInterval(() => setElapsed((e) => e + 1), 1000)
-    return () => window.clearInterval(t)
-  }, [phase])
-
   const nowMs = now.getTime()
   const studying = phase === 'studying'
   const complete = studying && pos >= queue.length
+
+  // The session clock only runs while cards remain; it stops on the
+  // completion screen so the summary's sec/card stays accurate.
+  useEffect(() => {
+    if (!studying || complete) return
+    const t = window.setInterval(() => setElapsed((e) => e + 1), 1000)
+    return () => window.clearInterval(t)
+  }, [studying, complete])
   const currentId = !studying || complete ? null : queue[pos]
   const current: QueueCard | null = useMemo(() => {
     if (!currentId) return null

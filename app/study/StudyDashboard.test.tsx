@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StudyDashboard } from './StudyDashboard'
 import type { QueueCard, StudyDashboardData } from '@/lib/study'
@@ -233,6 +233,28 @@ describe('StudyDashboard', () => {
 
     expect(screen.getByText(/session complete/i)).toBeInTheDocument()
     await waitFor(() => expect(mockedReviewCard).toHaveBeenCalledTimes(5))
+  })
+
+  it('stops the session clock once the session is complete', async () => {
+    vi.useFakeTimers()
+    try {
+      renderDashboard()
+      act(() => vi.advanceTimersByTime(3000))
+      expect(screen.getAllByText('00:03').length).toBeGreaterThan(0)
+
+      for (const front of ['Alpha question', 'Beta question', 'Gamma question', 'Delta question']) {
+        expectPrompt(front)
+        reveal()
+        pressGrade('3')
+      }
+      expect(screen.getByText(/session complete/i)).toBeInTheDocument()
+
+      act(() => vi.advanceTimersByTime(60_000))
+      expect(screen.getAllByText('00:03').length).toBeGreaterThan(0)
+      expect(screen.queryByText('01:03')).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('suspends the current card with S, before reveal, and moves on', async () => {
