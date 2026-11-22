@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { DeckInfo } from '@/lib/study'
 import { formatInterval, DAY_MS } from '@/lib/fsrs'
 import { cn } from '@/lib/cn'
@@ -48,6 +49,9 @@ export function Briefing({
 }) {
   const dueTotal = stats.dueReviews + stats.dueNew
   const nothingDue = dueTotal === 0
+  // The deck belongs to an enrolled course but the user never enrolled in
+  // the deck itself, so it has cards but no progress rows.
+  const notEnrolled = stats.total === 0 && deck.cardCount > 0
   const estimate = formatDuration(stats.sessionSize * stats.secondsPerCard)
 
   return (
@@ -65,11 +69,13 @@ export function Briefing({
             className={cn('size-2 rounded-full', nothingDue ? 'bg-rule-2' : 'bg-accent')}
             aria-hidden
           />
-          {nothingDue ? 'Nothing due' : 'Session ready'}
+          {notEnrolled ? 'Not enrolled' : nothingDue ? 'Nothing due' : 'Session ready'}
         </span>
 
         <h2 className="mt-5 max-w-[20ch] font-serif text-[clamp(32px,4.2vw,52px)] leading-[1.1] font-semibold tracking-[-0.015em] text-balance [font-variation-settings:'opsz'_60]">
-          {nothingDue ? (
+          {notEnrolled ? (
+            <>You haven&rsquo;t enrolled in {deck.name}.</>
+          ) : nothingDue ? (
             <>{deck.name} is up to date.</>
           ) : (
             <>
@@ -80,7 +86,15 @@ export function Briefing({
         </h2>
 
         <p className="text-ink-soft mt-4 max-w-[52ch] font-serif text-[17px] leading-relaxed">
-          {nothingDue ? (
+          {notEnrolled ? (
+            <>
+              It has <span className="tabular-nums">{deck.cardCount}</span> cards.{' '}
+              <Link href="/decks" className="text-accent underline underline-offset-4">
+                Enroll on the decks page
+              </Link>{' '}
+              to add them to your study.
+            </>
+          ) : nothingDue ? (
             stats.nextDue ? (
               <>
                 The next card comes due in {formatUntil(stats.nextDue, nowMs)}. You can study ahead,

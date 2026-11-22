@@ -65,6 +65,7 @@ function makeData(): StudyDashboardData {
         courseName: 'Cognitive Science',
         index: '01',
         cardsPerSession: 4,
+        cardCount: 4,
       },
       {
         id: 'd2',
@@ -73,6 +74,7 @@ function makeData(): StudyDashboardData {
         courseName: 'Design History',
         index: '02',
         cardsPerSession: 4,
+        cardCount: 4,
       },
     ],
     snapshot: [...deckOneCards, ...deckTwoCards],
@@ -362,6 +364,36 @@ describe('StudyDashboard', () => {
     await userEvent.click(screen.getByRole('button', { name: 'fewer new cards' }))
     expect(screen.getByRole('button', { name: /begin session/i })).toBeDisabled()
     expect(screen.getByText(/new-card limit is set to 0/i)).toBeInTheDocument()
+
+    // The keyboard shortcut must not bypass the disabled button.
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(screen.queryByText(/session complete/i)).toBeNull()
+    expect(screen.getByRole('button', { name: /begin session/i })).toBeInTheDocument()
+  })
+
+  it('explains an unenrolled deck and ignores Enter instead of completing an empty session', () => {
+    const data = makeData()
+    data.decks.push({
+      id: 'd3',
+      name: 'Chapter 3',
+      courseId: 'c1',
+      courseName: 'Cognitive Science',
+      index: '03',
+      cardsPerSession: 20,
+      cardCount: 19,
+    })
+    data.queues.d3 = []
+    render(<StudyDashboard data={data} initialDeckId="d3" signOutAction={vi.fn(async () => {})} />)
+
+    expect(screen.getByText(/not enrolled/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /enroll on the decks page/i })).toHaveAttribute(
+      'href',
+      '/decks'
+    )
+    expect(screen.getByRole('button', { name: /begin session/i })).toBeDisabled()
+
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(screen.getByRole('button', { name: /begin session/i })).toBeInTheDocument()
   })
 
   it('clamps the session limit stepper to 4..40', async () => {

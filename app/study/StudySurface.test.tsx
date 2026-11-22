@@ -13,6 +13,7 @@ const deck: DeckInfo = {
   courseName: 'Cognitive Science',
   index: '01',
   cardsPerSession: 12,
+  cardCount: 4,
 }
 
 const card: QueueCard = {

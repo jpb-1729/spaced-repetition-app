@@ -248,12 +248,20 @@ export function StudyDashboard({
     [phase, rebuild]
   )
 
+  // Begin is a no-op when the session would be empty (the briefing disables
+  // its button; this also covers the Enter/Space shortcut).
   const begin = useCallback(() => {
+    const nowD = new Date()
+    const q = buildQueue(deckRows(activeDeck), order, limit, newLimit, nowD.getTime())
+    if (q.length === 0) return
+    setNow(nowD)
+    setQueue(q)
+    setPos(0)
+    setRevealed(false)
     setPhase('studying')
     setElapsed(0)
     setSessionLog([])
-    rebuild(activeDeck, order, limit, newLimit)
-  }, [activeDeck, order, limit, newLimit, rebuild])
+  }, [activeDeck, order, limit, newLimit, deckRows])
 
   const submit = useCallback(
     (progressId: string, rating: Rating, clientReviewId: string = crypto.randomUUID()) => {
@@ -510,12 +518,16 @@ export function StudyDashboard({
   }, [router])
 
   const nextDeck = useCallback(() => {
+    // Skip decks with nothing to study (e.g. not enrolled), so the next deck
+    // never opens on an instantly complete session.
     const i = decks.findIndex((d) => d.id === activeDeck)
-    const n = decks[(i + 1) % decks.length]
+    const n =
+      [...decks.slice(i + 1), ...decks.slice(0, i + 1)].find((d) => deckRows(d.id).length > 0) ??
+      decks[(i + 1) % decks.length]
     setActiveDeck(n.id)
     rebuild(n.id, order, limit, newLimit)
     refreshWhenSynced()
-  }, [decks, activeDeck, order, limit, newLimit, rebuild, refreshWhenSynced])
+  }, [decks, activeDeck, order, limit, newLimit, rebuild, refreshWhenSynced, deckRows])
 
   return (
     <div className="min-h-screen lg:flex lg:h-screen lg:flex-col">

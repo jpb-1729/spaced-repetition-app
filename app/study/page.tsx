@@ -39,6 +39,7 @@ export default async function StudyPage(props: Props) {
       id: true,
       name: true,
       cardsPerSession: true,
+      _count: { select: { cards: true } },
       course: { select: { id: true, name: true } },
     },
   })
@@ -128,6 +129,7 @@ export default async function StudyPage(props: Props) {
       courseName: d.course.name,
       index: String(i + 1).padStart(2, '0'),
       cardsPerSession: d.cardsPerSession,
+      cardCount: d._count.cards,
     })),
     snapshot: snapshotRaw.map(toProgressRow),
     suspended: suspendedRaw.map((r) => ({
